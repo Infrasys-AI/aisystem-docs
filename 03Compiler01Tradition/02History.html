@@ -1,0 +1,1161 @@
+
+<!DOCTYPE html>
+
+
+<html lang="cn" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="传统编译器发展" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="03Compiler01Tradition/02History.html" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI系统原理)" />
+<meta property="og:description" content="编译技术是计算机科学皇冠上的一颗明珠，作为基础软件中的核心技术，程序员的终极追求是能够掌握编译器相关的技术。 简单的说，编译器其实只是一段程序，它用来将编程语言 A 翻译成另外-种编程语言 B，上面将源代码翻译为目标代码的过程是叫作编译（compile）。完整的编译过程通常包含词法分析、语法分析、语义分析、中间代码生成、优化、目标代码生成等步骤。我们很难想象，在没有出现编译器的时候，程序员编..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="/None" />
+<meta property="og:image:alt" content="编译技术是计算机科学皇冠上的一颗明珠，作为基础软件中的核心技术，程序员的终极追求是能够掌握编译器相关的技术。 简单的说，编译器其实只是一段程序，它用来将编程语言 A 翻译成另外-种编程语言 B，上面将源代码翻译为目标代码的过程是叫作编译（compile）。完整的编译过程通常包含词法分析、语法分析、语义分析、中间代..." />
+<meta name="description" content="编译技术是计算机科学皇冠上的一颗明珠，作为基础软件中的核心技术，程序员的终极追求是能够掌握编译器相关的技术。 简单的说，编译器其实只是一段程序，它用来将编程语言 A 翻译成另外-种编程语言 B，上面将源代码翻译为目标代码的过程是叫作编译（compile）。完整的编译过程通常包含词法分析、语法分析、语义分析、中间代码生成、优化、目标代码生成等步骤。我们很难想象，在没有出现编译器的时候，程序员编..." />
+<meta name="twitter:card" content="summary_large_image" />
+
+    <title>传统编译器发展 &#8212; AI System</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=362ab14a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+
+    <script src="../_static/documentation_options.js?v=aabdd393"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/rtd-data.js?v=db39d344"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '03Compiler01Tradition/02History';</script>
+    <script src="https://assets.readthedocs.org/static/javascript/readthedocs-doc-embed.js"></script>
+    <link rel="icon" href="../_static/logo-square.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GCC 主要特征" href="03GCC.html" />
+    <link rel="prev" title="编译器基础介绍" href="01Introduction.html" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="cn"/>
+    <meta name="docbuild:last-update" content="Jun 15, 2025"/>
+
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../reference/blog/atom.xml"
+  title="Blog"
+/>
+
+
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-wide.svg" class="logo__image only-light" alt="AI System - Home"/>
+    <script>document.write(`<img src="../_static/logo-wide.svg" class="logo__image only-dark" alt="AI System - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Youtube</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Blibili</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系结构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/01Introduction.html">课程内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/02ArchSlim.html">AI 计算模式（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/03MobileParallel.html">AI 计算模式（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/04Metrics.html">关键设计指标</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/05Matrix.html">核心计算之矩阵乘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/06BitWidth.html">计算之比特位宽</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware02ChipBase/README.html">AI 芯片基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/01CPUBase.html">CPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/02CPUISA.html">CPU 指令集架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/03CPUData.html">CPU 计算本质</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/04CPULatency.html">CPU 计算时延</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/05GPUBase.html">GPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/06NPUBase.html">NPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/07Future.html">超异构计算</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware03GPUBase/README.html">图形处理器 GPU</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/01Works.html">GPU 工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/02Principle.html">为什么 GPU 适用于 AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/03Concept.html">GPU 架构与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/04History.html">GPU 架构回顾</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware04NVIDIA/README.html">英伟达 GPU 详解</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/01BasicTC.html">Tensor Core 基本原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/02HistoryTC.html">Tensor Core 架构演进</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/03DeepTC.html">Tensor Core 深度剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/04BasicNvlink.html">分布式通信与 NVLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/05DeepNvlink.html">NVLink 原理剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/06DeepNvswitch.html">NV Switch 深度解析</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware05Abroad/README.html">国外 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/04TPUIntrol.html">谷歌 TPU 历史发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/05TPU1.html">谷歌 TPU v1-脉动阵列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/06TPU2.html">谷歌 TPUv2 训练芯片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/07TPU3.html">谷歌 TPUv3 POD 形态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/08TPU4.html">谷歌 TPU v4 与光路交换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware06Domestic/README.html">国内 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/04Cambricon.html">寒武纪介绍</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/08AscendBase.html">昇腾 AI 架构介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/09AscendSOC.html">昇腾 AI 处理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/10AscendCube.html">昇腾 AI 核心单元</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/11AscendLayout.html">昇腾数据布局转换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware07Thought/README.html">AI 芯片黄金十年</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/01Introduction.html">芯片的编程体系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/02SIMTSIMD.html">SIMD &amp; SIMT 与芯片架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/03SPMT.html">SIMD &amp; SIMT 与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/04NVSIMT.html">CUDA 编程模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/05DSA.html">从 CUDA 对 AI 芯片思考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/06AIChip.html">AI 芯片的思考</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与编译原理 ===</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">传统编译器</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01Introduction.html">编译器基础介绍</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">传统编译器发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03GCC.html">GCC 主要特征</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04LLVM.html">LLVM 架构设计和原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05LLVMIR.html">LLVM IR 基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06LLVMDetail.html">LLVM IR 详解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07LLVMFrontend.html">LLVM 前端和优化层</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08LLVMBackend.html">LLVM 后端代码生成</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler02AICompiler/README.html">AI 编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/01Appear.html">为什么需要 AI 编译器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/02Stage.html">AI 编译器历史阶段</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/03Architecture.html">AI 编译器基本架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/04Future.html">AI 编译器挑战与思考</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler03Frontend/README.html">前端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/01Introduction.html">AI 编译器前端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/02GraphIR.html">图算 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/03OPFusion.html">算子融合</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/04LayoutPrinc.html">布局转换原理与算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/06Memory.html">内存分配算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/07ConstantFold.html">常量折叠原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/08CSE.html">公共表达式消除原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/09DCE.html">死代码消除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/10algebraic.html">代数简化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler04Backend/README.html">后端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/01Introduction.html">AI 编译器后端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/02OPSCompute.html">计算与调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/03Optimization.html">算子手工优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/04LoopOpt.html">算子循环优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler07CANN/README.html">CANN &amp; Ascend C</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/01CANN.html">昇腾异构计算架构 CANN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/02OPType.html">CANN 算子类型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/03AscendC.html">算子开发编程语言 Ascend C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/04Grmmar.html">Ascend C 语法扩展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/05Paradigm.html">Ascend C 编程范式</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 四. 推理系统&amp;引擎 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../04Inference/README.html">推理系统&amp;引擎概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference01Inference/README.html">推理系统</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/01Introduction.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/02Constraints.html">推理系统介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/03Workflow.html">推理流程全景</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/04System.html">推理系统架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/05Inference.html">推理引擎架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/07MindIEIntro.html">昇腾推理引擎 MindIE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/08AscendCL.html">推理引擎示例：AscendCL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference02Mobilenet/README.html">模型轻量化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/01Introduction.html">推理参数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/021Squeezenet.html">SqueezeNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/022Shufflenet.html">ShuffleNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/023Mobilenet.html">MobileNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/024ESPNet.html">ESPNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/025FBNet.html">FBNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/026EfficientNet.html">EfficientNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/027GhostNet.html">GhostNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/02Cnn.html">CNN 模型小型化（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/031MobileVit.html">MobileVit 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/032MobileFormer.html">MobileFormer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/033EfficientFormer.html">EfficientFormer 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Cnn.html">CNN 模型小型化（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Transformer.html">Transformer 小型化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/04Transformer.html">Transformer 模型小型化</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference03Slim/README.html">模型压缩</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/02Quant.html">低比特量化原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/03QAT.html">感知量化训练 QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/04PTQ.html">训练后量化与部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/05Pruning.html">模型剪枝</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/06Distillation.html">知识蒸馏原理</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference04Converter/README.html">模型转换</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/02Principle.html">推理文件格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/03IR.html">自定义计算图 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/04Detail.html">模型转换流程</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference05Optimize/README.html">模型优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/01Optimizer.html">计算图优化架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/02Basic.html">离线图优化技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/03Extend.html">其他计算图优化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference06Kernel/README.html">Kernel 优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/01Introduction.html">Kernel 层架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/02Conv.html">卷积操作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/03Im2col.html">Im2Col 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/04Winograd.html">Winograd 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/05Qnnpack.html">QNNPack 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/06Memory.html">推理内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/08Others.html">汇编与循环优化</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 五. AI 框架核心模块 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../05Framework/README.html">AI 框架核心概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework01Foundation/README.html">AI 框架基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/01Introduction.html">内容介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/02Fundamentals.html">AI 框架作用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/03History.html">AI 框架之争</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/04Programing.html">框架编程范式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/05MindSpore.html">昇思 MindSore 关键特性</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework02AutoDiff/README.html">自动微分</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/01Introduction.html">自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/02BaseConcept.html">什么是微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/03GradMode.html">微分计算模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/04Implement.html">微分实现方式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/05ForwardMode.html">动手实现自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/06ReversedMode.html">动手实现 PyTorch 微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/07Challenge.html">自动微分的挑战&amp;未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework03DataFlow/README.html">计算图</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/02Computegraph.html">计算图原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/03Atuodiff.html">计算图与自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/04Dispatch.html">计算图的调度与执行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/05ControlFlow.html">计算图的控制流实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/06StaticGraph.html">动态图与静态图转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/07Future.html">计算图挑战与未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework04Parallel/README.html">分布式并行</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/02DataParallel.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/03ZeRODP.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/04TensorParallel.html">张量并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/05PipelineParallel.html">流水并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/06HybridParallel.html">混合并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/07MSParallel.html">昇思MindSpore并行</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 附录内容 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../00Others/README.html">附录(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Editors.html">编辑和作者(DONE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Instruments.html">书写工具(DONE)</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../00Others/Install.html">本地部署(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Inference.html">参考链接(DONE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Glossary.html">术语表(DONE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Criterion.html">书写规范(DONE)</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/blob/master/03Compiler01Tradition/02History.md?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/edit/master/03Compiler01Tradition/02History.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/issues/new?title=Issue%20on%20page%20%2F03Compiler01Tradition/02History.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/03Compiler01Tradition/02History.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>传统编译器发展</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">基础介绍</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">出现原因</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">什么是编译器</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">历史发展</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">基本构成</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">编译体系</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">基础设施</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">虚拟机与优化</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">集成环境</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">传统编译器之争</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcc">GCC</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">总结</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clang">Clang</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">Clang 历史</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">总结</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#llvm">LLVM</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id15">LLVM 历史</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id16">总结</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id17">差异对比</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id18">未来发展趋势</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id19">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id20">本节视频</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+<!--Copyright © ZOMI 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+<section class="tex2jax_ignore mathjax_ignore" id="id1">
+<h1>传统编译器发展<a class="headerlink" href="#id1" title="Link to this heading">#</a></h1>
+<p>编译技术是计算机科学皇冠上的一颗明珠，作为基础软件中的核心技术，程序员的终极追求是能够掌握编译器相关的技术。</p>
+<p>简单的说，编译器其实只是一段程序，它用来将编程语言 A 翻译成另外-种编程语言 B，上面将源代码翻译为目标代码的过程是叫作编译（compile）。完整的编译过程通常包含词法分析、语法分析、语义分析、中间代码生成、优化、目标代码生成等步骤。我们很难想象，在没有出现编译器的时候，程序员编程是有多么的困难。</p>
+<p>在本节内容里面，由于 AI 系统中大量地使用了传统编译器中的概念和内容，本节我们将会去了解传统编译器的发展。想要深入了解编译器的内容也参考以下经典材料。</p>
+<p><img alt="编译器经典教材" src="../_images/02History01.png" /></p>
+<section id="id2">
+<h2>基础介绍<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<section id="id3">
+<h3>出现原因<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>我们平时所说的程序，是指双击后或者执行命令行后，就可以直接运行的程序，这样的程序被称为可执行程序（Executable Program）。在 Windows 下，可执行程序的后缀有 <code class="docutils literal notranslate"><span class="pre">.exe</span></code> 和 <code class="docutils literal notranslate"><span class="pre">.com</span></code>；在类 UNIX 系统（Linux、Mac OS 等）下，可执行程序没有特定的后缀，系统根据文件的头部信息来判断是否是可执行程序。</p>
+<p>可执行程序的内部是一系列计算机指令和数据的集合，它们都是二进制形式的，CPU 可以直接识别，毫无障碍；但是对于程序员，它们非常晦涩，难以记忆和使用。</p>
+<p>例如，在屏幕上输出一句话，Python 语言的写法为：</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">print_id</span><span class="p">(</span><span class="n">comment</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+
+<span class="n">print_id</span><span class="p">(</span><span class="s2">&quot;我是 ZOMI&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>二进制的写法就变得非常复杂，看到都想撞墙：</p>
+<p><img alt="二进制示例" src="../_images/02History02.png" /></p>
+<p>在 1950 年代开始，计算机发展的初期，程序员就是使用二进制指令来编写程序，当时候除了缺乏编译器也缺乏良好的编程语言。当程序比较大的时候，不但编写麻烦，需要频繁查询指令手册，而且 Debug 会异常苦恼，要直接面对二进制数据，让人眼花缭乱。另外，用二进制指令编程步骤繁琐，要考虑各种边界情况和底层问题，开发效率十分低下。</p>
+<p>这就迫使程序员开发出了编程语言，提高程序开发的效率，例如汇编、C 语言、C++、Java、Python、Go 语言等，都是在逐步提高程序的开发效率。至此，编程终于不再是只有极客能做的事情了，不了解计算机的读者经过一定的训练也可以编写出有模有样的程序。</p>
+<p>因此，编译器跟编程语言的发展是相辅相成的，有了高级编程语言，通过编译器能够翻译成低级的指令或者二进制机器码。</p>
+</section>
+<section id="id4">
+<h3>什么是编译器<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<p>典型的编译型程序语言有 C 和 C++，以 C 语言为例：C 语言代码由固定的词汇按照固定的格式组织起来，简单直观，程序员容易识别和理解，但是对于 CPU，只认识有限的二进制形式的指令。这时候就需要一个程序工具，将 C 语言代码转换成 CPU 能够识别的二进制指令。这个工具是一个特殊的软件程序，叫做编译器（Compiler）。</p>
+<p>编译器可以将整个程序转换为目标代码（object code），这些目标代码通常存储在文件中。目标代码也被称为二进制代码，在进行链接后可以被机器直接执行。</p>
+<p><img alt="编译器示例" src="../_images/02History03.png" /></p>
+<p><strong>编译器能够识别高级语言程序代码中的词汇、句子以及各种特定的格式和数据结构，并将其转换成机器能够识别的二进制码，这个过程称为编译（Compile）</strong>。</p>
+<p>编译的过程，类似于将中文翻译成英文、将英文翻译成象形文字。它是一个复杂的软件执行过程，大致包括词法分析、语法分析、语义分析、性能优化、生成可执行文件等多个步骤，期间涉及到复杂的算法和硬件架构。</p>
+<p>在 C 语言的编译器有很多种，不同的平台下有不同的编译器，例如：</p>
+<ul class="simple">
+<li><p>Windows：常用的是微软编译器（cl.exe），被集成在 Visual Studio 或 Visual C++ 中，一般不单独使用；</p></li>
+<li><p>Linux：常用 GUN 组织开发的 GCC，很多 Linux 发行版都自带 GCC；</p></li>
+<li><p>Mac：常用的是 LLVM/Clang，被集成在 Xcode 中</p></li>
+</ul>
+<p>代码语法正确与否是由编译器来检查，即编译器可以 100% 保证开发者编写的程序代码从语法上是正确，因为哪怕有一点小小的错误，编译器会反馈错误的地方，便于开发者对自己编写的代码进行修改。</p>
+<p>最后是编译器的几个重要的<strong>特点</strong>：</p>
+<ol class="arabic simple">
+<li><p>编译器读取源程序代码，输出可执行机器码，即把开发者编写的代码转换成 CPU 等硬件能理解的格式</p></li>
+<li><p>将输入源程序转换为机器语言或低级语言，并在执行前并报告程序中出现的错误</p></li>
+<li><p>编译的过程比较复杂，会消耗比较多的时间分析和处理开发者编写的程序代码</p></li>
+<li><p>可执行结果，属于某种形式的特定于机器的二进制代码</p></li>
+</ol>
+</section>
+<section id="id5">
+<h3>历史发展<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>编译器从计算机架构和驱动计算机架构刚开始发展到现在，历经了 60 余年，这段时间内编译器发展了很多代。先让目光回到 1957 年的第一个编译器 IBM Fortran，其早期在计算机领域属于一项了不起的技术。它的起源和取得的成果，付出的巨大努力是今天很多开发者都无法想象的。</p>
+<p><img alt="IBM Fortran 发明者合照" src="../_images/02History04.jpg" /></p>
+<p>1955 年 IBM 想要销售让更多的人能够进行编程的计算机。但是当时编程是用汇编语言完成的，IBM 的工程师很清楚编程对于大多开发者来说太难了。于是蓝色巨人希望在不牺牲性能的前提下，给开发者提供更快、更方便地编写程序的方式。发明 Fortran 计算机语言的科学家，希望利用高级编程语言编写的程序，提供尽可能接近手动调整的机器代码的性能。</p>
+<p>对于编译器来说，需要重点思考一下三个点：性能、生产力和可移植性。</p>
+<p>性能上，Fortran 的发明者拿机器代码的性能作了比较；生产力方面的好处是，开发者再也不必编写机器代码。在 1957 年无法为软件申请专利权，IBM 也没有禁止其他企业和组织实现 Fortran。因此过了一段时间后，市面上出现了来自其他企业和组织面向其他机器的 Fortran 编译器。这立即为 Fortran 程序创造了机器代码无法想象的可移植性生态。</p>
+<p>从这时开始，编译器开始迅猛发展起来。下面一起回顾编译器发展情况，编译器与编程语言几乎是同步发展起来的，发展过程可以分为几个阶段：</p>
+<ul class="simple">
+<li><p>第一阶段：20 世纪 50 年代，出现了第一个编译程序，将算术公式翻译成机器代码，为高级语言的发展奠定了基础。</p></li>
+<li><p>第二阶段：20 世纪 60 年代，出现多种高级语言和相应的编译器，如 Fortran、COBOL、LISP、ALGOL 等，编译技术也逐渐成熟和规范化</p></li>
+<li><p>第三阶段：20 世纪 70 年代，出现了结构化程序设计方法和模块化编程思想，以及面向对象的语言和编译器，如 Pascal、C、Simula 等，编译技术也开始注重工程代码的可读性和可维护性。</p></li>
+<li><p>第四阶段是 20 世纪 80 年代，出现了并行计算机和分布式系统，以及支持并行和分布式的语言和编译器，如 Ada、Prolog、ML 等，编译技术也开始考虑程序的并行和分布能力。</p></li>
+<li><p>第五阶段：20 世纪 90 年代，出现了互联网和移动设备等新兴平台，以及支持跨平台和动态特性的语言和编译器，如 Java、C#、Python 等，编译技术也开始关注程序的安全性和效率。</p></li>
+<li><p>第六阶段：21 世纪第一个 10 年，出现了以 Lua 为首的 Torch 框架，用于解决爆炸式涌现的 AI 应用和 AI 算法研究，之后又推出 TensorFlow、PyTorch、MindSpore、Paddle 等 AI 框架，随着 AI 框架和 AI 产业的发展，出现了如 AKG、MLIR 等 AI 编译器。</p></li>
+</ul>
+<p><img alt="历史涌现的编译器" src="../_images/02History05.png" /></p>
+<p>在发展过程中也伴随着编译理论体系的逐步成熟，一些关键也成为了实现编译器必不可少的部分，如：有限状态自动机、上下文无关文法、属性文法等。</p>
+</section>
+<section id="id6">
+<h3>基本构成<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
+<p>目前主流如 LLVM 和 GCC 等经典的开源编译器，通常分为三个部分，前端(Frontend)，优化器(Optimizer)和后端(Backend)。</p>
+<ol class="arabic simple">
+<li><p>Frontend：主要负责词法和语法分析，将源代码转化为抽象语法树，即将程序划分为基本的组成部分，检查代码的语法、语义和语法，然后生成中间代码</p></li>
+<li><p>Optimizer：优化器则是在前端的基础上，对得到的中间代码进行优化（如去掉冗余代码、子表达式消除等工作），使代码更加高效</p></li>
+<li><p>Backend：后端则是将已经优化的中间代码，针对具体的硬件生成目标代码，转换成为包括代码优化器和代码生成器</p></li>
+</ol>
+<p><img alt="编译器" src="../_images/02History11.png" /></p>
+</section>
+</section>
+<section id="id7">
+<h2>编译体系<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
+<p>在 21 世纪后仍然有许多新兴的编程语言，如函数式编程语言 Haskell，优秀的内存安全性与性能的 Rust，用于分布式微服务的 Go，基于 JVM 平台的 Android 官方开发语言 Kotlin，Apple 平台的新编程语言 Swift 等。</p>
+<p>这些新的编程语言设计之初都有着不同的侧重点，并且相比传统的编程语言拥有着更加优秀的专业领域表达能力，伴随着也拥有着更完善的编译体系，比如有强大的 lint 静态分析工具，以及更出色的编译期优化。优秀的语言与编译套件，能大大提升在专业领域的软件开发效率。</p>
+<section id="id8">
+<h3>基础设施<a class="headerlink" href="#id8" title="Link to this heading">#</a></h3>
+<p>新兴编程语言的快速发展少不了基础设施的逐步完善。如 LLVM (Low Level Virtual Machine) 的出现，可以让任意编程语言前端编译到一个 LLVM 的中间表示（IR），再由 LLVM 中的后端编译至具体硬件平台，并且可以分不同阶段实现优化。</p>
+<p>LLVM 极大地简化了编程语言编译器的开发过程，不同语言只需要实现语言到 LLVM IR 的前端编译程序，再调用 LLVM 后端编译器，就可以得到编译至任意平台的能力，而无需为不同的平台实现不同的编译器。如 Rust 和 Swift 语言的编译器就使用了 LLVM 作为后端。</p>
+<p>不过随着时代发展，其他语言也能通过 GCC(GNU Compiler Collection)的 IR 来实现最终编译阶段，目前 Rust 社区也在积极尝试使用 GCC 作为后端的编译器，以使用 GCC 的优化和平台支持。</p>
+<p>值得一提的是，正如如上文所述，LLVM 和 GCC 如今已不再是某个具体的编译工具，而已然成为了一套<strong>编译基础设施</strong>。LLVM 和 GCC 不仅提供了一系列编译器，也主要提供了一些 C/C++ 语言相关配套工具，如 LLVM 的 Clang 工具链（包含 Clang-tidy、Clang-format）。</p>
+<p>此外配套的一些语言的分析工具：</p>
+<ul class="simple">
+<li><p><strong>代码格式化工具</strong>：自动格式化代码，使代码符合固定格式，提高代码可读性。</p></li>
+<li><p><strong>静态代码分析工具</strong>：编译期间运行，来检测出代码中的问题和漏洞。如 Clang-tidy、rust-clippy、Clangd(LSP)、rust-analyzer(LSP)</p></li>
+<li><p><strong>动态代码分析工具</strong>：运行时分析，比静态分析更能发现一些潜在的漏洞，诸如 C/C++ 的内存检测工具，用于检查内存泄露以及异常内存使用并能返回问题代码位置。</p></li>
+</ul>
+</section>
+<section id="id9">
+<h3>虚拟机与优化<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
+<p>一些高级编程语言（如 Java、Python、JavaScript）的运行，依赖于运行时（Runtime），并常常带有虚拟机（VM）和解释器。</p>
+<p>这些语言有的作为脚本语言不需要编译，或者是可编译为跨平台的字节码。语言性能通常较静态且直接编译为机器码的语言低许多，原因也是很明显的，因为其需要在运行时先解释代码再执行。不过如今也有许多技术手段能够提升这些语言的性能。下文将主要以 JVM 平台调优举例说明：</p>
+<ul class="simple">
+<li><p>JIT(Just In Time)：即时编译，在程序运行时将源代码或字节码编译成机器码，提高执行效率。使用 JIT 可以避免热点代码的重复解释，虚拟机可以在运行时实施动态优化，检测并将热点代码编译成机器码。缺点是会增加启动时间和内存占用。</p></li>
+<li><p>AOT(Ahead Of Time)：预编译，运行前将代码编译成机器码，获得更少的启动时间和内存占用以及更接近原生的性能，甚至不再需要依赖于虚拟机。但是随之而来缺陷是，失去了一次编译，处处使用的跨平台特性，以及一些语言的动态特性。</p></li>
+<li><p>虚拟机优化：OpenJDK 有许多不同的实现，不同的实现也有着不同的性能，其中比如 Oracle 的 HotSpot JVM(with GraalVM’s advanced JIT optimizing compiler) 对 JIT 有额外的优化编译器。</p></li>
+</ul>
+</section>
+<section id="id10">
+<h3>集成环境<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
+<p>实际开发中，除了编译器是必须的工具，往往还需要很多其他辅助软件，例如：</p>
+<ul class="simple">
+<li><p><strong>编辑器</strong>：用来编写代码，并且给代码着色，以方便阅读；</p></li>
+<li><p><strong>代码提示器</strong>：输入部分代码，即可提示全部代码，加速代码的编写过程；</p></li>
+<li><p><strong>调试器</strong>：观察程序的每一个运行步骤，发现程序的逻辑错误；</p></li>
+<li><p><strong>管理工具</strong>：对程序涉及到的所有资源进行管理，包括源文件、图片、视频、第三方库等；</p></li>
+<li><p><strong>开发的界面</strong>：各种按钮、面板、菜单、窗口等控件整齐排布，操作更方便。</p></li>
+</ul>
+<p>这些工具通常被打包在一起，统一发布和安装，例如 Visual Studio、Dev C++、Xcode、Visual C++ 6.0、C-Free、Code::Blocks 等，统称为<strong>集成开发环境（IDE，Integrated Development Environment）</strong>。</p>
+<p>集成开发环境就是一系列开发工具的组合套装。这就好比台式机，一个台式机的核心部件是主机，有了主机就能独立工作了，但是在购买台式机时，往往还要附带上显示器、键盘、鼠标、U 盘、摄像头等外围设备。集成开发环境也是相同道理，只有编译器不方便，所以还要增加其他的辅助工具。</p>
+</section>
+</section>
+<section id="id11">
+<h2>传统编译器之争<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<p>GCC、LLVM 和 Clang 都是常见的编译器，用于将高级语言代码转换为机器语言代码。它们在编译速度、优化能力和支持的语言等方面有所不同，曾经很长一段时间，开发者都会在争论到底哪个开源编译器更好。</p>
+<p><img alt="GCC 与 LLVM" src="../_images/02History06.png" /></p>
+<section id="gcc">
+<h3>GCC<a class="headerlink" href="#gcc" title="Link to this heading">#</a></h3>
+<blockquote>
+<div><p>GCC（GNU Compiler Collection，GNU 编译器套装），是一套由 GNU 开发的编程语言编译器。它是一套以 GPL 及 LGPL 许可证所发布的自由软件，也是 GNU 项目的关键部分，亦是自由的类 Unix 及苹果电脑 Mac OS X 操作系统的标准编译器。GCC（特别是其中的 C 语言编译器）也常被认为是跨平台编译器的事实标准。</p>
+</div></blockquote>
+<p>上面提到的 GNU 名称来自 Gnu's Not Unix&quot;的缩写，一个类 UNIX 的操作系统，由 GNU 计划推动，目标在于创建一个完全兼容于 UNIX 的自由软件环境。由于 UNIX 系统是商业收费软件，而且有一部分源码是没有开放的，所以在 1983 年，理查德·斯托曼提出 GN 计划，希望发展出一套完整的开放源代码操作系统来取代 Unix，计划中的操作系统，名为 GNU。</p>
+<p><img alt="GUN" src="../_images/02History07.png" /></p>
+<p>但是操作系统是包括很多软件的，除了操作系统内核之外，还要有编辑器，编译器，shell 等等一些软件来支持。</p>
+<p>GNU 工程十几年以来已经成为一个对软件开发主要的影响力量，创造了无数的重要的工具，例如：GCC 编译器，甚至一个全功能的 Linux 操作系统。GNU 计划采用了部分当时已经可自由使用的软件，例如 TeX 排版系统和 X Window 视窗系统等。不过 GNU 计划也开发了大批其他的自由软件，这些软件也被移植到其他操作系统平台上，例如 Microsoft Windows、 BSD 家族、 Solaris 及 Mac OS。</p>
+<p>GCC 作为 GNU 工程的其中一个项目，原名为 GNU C 语言编译器（GNU C Compiler），因为它原本只能处理 C 语言。GCC 很快地扩展，变得可处理 C++。之后也变得可处理 Fortran、Pascal、Objective-C、Java、Ada，以及 Go 与其他语言。</p>
+<p><img alt="GCC" src="../_images/02History08.png" /></p>
+<p>GCC 原本使用 C 开发，后来因为 LLVM、 Clang 的崛起，令 GCC 更快将开发语言转换为 C++。许多 C 的爱好者在对 C++ 一知半解的情况下主观认定 C++ 的性能一定会输给 C，但是 Taylor 给出了不同的意见，并表明 C++ 不但性能不输给 C，而且能设计出更好，更容易维护的程序。</p>
+<p>由于 GCC 已成为 GNU 系统的官方编译器（包括 GNU/Linux 家族），它也成为编译与创建其他操作系统的主要编译器，包括 BSD 家族、Mac OS X、NeXTSTEP 与 BeOS。</p>
+<p>GCC 通常是跨平台软件的编译器首选。有别于一般局限于特定系统与运行环境的编译器，GCC 在所有平台上都使用同一个前端处理程序，产生一样的中介码，因此此中介码在各个其他平台上使用 GCC 编译，有很大的机会可得到正确无误的输出程序。</p>
+<section id="id12">
+<h4>总结<a class="headerlink" href="#id12" title="Link to this heading">#</a></h4>
+<p>GNU 计划本来是为了开发一个自由系统来取代 UNIX 的，但是由于开发的内核 Hurd 一直不怎么样，这个系统至今都没出稳定版本，然而 GNU 计划中开发的其他一些自由软件，比如 GCC 编译器，却非常的好，在移植到各大操作系统上一直广泛使用至今。</p>
+</section>
+</section>
+<section id="clang">
+<h3>Clang<a class="headerlink" href="#clang" title="Link to this heading">#</a></h3>
+<blockquote>
+<div><p>Clang 是一个 C、 C++、 Objective-C 和 Objective-C++ 编程语言的编译器前端。它采用了底层虚拟机（LLVM）作为其后端。</p>
+</div></blockquote>
+<p>Clang 项目在 2005 年由苹果电脑发起，是 LLVM 编译器工具集的前端（front-end），目的是输出代码对应的抽象语法树（Abstract Syntax Tree, AST），并将代码编译成 LLVM Bitcode。接着在后端（back-end）使用 LLVM 编译成平台相关的机器语言。它的目标是提供一个 GNU 编译器套装（GCC）的替代品。Clang 课程包括 Clang 前端和 Clang 静态分析器等。</p>
+<p>Clang 本身性能优异，其生成的 AST 所耗用掉的内存仅仅是 GCC 的 20% 左右。FreeBSD 10 将 Clang/LLVM 作为默认编译器。测试证明 Clang 编译 Objective-C 代码时速度为 GCC 的 3 倍，还能针对用户发生的编译错误准确地给出建议。</p>
+<section id="id13">
+<h4>Clang 历史<a class="headerlink" href="#id13" title="Link to this heading">#</a></h4>
+<p>Apple 吸收 Chris Lattner 的目的要比改进 GCC 代码优化宏大得多，GCC 系统庞大而笨重，而 Apple 在 MAC 系统大量使用的 Objective-C 在 GCC 的项目支持优先级中比较低。此外 GCC 作为一个纯粹的编译系统，与 IDE 配合得很差。</p>
+<p>加之许可证方面的要求，Apple 无法使用 LLVM 继续改进 GCC 的代码质量。于是，Apple 决定从零开始写 C、C++、Objective-C 语言的前端 Clang，完全替代掉 GCC。</p>
+<p><img alt="苹果开发 LLVM 与 Clang" src="../_images/02History09.png" /></p>
+<p>正像名字所写的那样，Clang 只支持 C，C++ 和 Objective-C 三种 C 家族语言。2007 年开始开发，C 编译器最早完成，而由于 Objective-C 相对简单，只是 C 语言的一个简单扩展，很多情况下甚至可以等价地改写为 C 语言对 Objective-C 运行库的函数调用，因此在 2009 年时，已经完全可以用于生产环境。C++ 的支持也热火朝天地进行着。</p>
+</section>
+<section id="id14">
+<h4>总结<a class="headerlink" href="#id14" title="Link to this heading">#</a></h4>
+<p>GCC 目前作为跨平台编译器来说它的兼容性无异是最强的，兼容最强肯定是以牺牲一定的性能为基础，苹果为了提高性能，因此专门针对 mac 系统开发了专用的编译器 Clang 与 LLVM，Clang 用于编译器前段，LLVM 用于后端。</p>
+</section>
+</section>
+<section id="llvm">
+<h3>LLVM<a class="headerlink" href="#llvm" title="Link to this heading">#</a></h3>
+<blockquote>
+<div><p>LLVM (Low Level Virtual Machine，底层虚拟机) 提供了与编译器相关的支持，能够进行程序语言的编译期优化、链接优化、在线编译优化、代码生成。简而言之，可以作为多种编译器的后台来使用。</p>
+</div></blockquote>
+<p>LLVM 作为一个编译器的基础建设，它是为了任意一种编程语言写成的程序，利用虚拟技术，创造出编译时期，链结时期，运行时期以及“闲置时期”的优化。</p>
+<section id="id15">
+<h4>LLVM 历史<a class="headerlink" href="#id15" title="Link to this heading">#</a></h4>
+<p>Apple 一直使用 GCC 作为官方的编译器。GCC 作为开源世界的编译器标准一直做得不错，但 Apple 对编译工具会提出更高的要求：</p>
+<p>一方面，Apple 对 Objective-C 语言（甚至后来对 C 语言）新增很多特性，但 GCC 开发者对 Apple 使用 Objective-C 的支持度较低。因此 Apple 基于 GCC 某个版本开始，分成两条分支分别开发，这也造成 Apple 的编译器版本远落后于 GCC 的官方版本。</p>
+<p>另一方面，GCC 的代码耦合度太高，不好独立，而且越是后期的版本，代码质量越差，但 Apple 想做的很多功能（比如更好的 IDE 支持）需要模块化的方式来调用 GCC，但 GCC 一直没有实现，从根本上限制了 LLVM-GCC 的开发。</p>
+<p>所以，这种不和让 Apple 一直在寻找一个高效的、模块化的、协议更放松的开源替代品，于是 Apple 请来了编译器高材生 Chris Lattner，主持实现 LLVM 项目。</p>
+<p><img alt="编译器" src="../_images/02History10.png" /></p>
+</section>
+<section id="id16">
+<h4>总结<a class="headerlink" href="#id16" title="Link to this heading">#</a></h4>
+<p>因为 GCC 的编译器已经慢慢无法满足苹果的需求，因此苹果开发了 Clang 与 LLVM 来完全取代 GCC。Xcode4 之后，苹果的默认编译器采用 Clang 作为编译器前端，LLVM 作为编译器后端。</p>
+</section>
+</section>
+<section id="id17">
+<h3>差异对比<a class="headerlink" href="#id17" title="Link to this heading">#</a></h3>
+<p>下面来通过不同的维度来比较一下两大编译器巨头 GCC 和 Clang：</p>
+<ul class="simple">
+<li><p><strong>开源软件</strong>：众所周知，GCC 和 Clang 都是免费的开源软件。但是他们的许可授权很不一样。GCC 是参照 GPL（GNU 公共许可证）授权的，而 Clang/LLVM 是 Apache 许可授权的。要深入比较这两种许可证在法律层面的细微差别及其对商业应用和代码衍生的具体约束，最专业的判断往往来自于精通软件许可的律师，而非单纯的技术人员。</p></li>
+<li><p><strong>支持平台</strong>：GCC 和 Clang 都支持几乎所有的平台。Clang/LLVM 可在 Windows 本机上进行编译，而 GCC 则需要 MinGW 这样的子系统，才能与 Windows 兼容。这样比较 Clang 和 GCC 是不公平的，因为 GCC 没有在本地支持 Windows 的计划。</p></li>
+<li><p><strong>代码复杂度</strong>：GCC 是一个非常复杂的软件，有超过 1500 万行代码。尽管其前/后端定义清晰明了，但软件在本质上更为单一。对比 GCC，Clang 更多的是模块化架构，具有定义良好的扩展点。</p></li>
+<li><p><strong>标准支持</strong>：对 C++ 20，即最新推出的 C++ 版本，GCC 已通过测试。另外，它也完全符合 C++ 17 以及最新的 C 语言标准，C17。Clang 完全符合 C++ 17 标准，也将很快跟进 C++ 20 标准。</p></li>
+<li><p><strong>高效代码生成</strong>：Clang 和 GCC 的代码生成，在空间和时间的复杂度旗鼓相当。因此这种比较毫无意义，因为这两个编译优化工具都基于一种严密的静态分配形式。</p></li>
+<li><p><strong>语言独立的类型系统</strong>
+在这个标题下对比 Clang 与 GCC 很有意义。由于 Clang/LLVM 对所有兼容语言都使用语言独立的类型系统，因此可以确定指令的确切语义。GCC 则没有语言独立类型系统的设计目标。</p></li>
+<li><p><strong>前端解析器</strong>：GCC 以前有基于 Bison 的 LR 解析器，后来转向了手写递归下降解析器。Clang 一直使用手写的确定性递归下降解析器，且可回溯。</p></li>
+<li><p><strong>后端链接器</strong>：GCC 与 Clang 的差异在这个层面最为明显。GCC 使用 ld 作为链接器，支持 ld-gold。Clang 使用 lld 作为链接器。通过一些基准测试，可以看出 lld 比 ld 甚至最新的 ld-gold 都快。</p></li>
+<li><p><strong>构建工具</strong>：Clang 与 GCC 的另一个大的区别。GCC 使用 Autotools 和 Make 作为构建工具，而 Clang/LLVM 使用 CMake。</p></li>
+<li><p><strong>调试支持</strong>：GCC 有一个优秀的 GDB 调试器。GDB 历经时间考验，性能优异。Clang 则将 LLDB 调试器构建为 LLVM 上的一组可重用组件。</p></li>
+</ul>
+<p>GCC 是一个功能强大的编译器集合，支持多种编程语言，广泛应用于各种开源项目和商业软件。LLVM 是一个灵活的编译器基础设施，提供了通用的编译器工具和库，被用于构建自定义编译器。</p>
+<p>Clang 是基于 LLVM 的主要支持 C、C++、Objective-C 和 Objective-C++ 编译器，具有快速的编译速度和低内存占用，Clang 的底层框架 LLVM 具有足够的可扩展性，可以支持 Julia 和 Swift 等较新的语言。</p>
+<p>以下的表格简单梳理了两个工具的差异：</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head text-center"><p>类型</p></th>
+<th class="head text-center"><p>GCC</p></th>
+<th class="head text-center"><p>Clang/LLVM</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-center"><p>许可证</p></td>
+<td class="text-center"><p>GNU GPL</p></td>
+<td class="text-center"><p>Apache 2.0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p>代码模块化</p></td>
+<td class="text-center"><p>一体化架构</p></td>
+<td class="text-center"><p>模块化</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p>支持平台</p></td>
+<td class="text-center"><p>Uinx、Windows、MAC</p></td>
+<td class="text-center"><p>Uinx、Windows、MAC</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p>代码生成</p></td>
+<td class="text-center"><p>高效，有很多编译器选项可以使用</p></td>
+<td class="text-center"><p>高效，LLVM 后端使用了 SSA 表单</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p>语言独立类型系统</p></td>
+<td class="text-center"><p>没有</p></td>
+<td class="text-center"><p>有</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p>构建工具</p></td>
+<td class="text-center"><p>Make Base</p></td>
+<td class="text-center"><p>CMake</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p>解析器</p></td>
+<td class="text-center"><p>最早采用 Bison LR，现在改为递归下解析器</p></td>
+<td class="text-center"><p>手写的递归下降解析器</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p>链接器</p></td>
+<td class="text-center"><p>LD</p></td>
+<td class="text-center"><p>lld</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p>调试器</p></td>
+<td class="text-center"><p>GDB</p></td>
+<td class="text-center"><p>LLDB</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="id18">
+<h2>未来发展趋势<a class="headerlink" href="#id18" title="Link to this heading">#</a></h2>
+<p>根据现代语言发展的情况来看，跨越不同编程语言之间的鸿沟变得越来越小，语言也逐渐在一些方面趋同。</p>
+<p>比如如今在 JVM 平台上可以运行多种语言，甚至可以通过使用 GraalVM Compiler 对接 LLVM，使得 C/C++、Rust 代码得以在 JVM 上运行，实现多语言之间无缝调用。</p>
+<p>反之，在底层平台逐步扩大的同时，上层的语言也变得能够扩张到任何平台，比如 Java、Kotlin 最初在 JVM 上运行，到可以编译为原生机器码或者 WASM 在 WebAssembly 平台上运行。</p>
+</section>
+<section id="id19">
+<h2>小结与思考<a class="headerlink" href="#id19" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>编译技术是计算机科学皇冠上的一颗明珠，作为基础软件中的核心技术</p></li>
+<li><p>编译器能够识别高级语言程序代码中的词汇、句子以及各种特定的格式和数据结构</p></li>
+<li><p>编译过程，是将源代码程序转换成机器能够识别的二进制码</p></li>
+<li><p>传统编译器通常分为三个部分，前端(frontEnd)，优化器(Optimizer)和后端(backEnd)</p></li>
+</ul>
+</section>
+<section id="id20">
+<h2>本节视频<a class="headerlink" href="#id20" title="Link to this heading">#</a></h2>
+<html>
+<iframe src="https://player.bilibili.com/player.html?aid=520259153&bvid=BV1sM411C7Vr&cid=900893222&page=1&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</html>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./03Compiler01Tradition"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+<div class="section ablog__blog_comments">
+  
+  
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="01Introduction.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">编译器基础介绍</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="03GCC.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">GCC 主要特征</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">基础介绍</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">出现原因</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">什么是编译器</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">历史发展</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">基本构成</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">编译体系</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">基础设施</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">虚拟机与优化</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">集成环境</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">传统编译器之争</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gcc">GCC</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">总结</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clang">Clang</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">Clang 历史</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">总结</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#llvm">LLVM</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id15">LLVM 历史</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id16">总结</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id17">差异对比</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id18">未来发展趋势</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id19">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id20">本节视频</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jun 15, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

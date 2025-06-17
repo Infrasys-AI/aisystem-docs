@@ -1,0 +1,1063 @@
+
+<!DOCTYPE html>
+
+
+<html lang="cn" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Ascend C 编程范式" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="03Compiler07CANN/05Paradigm.html" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI系统原理)" />
+<meta property="og:description" content="AI 的发展日新月异，AI 系统相关软件的更新迭代也是应接不暇，作为一本讲授理论的作品，我们将尽可能地讨论编程范式背后的原理和思考，而少体现代码实现，以期让读者理解 Ascend C 为何这样设计，进而随时轻松理解最新的 Ascend C 算子的编写思路。 本节将针对 Ascend C 的编程范式进行详细讲解，重点讲授向量计算编程范式。 向量编程范式: 基于 Ascend C 编程范式的方式..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="/None" />
+<meta property="og:image:alt" content="AI 的发展日新月异，AI 系统相关软件的更新迭代也是应接不暇，作为一本讲授理论的作品，我们将尽可能地讨论编程范式背后的原理和思考，而少体现代码实现，以期让读者理解 Ascend C 为何这样设计，进而随时轻松理解最新的 Ascend C 算子的编写思路。 本节将针对 Ascend C 的编程范式进行详细讲解，重..." />
+<meta name="description" content="AI 的发展日新月异，AI 系统相关软件的更新迭代也是应接不暇，作为一本讲授理论的作品，我们将尽可能地讨论编程范式背后的原理和思考，而少体现代码实现，以期让读者理解 Ascend C 为何这样设计，进而随时轻松理解最新的 Ascend C 算子的编写思路。 本节将针对 Ascend C 的编程范式进行详细讲解，重点讲授向量计算编程范式。 向量编程范式: 基于 Ascend C 编程范式的方式..." />
+<meta name="twitter:card" content="summary_large_image" />
+
+    <title>Ascend C 编程范式 &#8212; AI System</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=362ab14a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+
+    <script src="../_static/documentation_options.js?v=aabdd393"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/rtd-data.js?v=db39d344"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '03Compiler07CANN/05Paradigm';</script>
+    <script src="https://assets.readthedocs.org/static/javascript/readthedocs-doc-embed.js"></script>
+    <link rel="icon" href="../_static/logo-square.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="推理系统&amp;引擎概述" href="../04Inference/README.html" />
+    <link rel="prev" title="Ascend C 语法扩展" href="04Grmmar.html" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="cn"/>
+    <meta name="docbuild:last-update" content="Jun 15, 2025"/>
+
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../reference/blog/atom.xml"
+  title="Blog"
+/>
+
+
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-wide.svg" class="logo__image only-light" alt="AI System - Home"/>
+    <script>document.write(`<img src="../_static/logo-wide.svg" class="logo__image only-dark" alt="AI System - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Youtube</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Blibili</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系结构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/01Introduction.html">课程内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/02ArchSlim.html">AI 计算模式（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/03MobileParallel.html">AI 计算模式（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/04Metrics.html">关键设计指标</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/05Matrix.html">核心计算之矩阵乘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/06BitWidth.html">计算之比特位宽</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware02ChipBase/README.html">AI 芯片基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/01CPUBase.html">CPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/02CPUISA.html">CPU 指令集架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/03CPUData.html">CPU 计算本质</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/04CPULatency.html">CPU 计算时延</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/05GPUBase.html">GPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/06NPUBase.html">NPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/07Future.html">超异构计算</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware03GPUBase/README.html">图形处理器 GPU</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/01Works.html">GPU 工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/02Principle.html">为什么 GPU 适用于 AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/03Concept.html">GPU 架构与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/04History.html">GPU 架构回顾</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware04NVIDIA/README.html">英伟达 GPU 详解</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/01BasicTC.html">Tensor Core 基本原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/02HistoryTC.html">Tensor Core 架构演进</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/03DeepTC.html">Tensor Core 深度剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/04BasicNvlink.html">分布式通信与 NVLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/05DeepNvlink.html">NVLink 原理剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/06DeepNvswitch.html">NV Switch 深度解析</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware05Abroad/README.html">国外 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/04TPUIntrol.html">谷歌 TPU 历史发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/05TPU1.html">谷歌 TPU v1-脉动阵列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/06TPU2.html">谷歌 TPUv2 训练芯片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/07TPU3.html">谷歌 TPUv3 POD 形态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/08TPU4.html">谷歌 TPU v4 与光路交换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware06Domestic/README.html">国内 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/04Cambricon.html">寒武纪介绍</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/08AscendBase.html">昇腾 AI 架构介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/09AscendSOC.html">昇腾 AI 处理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/10AscendCube.html">昇腾 AI 核心单元</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/11AscendLayout.html">昇腾数据布局转换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware07Thought/README.html">AI 芯片黄金十年</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/01Introduction.html">芯片的编程体系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/02SIMTSIMD.html">SIMD &amp; SIMT 与芯片架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/03SPMT.html">SIMD &amp; SIMT 与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/04NVSIMT.html">CUDA 编程模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/05DSA.html">从 CUDA 对 AI 芯片思考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/06AIChip.html">AI 芯片的思考</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与编译原理 ===</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/01Introduction.html">编译器基础介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/02History.html">传统编译器发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/03GCC.html">GCC 主要特征</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/04LLVM.html">LLVM 架构设计和原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/05LLVMIR.html">LLVM IR 基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/06LLVMDetail.html">LLVM IR 详解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/07LLVMFrontend.html">LLVM 前端和优化层</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/08LLVMBackend.html">LLVM 后端代码生成</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler02AICompiler/README.html">AI 编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/01Appear.html">为什么需要 AI 编译器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/02Stage.html">AI 编译器历史阶段</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/03Architecture.html">AI 编译器基本架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/04Future.html">AI 编译器挑战与思考</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler03Frontend/README.html">前端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/01Introduction.html">AI 编译器前端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/02GraphIR.html">图算 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/03OPFusion.html">算子融合</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/04LayoutPrinc.html">布局转换原理与算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/06Memory.html">内存分配算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/07ConstantFold.html">常量折叠原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/08CSE.html">公共表达式消除原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/09DCE.html">死代码消除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/10algebraic.html">代数简化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler04Backend/README.html">后端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/01Introduction.html">AI 编译器后端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/02OPSCompute.html">计算与调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/03Optimization.html">算子手工优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/04LoopOpt.html">算子循环优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">CANN &amp; Ascend C</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01CANN.html">昇腾异构计算架构 CANN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02OPType.html">CANN 算子类型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03AscendC.html">算子开发编程语言 Ascend C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04Grmmar.html">Ascend C 语法扩展</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Ascend C 编程范式</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 四. 推理系统&amp;引擎 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../04Inference/README.html">推理系统&amp;引擎概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference01Inference/README.html">推理系统</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/01Introduction.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/02Constraints.html">推理系统介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/03Workflow.html">推理流程全景</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/04System.html">推理系统架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/05Inference.html">推理引擎架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/07MindIEIntro.html">昇腾推理引擎 MindIE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/08AscendCL.html">推理引擎示例：AscendCL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference02Mobilenet/README.html">模型轻量化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/01Introduction.html">推理参数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/021Squeezenet.html">SqueezeNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/022Shufflenet.html">ShuffleNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/023Mobilenet.html">MobileNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/024ESPNet.html">ESPNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/025FBNet.html">FBNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/026EfficientNet.html">EfficientNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/027GhostNet.html">GhostNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/02Cnn.html">CNN 模型小型化（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/031MobileVit.html">MobileVit 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/032MobileFormer.html">MobileFormer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/033EfficientFormer.html">EfficientFormer 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Cnn.html">CNN 模型小型化（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Transformer.html">Transformer 小型化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/04Transformer.html">Transformer 模型小型化</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference03Slim/README.html">模型压缩</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/02Quant.html">低比特量化原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/03QAT.html">感知量化训练 QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/04PTQ.html">训练后量化与部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/05Pruning.html">模型剪枝</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/06Distillation.html">知识蒸馏原理</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference04Converter/README.html">模型转换</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/02Principle.html">推理文件格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/03IR.html">自定义计算图 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/04Detail.html">模型转换流程</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference05Optimize/README.html">模型优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/01Optimizer.html">计算图优化架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/02Basic.html">离线图优化技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/03Extend.html">其他计算图优化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference06Kernel/README.html">Kernel 优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/01Introduction.html">Kernel 层架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/02Conv.html">卷积操作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/03Im2col.html">Im2Col 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/04Winograd.html">Winograd 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/05Qnnpack.html">QNNPack 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/06Memory.html">推理内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/08Others.html">汇编与循环优化</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 五. AI 框架核心模块 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../05Framework/README.html">AI 框架核心概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework01Foundation/README.html">AI 框架基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/01Introduction.html">内容介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/02Fundamentals.html">AI 框架作用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/03History.html">AI 框架之争</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/04Programing.html">框架编程范式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/05MindSpore.html">昇思 MindSore 关键特性</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework02AutoDiff/README.html">自动微分</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/01Introduction.html">自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/02BaseConcept.html">什么是微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/03GradMode.html">微分计算模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/04Implement.html">微分实现方式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/05ForwardMode.html">动手实现自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/06ReversedMode.html">动手实现 PyTorch 微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/07Challenge.html">自动微分的挑战&amp;未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework03DataFlow/README.html">计算图</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/02Computegraph.html">计算图原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/03Atuodiff.html">计算图与自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/04Dispatch.html">计算图的调度与执行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/05ControlFlow.html">计算图的控制流实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/06StaticGraph.html">动态图与静态图转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/07Future.html">计算图挑战与未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework04Parallel/README.html">分布式并行</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/02DataParallel.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/03ZeRODP.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/04TensorParallel.html">张量并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/05PipelineParallel.html">流水并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/06HybridParallel.html">混合并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/07MSParallel.html">昇思MindSpore并行</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 附录内容 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../00Others/README.html">附录(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Editors.html">编辑和作者(DONE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Instruments.html">书写工具(DONE)</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../00Others/Install.html">本地部署(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Inference.html">参考链接(DONE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Glossary.html">术语表(DONE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Criterion.html">书写规范(DONE)</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/blob/master/03Compiler07CANN/05Paradigm.md?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/edit/master/03Compiler07CANN/05Paradigm.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/issues/new?title=Issue%20on%20page%20%2F03Compiler07CANN/05Paradigm.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/03Compiler07CANN/05Paradigm.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Ascend C 编程范式</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">向量编程范式</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">算子分析</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">核函数定义与封装</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">算子数据通路</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">算子类实现</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">算子切分策略</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">小结与思考</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+<!--适用于[License] (https://github.com/chenzomi12/AISystem/blob/main/LICENSE)版权许可-->
+<section class="tex2jax_ignore mathjax_ignore" id="ascend-c">
+<h1>Ascend C 编程范式<a class="headerlink" href="#ascend-c" title="Link to this heading">#</a></h1>
+<p>AI 的发展日新月异，AI 系统相关软件的更新迭代也是应接不暇，作为一本讲授理论的作品，我们将尽可能地讨论编程范式背后的原理和思考，而少体现代码实现，以期让读者理解 Ascend C 为何这样设计，进而随时轻松理解最新的 Ascend C 算子的编写思路。</p>
+<p>本节将针对 Ascend C 的编程范式进行详细讲解，重点讲授向量计算编程范式。</p>
+<section id="id1">
+<h2>向量编程范式<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<p>基于 Ascend C 编程范式的方式实现自定义向量算子的流程如下图所示，由三个步骤组成：算子分析是进行编程的前置任务，负责明确自定义算子的各项需求，如输入输出、使用 API 接口等；核函数的定义和封装是编程的第一步，负责声明核函数的名称，并提供进入核函数运算逻辑的接口；基于算子需求实现算子类是整个核函数的核心计算逻辑，其由被分为内存初始化、数据搬入、算子计算逻辑实现、数据搬出四个部分，后三者被又被称为算子的实现流程。</p>
+<p><img alt="自定义算子开发流程" src="images/03Compiler07CANN/paradigm1.png" /></p>
+<p>自定义向量算子核心部分一般由两个函数组成，分别是 <code class="docutils literal notranslate"><span class="pre">Init()</span></code> 函数（初始化函数）与 <code class="docutils literal notranslate"><span class="pre">Process()</span></code> 函数（执行函数）。<code class="docutils literal notranslate"><span class="pre">Init()</span></code> 函数完成板外数据定位以及板上内存初始化工作；<code class="docutils literal notranslate"><span class="pre">Process()</span></code> 函数完成向量算子的实现，分成三个流水任务：CopyIn、Compute、CopyOut。CopyIn 负责板外数据搬入，Compute 负责向量计算，CopyOut 负责板上数据搬出。</p>
+<p>流水线任务之间存在数据依赖，需要进行数据传递。Ascend C 中使用 <code class="docutils literal notranslate"><span class="pre">TQue</span></code> 队列完成任务之间的数据通信和同步，提供 EnQue、<code class="docutils literal notranslate"><span class="pre">DeQue</span></code> 等基础 API；<code class="docutils literal notranslate"><span class="pre">TQue</span></code> 队列管理不同层级的物理内存时，用一种抽象的逻辑位置（TPosition）来表达各级别的存储，代替了片上物理存储的概念，开发者无需感知硬件架构。另外，Ascend C 使用 <code class="docutils literal notranslate"><span class="pre">GlobalTensor</span></code> 和 <code class="docutils literal notranslate"><span class="pre">LocalTensor</span></code> 作为数据的基本操作单元，它是各种指令 API 直接调用的对象，也是数据的载体。在向量编程模型中，使用到的 <code class="docutils literal notranslate"><span class="pre">TQue</span></code> 类型如下：搬入数据的存放位置 VECIN、搬出数据的存放位置 VECOUT。</p>
+<p>在本节中，我们将从 <code class="docutils literal notranslate"><span class="pre">add_custom</span></code> 这一基本的向量算子着手，根据自定义算子的开发流程，逐步介绍如何根据向量编程范式逐步编写自定义向量算子，最后会介绍 Ascend C 向量编程如何进行数据切分。</p>
+<section id="id2">
+<h3>算子分析<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>在开发算子代码之前需要分析算子的数学表达式、输入、输出以及计算逻辑的实现，明确需要调用的 Ascend C 接口。</p>
+<ol class="arabic simple">
+<li><p>明确算子的数学表达式</p></li>
+</ol>
+<p>Ascend C 提供的向量计算接口的操作元素都为 <code class="docutils literal notranslate"><span class="pre">LocalTensor</span></code>，输入数据需要先搬运进片上存储，以 Add 算子为例，数学表达式为：<em><strong>z</strong></em>=<em><strong>x</strong></em>+<em><strong>y</strong></em>，使用计算接口完成两个输入参数相加，得到最终结果，再搬出到外部存储上。</p>
+<ol class="arabic simple" start="2">
+<li><p>明确输入和输出</p></li>
+</ol>
+<p>Add 算子有两个输入：x 与 y，输出为 z。</p>
+<p>本样例中算子的输入支持的数据类型为 <code class="docutils literal notranslate"><span class="pre">half(float16)</span></code>，算子输出的数据类型与输入数据类型相同。</p>
+<p>算子输入支持 shape（8，2048），输出 shape 与输入 shape 相同。算子输入支持的数据格式（shape）为：ND。</p>
+<ol class="arabic simple" start="3">
+<li><p>确定算子实现所需接口</p></li>
+</ol>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">DataCopy</span></code> 来实现数据搬移；由于向量计算实现较为简单，使用基础 API 完成计算逻辑的实现，在加法算子中使用双目指令接口 Add 实现 x+y；使用 EnQue、<code class="docutils literal notranslate"><span class="pre">DeQue</span></code> 等接口对 <code class="docutils literal notranslate"><span class="pre">TQue</span></code> 队列进行管理。</p>
+</section>
+<section id="id3">
+<h3>核函数定义与封装<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>在完成算子分析后，可以正式开始开发算子代码，其第一步应该完成对于核函数的定义和封装。在本小节将介绍如何对函数原型进行定义，并介绍核函数定义中应该遵循的规则；随后将介绍函数原型中所需实现的内容；最后本小节将完成核函数的封装，便于后续对于核函数的调用。</p>
+<ol class="arabic simple">
+<li><p>函数原型定义</p></li>
+</ol>
+<p>本样例中，函数原型名为 <code class="docutils literal notranslate"><span class="pre">add_custom</span></code>，根据算子分析中对算子输入输出的分析，确定有 3 个参数 x，y，z，其中 x，y 为输入内存，z 为输出内存。</p>
+<p>根据核函数定义的规则，使用<code class="docutils literal notranslate"><span class="pre">__global__</span></code>函数类型限定符来标识它是一个核函数，可以被<code class="docutils literal notranslate"><span class="pre">&lt;&lt;&lt;...&gt;&gt;&gt;</span></code>调用；使用<code class="docutils literal notranslate"><span class="pre">__aicore__</span></code>函数类型限定符来标识该核函数在设备端 AI Core 上执行；为方便起见，统一使用 <code class="docutils literal notranslate"><span class="pre">GM_ADDR</span></code> 宏修饰入参，表示其为入参在内存中的位置。<code class="docutils literal notranslate"><span class="pre">add_custom</span></code> 函数原型的定义见下方程序第 1 行所示。</p>
+<ol class="arabic simple" start="2">
+<li><p>调用算子类的 Init 和 Process 函数</p></li>
+</ol>
+<p>在函数原型中，首先实例化对应的算子类，并调用该算子类的 <code class="docutils literal notranslate"><span class="pre">Init()</span></code> 和 <code class="docutils literal notranslate"><span class="pre">Process()</span></code> 函数，如下方程序第 2-4 行所示。其中，<code class="docutils literal notranslate"><span class="pre">Init()</span></code> 函数负责内存初始化相关工作，<code class="docutils literal notranslate"><span class="pre">Process()</span></code> 函数则负责算子实现的核心逻辑。</p>
+<ol class="arabic simple" start="3">
+<li><p>对核函数的调用进行封装</p></li>
+</ol>
+<p>对核函数的调用进行封装，得到 <code class="docutils literal notranslate"><span class="pre">add_custom_do</span></code> 函数，便于主程序调用。下方程序第 6 行所示内容表示该封装函数仅在编译运行 NPU 侧的算子时会用到，编译运行 CPU 侧的算子时，可以直接调用 <code class="docutils literal notranslate"><span class="pre">add_custom</span></code> 函数。</p>
+<p>调用核函数时，除了需要传入参数 x，y，z，还需要使用<code class="docutils literal notranslate"><span class="pre">&lt;&lt;&lt;…&gt;&gt;&gt;</span></code>传入 <code class="docutils literal notranslate"><span class="pre">blockDim</span></code>（核函数执行的核数）, <code class="docutils literal notranslate"><span class="pre">l2ctrl</span></code>（保留参数，设置为 nullptr）, <code class="docutils literal notranslate"><span class="pre">stream</span></code>（应用程序中维护异步操作执行顺序的任务流对象）来规定核函数的执行配置，如下方程序第 10 行所示。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">extern</span> <span class="s2">&quot;C&quot;</span> <span class="n">__global__</span> <span class="n">__aicore__</span> <span class="n">void</span> <span class="n">add_custom</span><span class="p">(</span><span class="n">GM_ADDR</span> <span class="n">x</span><span class="p">,</span> <span class="n">GM_ADDR</span> <span class="n">y</span><span class="p">,</span> <span class="n">GM_ADDR</span> <span class="n">z</span><span class="p">){</span>
+    <span class="n">KernelAdd</span> <span class="n">op</span><span class="p">;</span>
+    <span class="n">op</span><span class="o">.</span><span class="n">Init</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">);</span>
+    <span class="n">op</span><span class="o">.</span><span class="n">Process</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">#ifndef __CCE_KT_TEST__</span>
+
+<span class="o">//</span> <span class="n">call</span> <span class="n">of</span> <span class="n">kernel</span> <span class="n">function</span>
+<span class="n">void</span> <span class="n">add_custom_do</span><span class="p">(</span><span class="n">uint32_t</span> <span class="n">blockDim</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">l2ctrl</span><span class="p">,</span> <span class="n">void</span><span class="o">*</span> <span class="n">stream</span><span class="p">,</span> <span class="n">uint8_t</span><span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">uint8_t</span><span class="o">*</span> <span class="n">y</span><span class="p">,</span> <span class="n">uint8_t</span><span class="o">*</span> <span class="n">z</span><span class="p">){</span>
+    <span class="n">add_custom</span><span class="o">&lt;&lt;&lt;</span><span class="n">blockDim</span><span class="p">,</span> <span class="n">l2ctrl</span><span class="p">,</span> <span class="n">stream</span><span class="o">&gt;&gt;&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">#endif</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h3>算子数据通路<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<p>前文已经提到过在 <code class="docutils literal notranslate"><span class="pre">Process()</span></code> 函数中存在三个流水任务，分别是 CopyIn、Compute 和 CopyOut。本节将详细讲解数据在这三个任务之间的传递过程，并为后续使用 Ascend C 对其进行实现作铺垫。</p>
+<p>向量算子三阶段任务流水的数据通路如下图所示。</p>
+<p><img alt="算子数据通路" src="images/03Compiler07CANN/paradigm2.png" /></p>
+<p>上图纵向分为 2 部分，上部分为发生在外部存储（Global Memory）中的数据流通过程，下部分为发生在 AI Core 内（Local Memory）中的数据流通过程；横向分为 3 部分，指代 CopyIn、Compute 和 CopyOut 这三个阶段中的数据流通过程。发生在 AI Core 内的任务间数据传递统一由 TPipe 资源管理模块进行管理。</p>
+<p>在 CopyIn 任务中，需要先将执行计算的数据 xGm、yGm 从外部存储通过 <code class="docutils literal notranslate"><span class="pre">DataCopy</span></code> 接口传入板上，存储为 xLocal、yLocal，并通过 EnQue 接口传入数据搬入队列 inQueueX、inQueueY 中，以便进行流水模块间的数据通信与同步。</p>
+<p>在 Compute 任务中，需要先将 xLocal、yLocal 使用 <code class="docutils literal notranslate"><span class="pre">DeQue</span></code> 接口从数据搬入队列中取出，并使用相应的向量运算 API 执行计算操作得到结果 zLocal，并将 zLocal 通过 EnQue 接口传入数据搬出队列 outQueueZ 中。</p>
+<p>在 CopyOut 任务中，需要先将结果数据 zLocal 使用 <code class="docutils literal notranslate"><span class="pre">DeQue</span></code> 接口从数据搬出队列中取出，并使用 <code class="docutils literal notranslate"><span class="pre">DataCopy</span></code> 接口将板上数据传出到外部存储 zGm 中。</p>
+<p>上述为向量算子核心处理部分的数据通路，同时也作为一个程序设计思路，下面将介绍如何用 Ascend C 对其进行实现。</p>
+</section>
+<section id="id5">
+<h3>算子类实现<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>在对核函数的声明和定义中，我们会提到需要实例化算子类，并调用其中的两个函数来实现算子。在本节中，将首先展示算子类的成员，随后具体介绍 <code class="docutils literal notranslate"><span class="pre">Init()</span></code> 函数和 <code class="docutils literal notranslate"><span class="pre">Process()</span></code> 函数的作用与实现。</p>
+<ol class="arabic simple">
+<li><p>算子类成员定义</p></li>
+</ol>
+<p>算子类的成员如下方程序所示。如第 4-5 行所示，在算子类中，需要声明对外开放的内存初始化函数 <code class="docutils literal notranslate"><span class="pre">Init()</span></code> 和核心处理函数 <code class="docutils literal notranslate"><span class="pre">Process()</span></code>。而为了实现适量算子核内计算流水操作，在向量算子中我们又将 <code class="docutils literal notranslate"><span class="pre">Process()</span></code>函数分为三个部分，即数据搬入阶段 <code class="docutils literal notranslate"><span class="pre">CopyIn()</span></code>、计算阶段 <code class="docutils literal notranslate"><span class="pre">Compute()</span></code>与数据搬出阶段 CopyOut()三个私有类成员，见第 6～9 行。</p>
+<p>除了这些函数成员声明外，第 10-14 行还依次声明了内存管理对象 pipe、输入数据 <code class="docutils literal notranslate"><span class="pre">TQue</span></code> 队列管理对象 inQueueX 和 inQueueY、输出数据 <code class="docutils literal notranslate"><span class="pre">TQue</span></code> 队列管理对象 outQueueZ 以及管理输入输出 Global Memory 内存地址的对象 xGm，yGm 与 zGm，这些均作为私有成员在算子实现中被使用。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">KernelAdd</span> <span class="p">{</span>
+
+<span class="n">public</span><span class="p">:</span>
+    <span class="n">__aicore__</span> <span class="n">inline</span> <span class="n">KernelAdd</span><span class="p">()</span> <span class="p">{}</span> 
+    <span class="n">__aicore__</span> <span class="n">inline</span> <span class="n">void</span> <span class="n">Init</span><span class="p">(</span><span class="n">GM_ADDR</span> <span class="n">x</span><span class="p">,</span> <span class="n">GM_ADDR</span> <span class="n">y</span><span class="p">,</span> <span class="n">GM_ADDR</span> <span class="n">z</span><span class="p">){}</span> 
+    <span class="n">__aicore__</span> <span class="n">inline</span> <span class="n">void</span> <span class="n">Process</span><span class="p">(){}</span>
+
+<span class="n">private</span><span class="p">:</span>
+    <span class="n">__aicore__</span> <span class="n">inline</span> <span class="n">void</span> <span class="n">CopyIn</span><span class="p">(</span><span class="n">int32_t</span> <span class="n">progress</span><span class="p">){}</span>
+    <span class="n">__aicore__</span> <span class="n">inline</span> <span class="n">void</span> <span class="n">Compute</span><span class="p">(</span><span class="n">int32_t</span> <span class="n">progress</span><span class="p">){}</span>
+    <span class="n">__aicore__</span> <span class="n">inline</span> <span class="n">void</span> <span class="n">CopyOut</span><span class="p">(</span><span class="n">int32_t</span> <span class="n">progress</span><span class="p">){}</span>
+
+<span class="n">private</span><span class="p">:</span>
+    <span class="n">TPipe</span> <span class="n">pipe</span><span class="p">;</span> 
+    <span class="n">TQue</span><span class="o">&lt;</span><span class="n">TPosition</span><span class="p">::</span><span class="n">VECIN</span><span class="p">,</span> <span class="n">BUFFER_NUM</span><span class="o">&gt;</span> <span class="n">inQueueX</span><span class="p">,</span> <span class="n">inQueueY</span><span class="p">;</span>  
+    <span class="n">TQue</span><span class="o">&lt;</span><span class="n">TPosition</span><span class="p">::</span><span class="n">VECOUT</span><span class="p">,</span> <span class="n">BUFFER_NUM</span><span class="o">&gt;</span> <span class="n">outQueueZ</span><span class="p">;</span>  
+    <span class="n">GlobalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">xGm</span><span class="p">,</span> <span class="n">yGm</span><span class="p">,</span> <span class="n">zGm</span><span class="p">;</span>  
+<span class="p">};</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>初始化函数 Init()函数实现</p></li>
+</ol>
+<p>在多核并行计算中，每个核计算的数据是全部数据的一部分。Ascend C 核函数是单个核的处理函数，所以我们需要获取每个核负责的对应位置的数据。此外，我们还需要对于声明的输入输出 <code class="docutils literal notranslate"><span class="pre">TQue</span></code> 队列分配相应的内存空间。</p>
+<p><code class="docutils literal notranslate"><span class="pre">Init()</span></code> 函数实现见下方程序。第 2～5 行通过计算得到该核所负责的数据所在位置，其中 x、y、z 表示 3 个入参在片外的起始地址；BLOCK_LENGTH 表示单个核负责的数据长度，为数据全长与参与计算核数的商；<code class="docutils literal notranslate"><span class="pre">GetBlockIdx()</span></code>是与硬件感知相关的 API 接口，可以得到核所对应的编号，在该样例中为 0-7。通过这种方式可以得到该核函数需要处理的输入输出在 Global Memory 上的内存偏移地址，并将该偏移地址设置在 Global Tensor 中。</p>
+<p>第 6～8 行通过 TPipe 内存管理对象为输入输出 <code class="docutils literal notranslate"><span class="pre">TQue</span></code> 分配内存。其调用 API 接口 <code class="docutils literal notranslate"><span class="pre">InitBuffer()</span></code>，接口入参依次为 <code class="docutils literal notranslate"><span class="pre">TQue</span></code> 队列名、是否启动 double buffer 机制以及单个数据块的大小（而非长度）。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span>   <span class="n">__aicore__</span> <span class="n">inline</span> <span class="n">void</span> <span class="n">Init</span><span class="p">(</span><span class="n">GM_ADDR</span> <span class="n">x</span><span class="p">,</span> <span class="n">GM_ADDR</span> <span class="n">y</span><span class="p">,</span> <span class="n">GM_ADDR</span> <span class="n">z</span><span class="p">)</span>
+<span class="mi">2</span>   <span class="p">{</span>
+<span class="mi">3</span>       <span class="n">xGm</span><span class="o">.</span><span class="n">SetGlobalBuffer</span><span class="p">((</span><span class="n">__gm__</span> <span class="n">half</span><span class="o">*</span><span class="p">)</span><span class="n">x</span> <span class="o">+</span> <span class="n">BLOCK_LENGTH</span> <span class="o">*</span> <span class="n">GetBlockIdx</span><span class="p">(),</span> <span class="n">BLOCK_LENGTH</span><span class="p">);</span>
+<span class="mi">4</span>       <span class="n">yGm</span><span class="o">.</span><span class="n">SetGlobalBuffer</span><span class="p">((</span><span class="n">__gm__</span> <span class="n">half</span><span class="o">*</span><span class="p">)</span><span class="n">y</span> <span class="o">+</span> <span class="n">BLOCK_LENGTH</span> <span class="o">*</span> <span class="n">GetBlockIdx</span><span class="p">(),</span> <span class="n">BLOCK_LENGTH</span><span class="p">);</span>
+<span class="mi">5</span>       <span class="n">zGm</span><span class="o">.</span><span class="n">SetGlobalBuffer</span><span class="p">((</span><span class="n">__gm__</span> <span class="n">half</span><span class="o">*</span><span class="p">)</span><span class="n">z</span> <span class="o">+</span> <span class="n">BLOCK_LENGTH</span> <span class="o">*</span> <span class="n">GetBlockIdx</span><span class="p">(),</span> <span class="n">BLOCK_LENGTH</span><span class="p">);</span>
+<span class="mi">6</span>       <span class="n">pipe</span><span class="o">.</span><span class="n">InitBuffer</span><span class="p">(</span><span class="n">inQueueX</span><span class="p">,</span> <span class="n">BUFFER_NUM</span><span class="p">,</span> <span class="n">TILE_LENGTH</span> <span class="o">*</span> <span class="n">sizeof</span><span class="p">(</span><span class="n">half</span><span class="p">));</span>
+<span class="mi">7</span>       <span class="n">pipe</span><span class="o">.</span><span class="n">InitBuffer</span><span class="p">(</span><span class="n">inQueueY</span><span class="p">,</span> <span class="n">BUFFER_NUM</span><span class="p">,</span> <span class="n">TILE_LENGTH</span> <span class="o">*</span> <span class="n">sizeof</span><span class="p">(</span><span class="n">half</span><span class="p">));</span>
+<span class="mi">8</span>       <span class="n">pipe</span><span class="o">.</span><span class="n">InitBuffer</span><span class="p">(</span><span class="n">outQueueZ</span><span class="p">,</span> <span class="n">BUFFER_NUM</span><span class="p">,</span> <span class="n">TILE_LENGTH</span> <span class="o">*</span> <span class="n">sizeof</span><span class="p">(</span><span class="n">half</span><span class="p">));</span>
+<span class="mi">9</span>   <span class="p">}</span>
+
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>核心处理函数 Process()函数实现</p></li>
+</ol>
+<p>基于向量编程范式，将核函数的实现分为 3 个基本任务：CopyIn，Compute，CopyOut，<code class="docutils literal notranslate"><span class="pre">Process()</span></code> 函数通过调用顺序调用这三个基本任务完成核心计算任务。然而考虑到每个核内的数据仍然被进一步切分成小块，需要循环执行上述步骤，从而得到最终结果。<code class="docutils literal notranslate"><span class="pre">Process()</span></code> 函数的实现如下方程序所示。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span>   <span class="n">public</span><span class="p">:</span>
+<span class="mi">2</span>       <span class="n">__aicore__</span> <span class="n">inline</span> <span class="n">void</span> <span class="n">Process</span><span class="p">()</span>
+<span class="mi">3</span>       <span class="p">{</span>
+<span class="mi">4</span>           <span class="n">constexpr</span> <span class="n">int32_t</span> <span class="n">loopCount</span> <span class="o">=</span> <span class="n">TILE_NUM</span> <span class="o">*</span> <span class="n">BUFFER_NUM</span><span class="p">;</span>
+<span class="mi">5</span>           <span class="k">for</span> <span class="p">(</span><span class="n">int32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">loopCount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+<span class="mi">6</span>               <span class="n">CopyIn</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="mi">7</span>               <span class="n">Compute</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="mi">8</span>               <span class="n">CopyOut</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="mi">9</span>           <span class="p">}</span>
+<span class="mi">10</span>      <span class="p">}</span>
+<span class="mi">11</span>  <span class="n">private</span><span class="p">:</span>
+<span class="mi">12</span>      <span class="n">__aicore__</span> <span class="n">inline</span> <span class="n">void</span> <span class="n">CopyIn</span><span class="p">(</span><span class="n">int32_t</span> <span class="n">progress</span><span class="p">)</span>
+<span class="mi">13</span>      <span class="p">{</span>
+<span class="mi">14</span>          <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">xLocal</span> <span class="o">=</span> <span class="n">inQueueX</span><span class="o">.</span><span class="n">AllocTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="mi">15</span>          <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">yLocal</span> <span class="o">=</span> <span class="n">inQueueY</span><span class="o">.</span><span class="n">AllocTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="mi">16</span>          <span class="n">DataCopy</span><span class="p">(</span><span class="n">xLocal</span><span class="p">,</span> <span class="n">xGm</span><span class="p">[</span><span class="n">progress</span> <span class="o">*</span> <span class="n">TILE_LENGTH</span><span class="p">],</span> <span class="n">TILE_LENGTH</span><span class="p">);</span>
+<span class="mi">17</span>          <span class="n">DataCopy</span><span class="p">(</span><span class="n">yLocal</span><span class="p">,</span> <span class="n">yGm</span><span class="p">[</span><span class="n">progress</span> <span class="o">*</span> <span class="n">TILE_LENGTH</span><span class="p">],</span> <span class="n">TILE_LENGTH</span><span class="p">);</span>
+
+<span class="mi">18</span>          <span class="n">inQueueX</span><span class="o">.</span><span class="n">EnQue</span><span class="p">(</span><span class="n">xLocal</span><span class="p">);</span>
+<span class="mi">19</span>          <span class="n">inQueueY</span><span class="o">.</span><span class="n">EnQue</span><span class="p">(</span><span class="n">yLocal</span><span class="p">);</span>
+<span class="mi">20</span>      <span class="p">}</span>
+<span class="mi">21</span>      <span class="n">__aicore__</span> <span class="n">inline</span> <span class="n">void</span> <span class="n">Compute</span><span class="p">(</span><span class="n">int32_t</span> <span class="n">progress</span><span class="p">)</span>
+<span class="mi">22</span>      <span class="p">{</span>
+<span class="mi">23</span>          <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">xLocal</span> <span class="o">=</span> <span class="n">inQueueX</span><span class="o">.</span><span class="n">DeQue</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="mi">24</span>          <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">yLocal</span> <span class="o">=</span> <span class="n">inQueueY</span><span class="o">.</span><span class="n">DeQue</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="mi">25</span>          <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">zLocal</span> <span class="o">=</span> <span class="n">outQueueZ</span><span class="o">.</span><span class="n">AllocTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="mi">26</span>          <span class="n">Add</span><span class="p">(</span><span class="n">zLocal</span><span class="p">,</span> <span class="n">xLocal</span><span class="p">,</span> <span class="n">yLocal</span><span class="p">,</span> <span class="n">TILE_LENGTH</span><span class="p">);</span>
+<span class="mi">27</span>          <span class="n">outQueueZ</span><span class="o">.</span><span class="n">EnQue</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">(</span><span class="n">zLocal</span><span class="p">);</span>
+
+<span class="mi">28</span>          <span class="n">inQueueX</span><span class="o">.</span><span class="n">FreeTensor</span><span class="p">(</span><span class="n">xLocal</span><span class="p">);</span>
+<span class="mi">29</span>          <span class="n">inQueueY</span><span class="o">.</span><span class="n">FreeTensor</span><span class="p">(</span><span class="n">yLocal</span><span class="p">);</span>
+<span class="mi">30</span>      <span class="p">}</span>
+<span class="mi">31</span>      <span class="n">__aicore__</span> <span class="n">inline</span> <span class="n">void</span> <span class="n">CopyOut</span><span class="p">(</span><span class="n">int32_t</span> <span class="n">progress</span><span class="p">)</span>
+<span class="mi">32</span>      <span class="p">{</span>
+<span class="mi">33</span>          <span class="n">LocalTensor</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span> <span class="n">zLocal</span> <span class="o">=</span> <span class="n">outQueueZ</span><span class="o">.</span><span class="n">DeQue</span><span class="o">&lt;</span><span class="n">half</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="mi">34</span>          <span class="n">DataCopy</span><span class="p">(</span><span class="n">zGm</span><span class="p">[</span><span class="n">progress</span> <span class="o">*</span> <span class="n">TILE_LENGTH</span><span class="p">],</span> <span class="n">zLocal</span><span class="p">,</span> <span class="n">TILE_LENGTH</span><span class="p">);</span>
+<span class="mi">35</span>          <span class="n">outQueueZ</span><span class="o">.</span><span class="n">FreeTensor</span><span class="p">(</span><span class="n">zLocal</span><span class="p">);</span>
+<span class="mi">36</span>      <span class="p">}</span>
+
+</pre></div>
+</div>
+<p>如上方程序第 4-9 行所示，<code class="docutils literal notranslate"><span class="pre">Process()</span></code> 函数需要首先计算每个核内的分块数量，从而确定循环执行三段流水任务的次数，随后依此循环顺序执行数据搬入任务 <code class="docutils literal notranslate"><span class="pre">CopyIn()</span></code>、向量计算任务 <code class="docutils literal notranslate"><span class="pre">Compute()</span></code> 和数据搬出任务 <code class="docutils literal notranslate"><span class="pre">CopyOut()</span></code>。一个简化的数据通路图如下图所示。根据此图，可以完成各个任务的程序设计。</p>
+<p><img alt="三段式流水任务数据通路" src="images/03Compiler07CANN/paradigm3.png" /></p>
+<ul class="simple">
+<li><p>CopyIn()私有类函数实现</p></li>
+</ul>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">AllocTensor</span></code> 接口为参与计算的输入分配板上存储空间，如上方程序第 14～15 行代码所示，由于定义的入参数据类型是 half 类型的，所以此处分配的空间大小也为 half。</p>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">DataCopy</span></code> 接口将 <code class="docutils literal notranslate"><span class="pre">GlobalTensor</span></code> 数据拷贝到 <code class="docutils literal notranslate"><span class="pre">LocalTensor</span></code>，如第 16～17 行所示，xGm、yGm 存储的是该核所需处理的所有输入，因此根据该分块对应编号找到相关的分块数据拷贝至板上。</p>
+<p>使用 EnQue 将 <code class="docutils literal notranslate"><span class="pre">LocalTensor</span></code> 放入 VecIn 的 <code class="docutils literal notranslate"><span class="pre">TQue</span></code> 中，如第 18～19 行所示。</p>
+<ul class="simple">
+<li><p>Compute()私有类函数实现</p></li>
+</ul>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">DeQue</span></code> 从 VecIn 中取出输入 x 和 y，如上方程序第 23-24 行所示。</p>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">AllocTensor</span></code> 接口为输出分配板上存储空间，如第 25 行所示。</p>
+<p>使用 Ascend C 接口 Add 完成向量计算，如第 26 行所示。该接口是一个双目指令 2 级接口，入参分别为目的操作数、源操作数 1、源操作数 2 和输入元素个数。</p>
+<p>使用 EnQue 将计算结果 <code class="docutils literal notranslate"><span class="pre">LocalTensor</span></code> 放入到 VecOut 的 <code class="docutils literal notranslate"><span class="pre">TQue</span></code> 中，如第 27 行所示。</p>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">FreeTensor</span></code> 释放不再使用的 <code class="docutils literal notranslate"><span class="pre">LocalTensor</span></code>，即两个用于存储输入的 <code class="docutils literal notranslate"><span class="pre">LocalTensor</span></code>，如第 28～29 行所示。</p>
+<ul class="simple">
+<li><p>CopyOut 私有类函数实现</p></li>
+</ul>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">DeQue</span></code> 接口从 VecOut 的 <code class="docutils literal notranslate"><span class="pre">TQue</span></code> 中取出目标结果 z，如上方程序第 33 行所示。</p>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">DataCopy</span></code> 接口将 <code class="docutils literal notranslate"><span class="pre">LocalTensor</span></code> 数据拷贝到 <code class="docutils literal notranslate"><span class="pre">GlobalTensor</span></code> 上，如第 34 行所示。</p>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">FreeTensor</span></code> 将不再使用的 <code class="docutils literal notranslate"><span class="pre">LocalTensor</span></code> 进行回收，如第 35 行所示。</p>
+</section>
+<section id="id6">
+<h3>算子切分策略<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
+<p>正如前文所述，Ascend C 算子编程是 SPMD 编程，其使用多个核进行并行计算，在单个核内还将数据根据需求切分成若干份，降低每次计算负荷，从而起到加快计算效率的作用。这里需要注意，Ascend C 中涉及到的核数其实并不是指实际执行的硬件中所拥有的处理器核数，而是“逻辑核”的数量，即同时运行了多少个算子的实例，是同时执行此算子的进程数量。一般的，建议使用的逻辑核数量是实际处理器核数的整数倍。此外，如果条件允许，还可以进一步将每个待处理数据一分为二，开启 double buffer 机制（一种性能优化方法），实现流水线间并行，进一步减少计算单元的闲置问题。</p>
+<p>在本 add_custom 算子样例中，设置数据整体长度 TOTAL_LENGTH 为 8* 2048，平均分配到 8 个核上运行，单核上处理的数据大小 BLOCK_LENGTH 为 2048；对于单核上的处理数据，进行数据切块，将数据切分成 8 块（并不意味着 8 块就是性能最优）；切分后的每个数据块再次切分成 2 块，即可开启 double buffer。此时每个数据块的长度 TILE_LENGTH 为 128 个数据。</p>
+<p>具体数据切分示意图下图所示，在确定一个数据的起始内存位置后，将数据整体平均分配到各个核中，随后针对单核上的数据再次进行切分，将数据切分为 8 块，并启动 double buffer 机制再次将每个数据块一分为二，得到单个数据块的长度 TILE_LENGTH。</p>
+<p><img alt="算子数据切分策略" src="images/03Compiler07CANN/paradigm4.png" /></p>
+<p>数据切分中所使用的各参数定义如下程序所示：第 1 行定义了数据全长 TOTAL_LENGTH，约束了输入数据的长度；第 2 行声明了参与计算任务的核数 USE_CORE_NUM；第 3 行计算得到了单个核负责计算的数据长度 BLOCK_LENGTH；第 4 行定义了单个核中数据的切分块数 TILE_NUM；第 5 行决定了是否开启 double buffer 机制，如果不开启则规定 BUFFER_NUM = 1；第六行计算得到单个数据块的数据长度 TILE_LENGTH。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span>   <span class="n">constexpr</span> <span class="n">int32_t</span> <span class="n">TOTAL_LENGTH</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="mi">2048</span><span class="p">;</span>  
+<span class="mi">2</span>   <span class="n">constexpr</span> <span class="n">int32_t</span> <span class="n">USE_CORE_NUM</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
+<span class="mi">3</span>   <span class="n">constexpr</span> <span class="n">int32_t</span> <span class="n">BLOCK_LENGTH</span> <span class="o">=</span> <span class="n">TOTAL_LENGTH</span> <span class="o">/</span> <span class="n">USE_CORE_NUM</span><span class="p">;</span>
+<span class="mi">4</span>   <span class="n">constexpr</span> <span class="n">int32_t</span> <span class="n">TILE_NUM</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span> 
+<span class="mi">5</span>   <span class="n">constexpr</span> <span class="n">int32_t</span> <span class="n">BUFFER_NUM</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="mi">6</span>   <span class="n">constexpr</span> <span class="n">int32_t</span> <span class="n">TILE_LENGTH</span> <span class="o">=</span> <span class="n">BLOCK_LENGTH</span> <span class="o">/</span> <span class="n">TILE_NUM</span> <span class="o">/</span> <span class="n">BUFFER_NUM</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id7">
+<h2>小结与思考<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>合理的编程范式能够帮助开发者省去许多设计代码结构的思考负担，以及在一定程度上隐藏并行计算等相关性能优化细节，对提升算子开发效率有很大帮助。</p></li>
+<li><p>编程范式除了向量计算范式以外，还有矩阵计算范式，以及向量-矩阵混合（通常是融合算子）编程范式。</p></li>
+</ul>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./03Compiler07CANN"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+<div class="section ablog__blog_comments">
+  
+  
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="04Grmmar.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Ascend C 语法扩展</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../04Inference/README.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">推理系统&amp;引擎概述</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">向量编程范式</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">算子分析</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">核函数定义与封装</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">算子数据通路</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">算子类实现</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">算子切分策略</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">小结与思考</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jun 15, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

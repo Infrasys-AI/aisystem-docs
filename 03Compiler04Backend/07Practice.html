@@ -1,0 +1,1599 @@
+
+<!DOCTYPE html>
+
+
+<html lang="cn" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="TVM 实践案例" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="03Compiler04Backend/07Practice.html" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI系统原理)" />
+<meta property="og:description" content="在本节我们探讨一下，如何利用 AI 编译器在新的硬件上部署一个神经网络，从算法设计到实际运行，有哪些需要考虑的地方？本节将以 TVM 为例，首先介绍一下 TVM 的工作流： image-20240612213553327 导入模型。TVM 可以从 TensorFlow、PyTorch、ONNX 等框架导入模型。, 转换为 Relay。Relay 是 TVM 的中间表示形式，已导入 TVM 的..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="/None" />
+<meta property="og:image:alt" content="在本节我们探讨一下，如何利用 AI 编译器在新的硬件上部署一个神经网络，从算法设计到实际运行，有哪些需要考虑的地方？本节将以 TVM 为例，首先介绍一下 TVM 的工作流： image-20240612213553327 导入模型。TVM 可以从 TensorFlow、PyTorch、ONNX 等框架导入模型。,..." />
+<meta name="description" content="在本节我们探讨一下，如何利用 AI 编译器在新的硬件上部署一个神经网络，从算法设计到实际运行，有哪些需要考虑的地方？本节将以 TVM 为例，首先介绍一下 TVM 的工作流： image-20240612213553327 导入模型。TVM 可以从 TensorFlow、PyTorch、ONNX 等框架导入模型。, 转换为 Relay。Relay 是 TVM 的中间表示形式，已导入 TVM 的..." />
+<meta name="twitter:card" content="summary_large_image" />
+
+    <title>TVM 实践案例 &#8212; AI System</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=362ab14a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+
+    <script src="../_static/documentation_options.js?v=aabdd393"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/rtd-data.js?v=db39d344"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '03Compiler04Backend/07Practice';</script>
+    <script src="https://assets.readthedocs.org/static/javascript/readthedocs-doc-embed.js"></script>
+    <link rel="icon" href="../_static/logo-square.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="CANN &amp; Ascend C" href="../03Compiler07CANN/README.html" />
+    <link rel="prev" title="Auto-Tuning 原理" href="06AutoTuning.html" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="cn"/>
+    <meta name="docbuild:last-update" content="Jun 15, 2025"/>
+
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../reference/blog/atom.xml"
+  title="Blog"
+/>
+
+
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-wide.svg" class="logo__image only-light" alt="AI System - Home"/>
+    <script>document.write(`<img src="../_static/logo-wide.svg" class="logo__image only-dark" alt="AI System - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Youtube</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Blibili</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系结构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/01Introduction.html">课程内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/02ArchSlim.html">AI 计算模式（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/03MobileParallel.html">AI 计算模式（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/04Metrics.html">关键设计指标</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/05Matrix.html">核心计算之矩阵乘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/06BitWidth.html">计算之比特位宽</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware02ChipBase/README.html">AI 芯片基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/01CPUBase.html">CPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/02CPUISA.html">CPU 指令集架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/03CPUData.html">CPU 计算本质</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/04CPULatency.html">CPU 计算时延</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/05GPUBase.html">GPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/06NPUBase.html">NPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/07Future.html">超异构计算</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware03GPUBase/README.html">图形处理器 GPU</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/01Works.html">GPU 工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/02Principle.html">为什么 GPU 适用于 AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/03Concept.html">GPU 架构与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/04History.html">GPU 架构回顾</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware04NVIDIA/README.html">英伟达 GPU 详解</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/01BasicTC.html">Tensor Core 基本原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/02HistoryTC.html">Tensor Core 架构演进</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/03DeepTC.html">Tensor Core 深度剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/04BasicNvlink.html">分布式通信与 NVLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/05DeepNvlink.html">NVLink 原理剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/06DeepNvswitch.html">NV Switch 深度解析</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware05Abroad/README.html">国外 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/04TPUIntrol.html">谷歌 TPU 历史发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/05TPU1.html">谷歌 TPU v1-脉动阵列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/06TPU2.html">谷歌 TPUv2 训练芯片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/07TPU3.html">谷歌 TPUv3 POD 形态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/08TPU4.html">谷歌 TPU v4 与光路交换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware06Domestic/README.html">国内 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/04Cambricon.html">寒武纪介绍</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/08AscendBase.html">昇腾 AI 架构介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/09AscendSOC.html">昇腾 AI 处理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/10AscendCube.html">昇腾 AI 核心单元</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/11AscendLayout.html">昇腾数据布局转换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware07Thought/README.html">AI 芯片黄金十年</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/01Introduction.html">芯片的编程体系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/02SIMTSIMD.html">SIMD &amp; SIMT 与芯片架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/03SPMT.html">SIMD &amp; SIMT 与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/04NVSIMT.html">CUDA 编程模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/05DSA.html">从 CUDA 对 AI 芯片思考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/06AIChip.html">AI 芯片的思考</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与编译原理 ===</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/01Introduction.html">编译器基础介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/02History.html">传统编译器发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/03GCC.html">GCC 主要特征</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/04LLVM.html">LLVM 架构设计和原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/05LLVMIR.html">LLVM IR 基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/06LLVMDetail.html">LLVM IR 详解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/07LLVMFrontend.html">LLVM 前端和优化层</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/08LLVMBackend.html">LLVM 后端代码生成</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler02AICompiler/README.html">AI 编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/01Appear.html">为什么需要 AI 编译器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/02Stage.html">AI 编译器历史阶段</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/03Architecture.html">AI 编译器基本架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/04Future.html">AI 编译器挑战与思考</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler03Frontend/README.html">前端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/01Introduction.html">AI 编译器前端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/02GraphIR.html">图算 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/03OPFusion.html">算子融合</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/04LayoutPrinc.html">布局转换原理与算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/06Memory.html">内存分配算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/07ConstantFold.html">常量折叠原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/08CSE.html">公共表达式消除原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/09DCE.html">死代码消除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/10algebraic.html">代数简化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">后端优化</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01Introduction.html">AI 编译器后端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02OPSCompute.html">计算与调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Optimization.html">算子手工优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04LoopOpt.html">算子循环优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05OtherOpt.html">指令和存储优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06AutoTuning.html">Auto-Tuning 原理</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">TVM 实践案例</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler07CANN/README.html">CANN &amp; Ascend C</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/01CANN.html">昇腾异构计算架构 CANN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/02OPType.html">CANN 算子类型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/03AscendC.html">算子开发编程语言 Ascend C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/04Grmmar.html">Ascend C 语法扩展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/05Paradigm.html">Ascend C 编程范式</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 四. 推理系统&amp;引擎 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../04Inference/README.html">推理系统&amp;引擎概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference01Inference/README.html">推理系统</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/01Introduction.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/02Constraints.html">推理系统介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/03Workflow.html">推理流程全景</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/04System.html">推理系统架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/05Inference.html">推理引擎架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/07MindIEIntro.html">昇腾推理引擎 MindIE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/08AscendCL.html">推理引擎示例：AscendCL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference02Mobilenet/README.html">模型轻量化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/01Introduction.html">推理参数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/021Squeezenet.html">SqueezeNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/022Shufflenet.html">ShuffleNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/023Mobilenet.html">MobileNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/024ESPNet.html">ESPNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/025FBNet.html">FBNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/026EfficientNet.html">EfficientNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/027GhostNet.html">GhostNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/02Cnn.html">CNN 模型小型化（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/031MobileVit.html">MobileVit 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/032MobileFormer.html">MobileFormer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/033EfficientFormer.html">EfficientFormer 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Cnn.html">CNN 模型小型化（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Transformer.html">Transformer 小型化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/04Transformer.html">Transformer 模型小型化</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference03Slim/README.html">模型压缩</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/02Quant.html">低比特量化原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/03QAT.html">感知量化训练 QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/04PTQ.html">训练后量化与部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/05Pruning.html">模型剪枝</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/06Distillation.html">知识蒸馏原理</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference04Converter/README.html">模型转换</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/02Principle.html">推理文件格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/03IR.html">自定义计算图 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/04Detail.html">模型转换流程</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference05Optimize/README.html">模型优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/01Optimizer.html">计算图优化架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/02Basic.html">离线图优化技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/03Extend.html">其他计算图优化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference06Kernel/README.html">Kernel 优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/01Introduction.html">Kernel 层架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/02Conv.html">卷积操作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/03Im2col.html">Im2Col 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/04Winograd.html">Winograd 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/05Qnnpack.html">QNNPack 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/06Memory.html">推理内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/08Others.html">汇编与循环优化</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 五. AI 框架核心模块 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../05Framework/README.html">AI 框架核心概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework01Foundation/README.html">AI 框架基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/01Introduction.html">内容介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/02Fundamentals.html">AI 框架作用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/03History.html">AI 框架之争</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/04Programing.html">框架编程范式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/05MindSpore.html">昇思 MindSore 关键特性</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework02AutoDiff/README.html">自动微分</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/01Introduction.html">自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/02BaseConcept.html">什么是微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/03GradMode.html">微分计算模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/04Implement.html">微分实现方式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/05ForwardMode.html">动手实现自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/06ReversedMode.html">动手实现 PyTorch 微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/07Challenge.html">自动微分的挑战&amp;未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework03DataFlow/README.html">计算图</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/02Computegraph.html">计算图原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/03Atuodiff.html">计算图与自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/04Dispatch.html">计算图的调度与执行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/05ControlFlow.html">计算图的控制流实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/06StaticGraph.html">动态图与静态图转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/07Future.html">计算图挑战与未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework04Parallel/README.html">分布式并行</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/02DataParallel.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/03ZeRODP.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/04TensorParallel.html">张量并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/05PipelineParallel.html">流水并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/06HybridParallel.html">混合并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/07MSParallel.html">昇思MindSpore并行</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 附录内容 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../00Others/README.html">附录(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Editors.html">编辑和作者(DONE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Instruments.html">书写工具(DONE)</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../00Others/Install.html">本地部署(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Inference.html">参考链接(DONE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Glossary.html">术语表(DONE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00Others/Criterion.html">书写规范(DONE)</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/blob/master/03Compiler04Backend/07Practice.md?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/edit/master/03Compiler04Backend/07Practice.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/issues/new?title=Issue%20on%20page%20%2F03Compiler04Backend/07Practice.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/03Compiler04Backend/07Practice.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>TVM 实践案例</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">算法层</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">算子优化</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">量化</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">编译层</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">前端量化模型解析</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">计算图优化</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#codegen">后端 Codegen 接入</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">图划分</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">特定加速器的处理</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">代码生成</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">运行时</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">仿真层</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">算子仿真</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">网络仿真</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+<!--Copyright © 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+<section class="tex2jax_ignore mathjax_ignore" id="tvm">
+<h1>TVM 实践案例<a class="headerlink" href="#tvm" title="Link to this heading">#</a></h1>
+<p>在本节我们探讨一下，如何利用 AI 编译器在新的硬件上部署一个神经网络，从算法设计到实际运行，有哪些需要考虑的地方？本节将以 TVM 为例，首先介绍一下 TVM 的工作流：</p>
+<p><img alt="image-20240612213553327" src="../_images/07Practice01.png" /></p>
+<ul class="simple">
+<li><p>导入模型。TVM 可以从 TensorFlow、PyTorch、ONNX 等框架导入模型。</p></li>
+<li><p>转换为 Relay。Relay 是 TVM 的中间表示形式，已导入 TVM 的模型以 Relay 表示。最新版本为 Relax。</p></li>
+<li><p>转换为 TE（Tensor Expression，张量表达式）。在 Relay 应用图级优化后，将模型进行子图分割，并将子图降低为 TE 表示。</p></li>
+<li><p>自动调优。使用 AutoTVM 或 AutoScheduler 搜索最佳调度，以更好利用硬件特性达到更高性能。生成最佳配置。在自动调优后，会生成调优记录日志，为每个子图选择最佳调度。</p></li>
+<li><p>转换为 TIR（Tensor Intermediate Representation）。这是 TVM 的低级中间表示，特定于硬件平台。TIR 通过低层次优化进行优化。之后优化的 TIR 被降低到硬件平台的目标编译器。这是生成可部署到生产中的优化模型的最终代码生成阶段。</p></li>
+<li><p>编译为机器码。TVM 支持不同硬件后端，包括：LLVM，针对任意微处理器架构，如 X86 和 ARM 处理器；专门的编译器，如 NVCC，NVIDIA 的编译器；嵌入式和专用目标平台，通过 TVM 的代码生成框架实现。</p></li>
+</ul>
+<section id="id1">
+<h2>算法层<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<section id="id2">
+<h3>算子优化<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>在部署网络时，首先要考虑在目标硬件平台的可行性，如果目标硬件平台不支持某个算子，那么就需要替换为相似的受支持的算子。例如在 YoloV5 中，默认的激活函数为 SiLU，SiLU 的计算公式涉及自然指数和除法，对 FPGA 硬件非常不友好，其函数曲线如下：</p>
+<p><img alt="" src="../_images/07Practice02.png" /></p>
+<p>而 YoloV5 中还提供了其他的激活函数如 ReLU6，其函数曲线如下图。经过实验发现二者在精度上面并无太大差异，而 ReLU6 的计算方式则简单的多，可以用 ReLU6 来替换 SiLU。</p>
+<p><img alt="" src="../_images/07Practice03.png" /></p>
+<p>除了激活函数的替换，另一个典型例子是卷积的改进。为了改进普通卷积高额的计算开销，研究人员开发了多种紧凑卷积来压缩计算量：</p>
+<ul class="simple">
+<li><p>压缩通道</p></li>
+</ul>
+<p>SqueezeNet 每个网络块利用小于输入通道数量的 1×1 filter 来减少挤压阶段的网络宽度，然后在扩展阶段利用多个 1×1 和 3×3 Kernel。通过挤压宽度，计算复杂度明显降低，同时补偿了扩展阶段的精度。SqueezeNext 在扩展阶段利用了可分离的卷积；一个 k×k 的 filter 被分为一个 k×1 和一个 1×k 的 filter。与 SqueezeNet 相比，这种可分离的卷积进一步减少了参数的数量。</p>
+<ul class="simple">
+<li><p>深度可分离卷积</p></li>
+</ul>
+<p>深度可分离卷积由 Depthwise Convolution 和 Pointwise Convolution 两部分构成。Depthwise Convolution 的计算非常简单，它对输入 feature map 的每个通道分别使用一个卷积核，然后将所有卷积核的输出再进行拼接得到它的最终输出，Pointwise Convolution 实际为 1×1 卷积。最大优点是计算效率非常高。典型实例如 Xception、MobileNet。</p>
+<ul class="simple">
+<li><p>线性瓶颈层</p></li>
+</ul>
+<p>瓶颈结构是指将高维空间映射到低维空间，缩减通道数。线性瓶颈结构，就是末层卷积使用线性激活的瓶颈结构（将 ReLU 函数替换为线性函数）。该方法在 MobileNet V2 中提出，为了减缓在 MobileNet V1 中出现的 Relu 激活函数导致的信息丢失现象。</p>
+<ul class="simple">
+<li><p>组卷积</p></li>
+</ul>
+<p>在组卷积方法中，输入通道分为几组，每组的通道分别与其他组进行卷积。例如，带有三组的输入通道需要三个独立的卷积。由于组卷积不与其他组中的通道进行交互，所以不同的组之间的交互将在单独的卷积之后进行。与使用常规卷积的 cnn 相比，组卷积方法减少了 MAC 操作的数量</p>
+</section>
+<section id="id3">
+<h3>量化<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>在算法层，还可以使用网络轻量化方法来对网络进行压缩。最常使用的方法是量化，在之前的章节已经介绍过量化的原理，在本节将以实践的角度介绍量化。</p>
+<p>Pytorch 有两种量化 API，分为动态图（eager）量化和静态图（fx）量化。</p>
+<p>在 torch.fx 出现之前（pytorch1.8 之前），量化可以在 eager 模式下进行。对一个 resnet18 进行量化感知训练的典型代码如下：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torchvision</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.optim</span> <span class="k">as</span> <span class="nn">optim</span>
+<span class="kn">import</span> <span class="nn">data_set</span>
+
+<span class="c1"># 模型加载</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda:0&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">torchvision</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">resnet18</span><span class="p">(</span><span class="n">pretrained</span><span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+<span class="n">model_weight_path</span> <span class="o">=</span> <span class="s2">&quot;./weights/resnet18-f37072fd.pth&quot;</span>
+<span class="n">net</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_weight_path</span><span class="p">),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># 指定融合层</span>
+<span class="n">fused_layer</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;model_fp32.conv1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.bn1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.relu&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer1.0.conv1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer1.0.bn1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer1.0.relu&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer1.0.conv2&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer1.0.bn2&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer1.1.conv1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer1.1.bn1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer1.1.relu&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer1.1.conv2&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer1.1.bn2&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer2.0.conv1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer2.0.bn1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer2.0.relu&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer2.0.conv2&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer2.0.bn2&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer2.1.conv1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer2.1.bn1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer2.1.relu&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer2.1.conv2&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer2.1.bn2&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer3.0.conv1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer3.0.bn1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer3.0.relu&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer3.0.conv2&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer3.0.bn2&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer3.1.conv1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer3.1.bn1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer3.1.relu&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer3.1.conv2&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer3.1.bn2&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer4.0.conv1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer4.0.bn1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer4.0.relu&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer4.0.conv2&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer4.0.bn2&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer4.1.conv1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer4.1.bn1&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer4.1.relu&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;model_fp32.layer4.1.conv2&#39;</span><span class="p">,</span> <span class="s1">&#39;model_fp32.layer4.1.bn2&#39;</span><span class="p">],</span>
+    <span class="p">]</span>
+
+<span class="c1"># 插入量化与反量化节点</span>
+<span class="k">class</span> <span class="nc">QuantizedResNet18</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_fp32</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">QuantizedResNet18</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># QuantStub converts tensors from floating point to quantized.</span>
+        <span class="c1"># This will only be used for inputs.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quant</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">quantization</span><span class="o">.</span><span class="n">QuantStub</span><span class="p">()</span>
+        <span class="c1"># DeQuantStub converts tensors from quantized to floating point.</span>
+        <span class="c1"># This will only be used for outputs.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dequant</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">quantization</span><span class="o">.</span><span class="n">DeQuantStub</span><span class="p">()</span>
+        <span class="c1"># FP32 model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_fp32</span> <span class="o">=</span> <span class="n">model_fp32</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># manually specify where tensors will be converted from floating</span>
+        <span class="c1"># point to quantized in the quantized model</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quant</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_fp32</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="c1"># manually specify where tensors will be converted from quantized</span>
+        <span class="c1"># to floating point in the quantized model</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dequant</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+
+<span class="n">quantized_model</span> <span class="o">=</span> <span class="n">QuantizedResNet18</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+<span class="n">quantized_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+<span class="c1"># 层融合</span>
+<span class="n">quantized_model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ao</span><span class="o">.</span><span class="n">quantization</span><span class="o">.</span><span class="n">fuse_modules</span><span class="p">(</span><span class="n">quantized_model</span><span class="p">,</span> <span class="n">fused_layer</span><span class="p">)</span>
+<span class="n">quantized_model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+<span class="c1"># 量化配置</span>
+<span class="n">quantization_config</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">quantization</span><span class="o">.</span><span class="n">QConfig</span><span class="p">(</span><span class="n">activation</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">quantization</span><span class="o">.</span><span class="n">MinMaxObserver</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">quint16</span><span class="p">),</span> <span class="n">weight</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">quantization</span><span class="o">.</span><span class="n">MinMaxObserver</span><span class="o">.</span><span class="n">with_args</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">qint8</span><span class="p">,</span> <span class="n">qscheme</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">per_tensor_affine</span><span class="p">))</span>
+<span class="n">quantized_model</span><span class="o">.</span><span class="n">qconfig</span> <span class="o">=</span> <span class="n">quantization_config</span>
+<span class="n">quantized_model</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">ao</span><span class="o">.</span><span class="n">quantization</span><span class="o">.</span><span class="n">prepare_qat</span><span class="p">(</span><span class="n">quantized_model</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">quantized_model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="c1">#超参数</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">lr</span> <span class="o">=</span> <span class="mf">0.0001</span>
+<span class="n">epoch</span> <span class="o">=</span> <span class="mi">10</span>
+
+
+<span class="n">trainloader</span><span class="p">,</span><span class="n">testloader</span><span class="p">,</span><span class="n">test_num</span> <span class="o">=</span> <span class="n">data_set</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+<span class="n">loss_function</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">quantized_model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+
+
+<span class="c1"># 训练</span>
+<span class="n">best_acc</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">save_path_fp32</span> <span class="o">=</span> <span class="s1">&#39;./weights/resNet18_fp32.pth&#39;</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epoch</span><span class="p">):</span>
+    <span class="c1"># training</span>
+    <span class="n">quantized_model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+    <span class="n">running_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trainloader</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">images</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">quantized_model</span><span class="p">(</span><span class="n">images</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_function</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">running_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="p">(</span><span class="n">step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">trainloader</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">rate</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span> <span class="o">*</span> <span class="nb">int</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">rate</span><span class="p">)</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">train loss: </span><span class="si">{:^3.0f}</span><span class="s2">%[</span><span class="si">{}</span><span class="s2">-&gt;</span><span class="si">{}</span><span class="s2">]</span><span class="si">{:.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">rate</span> <span class="o">*</span> <span class="mi">100</span><span class="p">),</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">loss</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">quantized_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>  <span class="c1"># change into test model</span>
+    <span class="c1"># int_model = torch.ao.quantization.convert(quantized_model, inplace=True)</span>
+    <span class="c1"># int_model.eval()</span>
+    <span class="c1"># 以上代码可以将模型转换为 int8 模型进行测试</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># accumulate accurate number / epoch</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">val_data</span> <span class="ow">in</span> <span class="n">testloader</span><span class="p">:</span>
+            <span class="n">val_images</span><span class="p">,</span> <span class="n">val_labels</span> <span class="o">=</span> <span class="n">val_data</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">quantized_model</span><span class="p">(</span><span class="n">val_images</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>  <span class="c1"># eval model only have last output layer</span>
+            <span class="c1"># loss = loss_function(outputs, test_labels)</span>
+            <span class="n">predict_y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">acc</span> <span class="o">+=</span> <span class="p">(</span><span class="n">predict_y</span> <span class="o">==</span> <span class="n">val_labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">val_accurate</span> <span class="o">=</span> <span class="n">acc</span> <span class="o">/</span> <span class="n">test_num</span>
+        <span class="k">if</span> <span class="n">val_accurate</span> <span class="o">&gt;</span> <span class="n">best_acc</span><span class="p">:</span>
+            <span class="n">best_acc</span> <span class="o">=</span> <span class="n">val_accurate</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">quantized_model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">save_path_fp32</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[epoch </span><span class="si">%d</span><span class="s1">] train_loss: </span><span class="si">%.3f</span><span class="s1">  test_accuracy: </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span>
+            <span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">running_loss</span> <span class="o">/</span> <span class="n">step</span><span class="p">,</span> <span class="n">val_accurate</span><span class="p">))</span>
+
+<span class="n">save_path_int8</span> <span class="o">=</span> <span class="s1">&#39;./weights/resNet18_INT16.pth&#39;</span>
+<span class="n">quantized_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>  <span class="c1"># change into test model</span>
+
+<span class="c1"># 转换为 int8 模型进行保存</span>
+<span class="n">int_model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">quantization</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">quantized_model</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">int_model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">save_path_int8</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>需要手动对模型有以下更改：</p>
+<ol class="arabic simple">
+<li><p>插入 quant 量化节点与 dequant 反量化节点，进行显式的 float32 与 int8 数据类型的转换。如果模型中有无法量化或有意以浮点类型运行的层，需要用这对节点进行包裹。若模型比较复杂，手动修改的地方很多。</p></li>
+<li><p>在搭建模型的过程中，eager 模式量化必须将用到的所有算子在__init__中定义，并且引入的是 torch.nn 的形式，不能以 torch.nn.functional 的形式，哪怕这个算子没有参数，比如 ReLU，也要在__init__中定义，并且由于要统计量化 scale 和 zero_point，对不同输入 tensor 不能使用相同的算子，最好每个输入 tensor 用到的算子都单独定义。</p></li>
+<li><p>在推理时，有时要进行层融合（算子融合），典型模式如 Linear+ReLU、Conv+ReLU、Conv+BatchNorm，需要手动进行融合模式的指定，如代码开头一大串的 fused_layer。</p></li>
+</ol>
+<p>整个过程需要对模型有较多修改，量化过程也有很多额外工作，过程很繁琐，特别是对于较复杂的模型，几乎要把模型代码修改一遍。</p>
+<p>fx 模式量化首先会对模型 trace 一遍，跟踪 forward 函数中的执行代码，并记录网络中的每个节点。由于在运行量化前，fx 模式就获得了整个模型图的信息，因此不用像 eager 模式那样手动指定融合层，fx 模式会自动执行融合过程。</p>
+<p>fx 模式也不用手动插入 quant 和 dequant 节点，在想要跳过量化的层指定量化 qconfig 为 None 就可以自动跳过这些层的量化，不用修改原模型代码。</p>
+<p>fx 也有其局限性，例如不支持运行时动态的控制流，fx 在程序启动前就对模型 trace 完毕，所以无法获得运行时才知道的条件判断信息。</p>
+<p>有些函数不支持直接的 trace，例如 arange、ones 等函数，可以通过&#64;torch.fx.wrap 注解来使其支持。</p>
+<p>fx 模式量化感知训练的典型代码如下：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.quantization.quantize_fx</span> <span class="kn">import</span> <span class="n">prepare_qat_fx</span><span class="p">,</span><span class="n">convert_fx</span>
+<span class="kn">import</span> <span class="nn">torch.quantization.observer</span> <span class="k">as</span> <span class="nn">observer</span>
+
+<span class="c1">#将模型转换为 QAT 版本模型，其他训练过程与正常训练类似</span>
+<span class="k">def</span> <span class="nf">qat_version_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">qconfig_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># Global Config</span>
+        <span class="s2">&quot;&quot;</span><span class="p">:</span><span class="n">torch</span><span class="o">.</span><span class="n">ao</span><span class="o">.</span><span class="n">quantization</span><span class="o">.</span><span class="n">get_default_qat_qconfig</span><span class="p">(</span><span class="s1">&#39;qnnpack&#39;</span><span class="p">),</span> <span class="c1">#全局量化配置</span>
+
+        <span class="c1"># # Disable by layer-name</span>
+        <span class="c1"># &quot;module_name&quot;: [(m, None) for m in disable_layers],</span>
+
+        <span class="c1"># Or disable by layer-type</span>
+        <span class="s2">&quot;object_type&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">PositionalEmbedding</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>   <span class="c1">#想要跳过量化层，可以设置为 None</span>
+            <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">,</span> <span class="n">softmax_qconfig</span><span class="p">),</span> <span class="c1">#指定与全局量化配置不同的量化配置</span>
+            <span class="o">......</span>
+        <span class="p">],</span>
+    <span class="p">}</span>
+    <span class="n">model_to_quantize</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">model_fp32_prepared</span> <span class="o">=</span> <span class="n">prepare_qat_fx</span><span class="p">(</span>
+        <span class="n">model_to_quantize</span><span class="p">,</span> <span class="n">qconfig_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model_fp32_prepared</span>
+
+<span class="n">qat_model</span><span class="o">=</span><span class="n">qat_version_model</span><span class="p">(</span><span class="n">float_model</span><span class="p">)</span>
+
+<span class="c1">#********模型训练**********</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epoch_nums</span><span class="p">):</span>
+    <span class="n">train</span><span class="p">(</span><span class="n">qat_model</span><span class="p">,</span><span class="n">train_data_loader</span><span class="p">)</span>
+    <span class="o">......</span>
+
+<span class="c1">#********模型验证**********</span>
+<span class="n">quantized_model</span> <span class="o">=</span> <span class="n">convert_fx</span><span class="p">(</span><span class="n">qat_model</span><span class="p">)</span>
+<span class="n">evaluate</span><span class="p">(</span><span class="n">quantized_model</span><span class="p">,</span><span class="n">eval_data_loader</span><span class="p">)</span>
+<span class="o">......</span>
+
+<span class="c1"># 保存量化版本的模型</span>
+
+<span class="c1"># 以 torchScript 的形式</span>
+<span class="n">trace_model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">quantized_model</span><span class="p">,</span> <span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">,</span> <span class="n">input3</span><span class="p">))</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">trace_model</span><span class="p">,</span> <span class="s1">&#39;trace_model.pt&#39;</span><span class="p">)</span>
+
+<span class="c1">#以 onnx 的形式</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">onnx</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">quantized_model</span><span class="p">,</span> <span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">,</span> <span class="n">input3</span><span class="p">),</span> <span class="s2">&quot;quantized_model.onnx&quot;</span><span class="p">,</span>
+<span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;input1&#39;</span><span class="p">,</span> <span class="s1">&#39;input2&#39;</span><span class="p">,</span> <span class="s1">&#39;input3&#39;</span><span class="p">],</span> <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">],</span>
+<span class="n">opset_version</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">export_params</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p>模型不同部分可以采用不同的量化配置，在 qconfig_dict 中支持以层名、层类型指定量化配置，想要跳过量化的层可以直接设置为 None。</p></li>
+<li><p>导出方式可以用 torchScript 的形式，也可以用 onnx 接口导出。</p></li>
+</ol>
+<p>使用 fx 量化有一些值得注意的地方，总结如下：</p>
+<ul>
+<li><p><strong>在模型经过 prepare_qat_fx 时，出现函数不支持 trace，典型报错如下：</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xxxfunc</span><span class="p">():</span> <span class="n">argument</span> <span class="s1">&#39;xxx&#39;</span> <span class="p">(</span><span class="n">position</span> <span class="mi">1</span><span class="p">)</span> <span class="n">must</span> <span class="n">be</span> <span class="n">xxx</span><span class="p">,</span> <span class="ow">not</span> <span class="n">Proxy</span>
+</pre></div>
+</div>
+<p>这是由于 fx 对模型 trace 的时候，并没有真正喂入数据，而是用 proxy 的形式作为输入，生成记录网络节点的信息。可以用以下形式规避：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@torch</span><span class="o">.</span><span class="n">fx</span><span class="o">.</span><span class="n">wrap</span>
+<span class="k">def</span> <span class="nf">abs_fx</span><span class="p">(</span><span class="n">dim1</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">dim2</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dim1</span> <span class="o">-</span> <span class="n">dim2</span><span class="p">)</span>
+
+<span class="nd">@torch</span><span class="o">.</span><span class="n">fx</span><span class="o">.</span><span class="n">wrap</span>
+<span class="k">def</span> <span class="nf">ones_fx</span><span class="p">(</span><span class="n">dim1</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">dim2</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dim1</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)</span>
+
+<span class="nd">@torch</span><span class="o">.</span><span class="n">fx</span><span class="o">.</span><span class="n">wrap</span>
+<span class="k">def</span> <span class="nf">triu_fx</span><span class="p">(</span><span class="n">dim1</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">dim2</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">dim1</span><span class="p">,</span><span class="n">dim2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>使用注解标注这个函数，然后调用该函数即可</p>
+</li>
+</ul>
+<ul>
+<li><p><strong>训练过程 loss 或量化参数出现 NAN</strong></p>
+<p>有两种可以尝试的方法：</p>
+<ul class="simple">
+<li><p>使用不同的量化 qconfig。不同的 qconfig 对于训练过程中 scale、zero_point 的生成是有区别的，可供探索的配置包括 observer、per_channel or per_tensor 等。</p></li>
+<li><p>在加入量化感知训练之前先预训练一段时间，最好待模型已经趋于收敛了再转为量化感知训练。</p></li>
+</ul>
+</li>
+<li><p><strong>量化感知训练时正确率和 loss 一直不变</strong></p></li>
+</ul>
+<p>这里有个细节，在模型训练过程中要选择 optimizer 来对模型参数更新，这个 optimizer 是与模型的参数关联的。在模型预训练后，转换为量化感知训练模型时，模型进行了深拷贝（model_to_quantize = copy.deepcopy(model)），模型参数的地址已经发生了改变，所以要重新生成一个与量化模型关联的 optimizer（或许也有学习率 scheduler）。</p>
+<ul class="simple">
+<li><p><strong>量化感知训练收敛速度过慢</strong></p></li>
+</ul>
+<p>预训练至模型趋于收敛了再转为量化感知训练。</p>
+</section>
+</section>
+<section id="id4">
+<h2>编译层<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<section id="id5">
+<h3>前端量化模型解析<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>TVM 使用 QNN Dialect 来解析量化模型。QNN 是为 TVM 开发的支持导入预量化模型的框架，具有以下特点：</p>
+<ul class="simple">
+<li><p>QNN 为计算图级别的高层次 IR。在 QNN 中添加了新的算子，但未进行任何图级别或算子级别优化。而是将这些算子映射到已经定义好的图或算子级别优化。</p></li>
+<li><p>QNN 量化算子表示比任何图级别算子的层次都高</p></li>
+<li><p>可以定义新的 QNN 优化 pass 来转换图，使其适配特定硬件后端</p></li>
+</ul>
+<p>以 PyTorch 模型为例从一个量化模型的导入到生成计算图来介绍 QNN 工作流程。TVM 为每一个训练框架的 Converter 都会维护一个<code class="docutils literal notranslate"><span class="pre">convert_map</span></code>，将该框架训练的模型算子转换为 relay 算子。例如<code class="docutils literal notranslate"><span class="pre">&quot;quantized::linear&quot;:</span> <span class="pre">_linear()</span></code>，<code class="docutils literal notranslate"><span class="pre">&quot;quantized::conv2d&quot;:</span> <span class="pre">_quantized_conv2d()</span></code> 。</p>
+<p>以 <code class="docutils literal notranslate"><span class="pre">_quantized_conv2d()</span></code> 为例，解释下导入的过程：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_quantized_conv2d</span><span class="p">(</span><span class="n">with_relu</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_impl</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="c1"># refer to src/ATen/native/quantized/cpu/qconv.cpp</span>
+        <span class="c1"># inputs[0]: input tensor</span>
+        <span class="c1"># inputs[1]: (weight, scale, zero_point, bias)</span>
+        <span class="c1"># inputs[2-5]: stride, padding, dilation, groups</span>
+        <span class="c1"># inputs[6]: output_scale</span>
+        <span class="c1"># inputs[7]: output_zero_point</span>
+        <span class="c1"># inputs[8]: input_scale (added manually by frontend)   input 的 scale 和 zero_point 在 QTensor 的属性中，需要提前运行_get_quant_param_for_input()函数获得。该函数有一个 output_quant_param_indices 的 dict，记录了算子输出结果的 scale 和 zero_point，作为下一个算子 input 的 scale 和 zero_point</span>
+        <span class="c1"># inputs[9]: input_zero_point (added manually by frontend)</span>
+        <span class="n">conv_params</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">conv_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">weight_scale</span> <span class="o">=</span> <span class="n">conv_params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">weight_zero_point</span> <span class="o">=</span> <span class="n">conv_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">bias</span> <span class="o">=</span> <span class="n">conv_params</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">conv_params</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="c1"># Torch 1.6 or newer case</span>
+            <span class="n">strides</span> <span class="o">=</span> <span class="n">conv_params</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="n">conv_params</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">dilation</span> <span class="o">=</span> <span class="n">conv_params</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+            <span class="n">groups</span> <span class="o">=</span> <span class="n">conv_params</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+
+            <span class="n">output_scale</span> <span class="o">=</span> <span class="n">_expr</span><span class="o">.</span><span class="n">const</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">output_zero_point</span> <span class="o">=</span> <span class="n">_expr</span><span class="o">.</span><span class="n">const</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">,</span> <span class="s2">&quot;Input quant params not found in op inputs&quot;</span>
+
+            <span class="c1"># These are manually added by add_input_quant_params_to_op_inputs above</span>
+            <span class="c1"># In torch, they are retrieved from QTensor data structure at runtime</span>
+            <span class="n">input_scale</span> <span class="o">=</span> <span class="n">_expr</span><span class="o">.</span><span class="n">const</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">input_zero_point</span> <span class="o">=</span> <span class="n">_expr</span><span class="o">.</span><span class="n">const</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">strides</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">dilation</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">groups</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">output_scale</span> <span class="o">=</span> <span class="n">_expr</span><span class="o">.</span><span class="n">const</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+            <span class="n">output_zero_point</span> <span class="o">=</span> <span class="n">_expr</span><span class="o">.</span><span class="n">const</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">inputs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;Input quant params not found in op inputs&quot;</span>
+
+            <span class="n">input_scale</span> <span class="o">=</span> <span class="n">_expr</span><span class="o">.</span><span class="n">const</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
+            <span class="n">input_zero_point</span> <span class="o">=</span> <span class="n">_expr</span><span class="o">.</span><span class="n">const</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
+
+        <span class="n">weight_shape</span> <span class="o">=</span> <span class="n">infer_shape</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
+        <span class="n">Kernel_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">weight_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">weight_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">out_channels</span> <span class="o">=</span> <span class="n">weight_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">padding</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">padding</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">pad_val</span> <span class="o">=</span> <span class="n">_get_scalar</span><span class="p">(</span><span class="n">input_zero_point</span><span class="p">)</span>
+            <span class="n">inp</span> <span class="o">=</span> <span class="n">_op</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+                <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                           <span class="p">(</span><span class="n">padding</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">padding</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">padding</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">padding</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
+                <span class="n">pad_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">pad_val</span><span class="p">),</span> <span class="c1">#padding 操作的值是输入的 zero_point，而不直接是 0</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inp</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># padding is (0, 0) because we did explicit pad op with</span>
+        <span class="c1"># pad value being zero point above</span>
+        <span class="n">conv_out</span> <span class="o">=</span> <span class="n">relay</span><span class="o">.</span><span class="n">qnn</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">conv2d</span><span class="p">(</span>  <span class="c1">#对接了 qnn 的 conv2d 算子，该算子的实现在 cpp 端，并没有直接实现量化 conv2d 的 kernel，而是转换为一系列 relay 操作</span>
+            <span class="n">inp</span><span class="p">,</span>
+            <span class="n">weight</span><span class="p">,</span>
+            <span class="n">input_zero_point</span><span class="p">,</span>
+            <span class="n">weight_zero_point</span><span class="p">,</span>
+            <span class="n">input_scale</span><span class="p">,</span>
+            <span class="n">weight_scale</span><span class="p">,</span>
+            <span class="n">kernel_size</span><span class="o">=</span><span class="n">kernel_size</span><span class="p">,</span>
+            <span class="n">dilation</span><span class="o">=</span><span class="n">dilation</span><span class="p">,</span>
+            <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span>
+            <span class="n">channels</span><span class="o">=</span><span class="n">out_channels</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1">#在计算完 quantized::conv2d 后，需要进行再量化</span>
+        <span class="k">return</span> <span class="n">_do_bias_and_requantize</span><span class="p">(</span>
+            <span class="n">conv_out</span><span class="p">,</span> <span class="n">bias</span><span class="p">,</span> <span class="n">input_scale</span><span class="p">,</span> <span class="n">weight_scale</span><span class="p">,</span> <span class="n">output_scale</span><span class="p">,</span> <span class="n">output_zero_point</span><span class="p">,</span> <span class="n">with_relu</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_impl</span>
+</pre></div>
+</div>
+<p><strong>关键函数：</strong></p>
+<ul class="simple">
+<li><p>add_input_quant_params_to_op_inputs</p></li>
+</ul>
+<p>将算子的 input 的 scale 和 zero_point 显式地提取出来。有一个<code class="docutils literal notranslate"><span class="pre">num_quantized_inputs</span></code>的 dict，记录了算子的量化输入的数量，例如 <code class="docutils literal notranslate"><span class="pre">&quot;quantized::conv2d&quot;:</span> <span class="pre">1</span></code>,<code class="docutils literal notranslate"><span class="pre">&quot;quantized::add&quot;:</span> <span class="pre">2</span></code>。如果有新的量化算子加入，需要在这里加入。</p>
+<ul class="simple">
+<li><p>get_quant_param_for_input</p></li>
+</ul>
+<p>执行 add_input_quant_params_to_op_inputs 函数中量化参数提取，维护<code class="docutils literal notranslate"><span class="pre">output_quant_param_indices</span></code>的 dict，记录算子 output 的 scale 和 zero_point 的 index，index 数据的来源是 node 中注册算子时的属性顺序。如果有新的量化算子加入，需要在这里加入。</p>
+<p><code class="docutils literal notranslate"><span class="pre">quantized::conv2d</span></code>分解为已有的 relay 算子。这个分解流程的原理来源于 Tensor 的量化原理。</p>
+<p>量化 tensor（以 A 代指原本的 input 的浮点数表示）可以表示为：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">A</span> <span class="o">=</span> <span class="n">scale_a</span> <span class="n">x</span> <span class="p">(</span><span class="n">QA</span> <span class="o">-</span> <span class="n">zp_A</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>矩阵乘法的浮点表达式为：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">=</span> <span class="n">Sigma</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">W</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span> <span class="o">//</span> <span class="n">表示在</span> <span class="n">k</span> <span class="n">axis</span> <span class="n">进行</span> <span class="n">reduce</span>
+</pre></div>
+</div>
+<p>将上式替换为量化形式，则为：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sigma</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="p">([</span><span class="n">QA</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">-</span> <span class="n">zp_a</span><span class="p">]</span> <span class="o">*</span> <span class="p">[</span><span class="n">QW</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">-</span> <span class="n">zp_w</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>这里将式子展开，即为以下四项。QNN 选择以下分解的原因，是出于对编译器现有操作的复用和底层指令的可利用性。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sigma</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="n">QA</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">QW</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>                         <span class="o">//</span> <span class="n">Term1</span>
+<span class="o">-</span> <span class="n">Sigma</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="n">zp_w</span> <span class="o">*</span> <span class="n">QA</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>                             <span class="o">//</span> <span class="n">Term2</span>
+<span class="o">-</span> <span class="n">Sigma</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="n">zp_a</span> <span class="o">*</span> <span class="n">QW</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>                             <span class="o">//</span> <span class="n">Term3</span>
+<span class="o">-</span> <span class="n">Sigma</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">zp_a</span> <span class="o">*</span> <span class="n">zp_w</span>                               <span class="o">//</span> <span class="n">Term4</span>
+</pre></div>
+</div>
+<p>除此之外，还有一种计算形式，TensorFlow 采用了这种形式。在下面这个式子里，只需每个 input 和 weight 减去各自的 zero_point，再进行乘累加计算，这样也能得到卷积的计算结果，但是需要针对量化来重写 conv2d 的 kernel。</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{aligned}&amp;y_{scale}\cdot(y_{int}-y_{zero})=x_{scale}\cdot(x_{int}-x_{zero})\cdot w_{scale}\cdot(w_{int}-w_{zero})\\&amp;y_{scale}\cdot(y_{int-}y_{zero})=(x_{scale}\cdot w_{scale})\cdot(x_{int-}x_{zero})\cdot(w_{int-}w_{zero})\\&amp;y_{scale}\cdot(y_{int-}\cdot y_{zero})=(x_{scale}\cdot w_{scale})*INT32GEMM\\&amp;y_{int}=(x_{scale}\cdot w_{scale}/y_{scale})\cdot INT32GEMM-y_{zero}\end{aligned}
+\end{split}\]</div>
+<p>除了卷积层，这里再介绍下其他主要算子的量化流程：</p>
+<ul>
+<li><p><strong>乘法</strong></p>
+<p>一个原始的 float mul 伪代码如下，这里数值类型都是 float 的：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">f_output</span> <span class="o">=</span> <span class="n">f_src0</span> <span class="o">*</span> <span class="n">f_src1</span>
+</pre></div>
+</div>
+<p>当其量化到 int8 时，计算当然不是简单的<code class="docutils literal notranslate"><span class="pre">i_output=i_src0*i_src1</span></code>，不然量化得到的尺度因子 scale 和零点 zero_point 完全没有用到。</p>
+<p>由于 f_output 和 i_output 是量化公式这层计算关系的，可以直接将量化公式带入浮点计算的式子，得到</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">i_output</span><span class="o">-</span><span class="n">zero_point_output</span><span class="p">)</span><span class="o">*</span><span class="n">scale_output</span> <span class="o">=</span><span class="p">((</span><span class="n">i_src0</span> <span class="o">-</span> <span class="n">zero_point_0</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale_0</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">i_src1</span> <span class="o">-</span> <span class="n">zero_point_1</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale_1</span><span class="p">)</span>
+
+<span class="o">//</span><span class="n">经过变换</span>
+<span class="n">i_output</span> <span class="o">=</span> <span class="p">((</span><span class="n">i_src0</span> <span class="o">-</span> <span class="n">zero_point_0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">i_src1</span> <span class="o">-</span> <span class="n">zero_point_1</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">scale_0</span><span class="o">*</span><span class="n">scale_1</span><span class="o">/</span><span class="n">scale_output</span><span class="p">)</span> <span class="o">+</span> <span class="n">zero_point_output</span>
+</pre></div>
+</div>
+<p>在上述计算中，<code class="docutils literal notranslate"><span class="pre">((i_src0</span> <span class="pre">-</span> <span class="pre">zero_point_0)*(i_src1</span> <span class="pre">-</span> <span class="pre">zero_point_1))</span></code>是整数计算，但是<code class="docutils literal notranslate"><span class="pre">(scale_0*scale_1/scale_output)</span></code>是一个浮点数，难道要在计算中插入一段浮点计算吗？当然不是这样，这段计算叫做<strong>requant</strong>，是为了修正数据传导到不同层含有不同 scale 和零点所做的操作。其计算完全可以转换为整数计算。<strong>那么量化乘法可以变为两个计算：整数的乘法计算和随后的 requant 计算。</strong></p>
+<p>我们也可以发现，如果使用对称量化，那么三个 zero_point 的值都等于 0，计算形式被大大简化了，变成了下面这样。这样指令数量和计算量减小了许多，因此如果神经网络不复杂或者数据分布够均匀，可以尽量使用对称量化来减小部署时的计算量。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">i_output</span> <span class="o">=</span> <span class="n">i_src0</span> <span class="o">*</span><span class="n">i_src1</span> <span class="o">*</span> <span class="p">(</span><span class="n">scale_0</span><span class="o">*</span><span class="n">scale_1</span><span class="o">/</span><span class="n">scale_output</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>requant 再量化操作</strong></p>
+<p>requant 中的难点是如何用整数计算来计算与<code class="docutils literal notranslate"><span class="pre">scale_0*scale_1/scale_output</span></code>这样一个浮点数的乘法。这一长串在运行时数据都是已知的，因此在编译期就可以将其提前计算，记作 s。假设 s=0.2，那么 s 可不可以表示为一串整数的计算？</p>
+<p>根据浮点数的存储原理，其可以分解为尾数<strong>mantissa</strong> 和阶数<strong>exponent</strong>，上面的 0.2 可以分解为尾数 0.8 和阶数-2，即 0.2=0.8<em>2^(-2)，公式化为<strong>s = mantissa * 2 ^ exponent</strong>。尾数的值在（0.5,1）之间。如果量化的内部硬件在计算时以 int32 计算，那么 mantissa 可以表示为 mantissa</em>2^31<em>2^-31。在这个例子中 0.8 变为 1717986918</em>2^-31，右半部分可以用移位计算，那么 0.2 就变成了 1717986918<em>2^-31</em>2^(-2)。就完全变成了乘法和移位计算，之前的浮点数 s 变成了一个乘数和一个移位数。</p>
+<p>下面这段 tvm 中的代码就是将 s 分解为乘数和移位数的函数：</p>
+<div class="highlight-C++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="p">,</span><span class="w"> </span><span class="kt">int32_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">GetFixedPointMultiplierShift</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">double_multiplier</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">significand</span><span class="p">,</span><span class="w"> </span><span class="n">exponent</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">double_multiplier</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mf">0.</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">significand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">exponent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span><span class="n">significand</span><span class="p">,</span><span class="w"> </span><span class="n">exponent</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">//获得尾数和阶数</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">significand_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">frexp</span><span class="p">(</span><span class="n">double_multiplier</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">exponent</span><span class="p">);</span>
+
+
+<span class="w">  </span><span class="n">significand_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">round</span><span class="p">(</span><span class="n">significand_d</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mf">1l</span><span class="n">l</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">31</span><span class="p">));</span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">significand_int64</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">significand_d</span><span class="p">);</span>
+<span class="w">  </span><span class="n">ICHECK_LE</span><span class="p">(</span><span class="n">significand_int64</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="mf">1l</span><span class="n">l</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">31</span><span class="p">));</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">significand_int64</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">(</span><span class="mf">1l</span><span class="n">l</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">31</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">significand_int64</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="o">++</span><span class="n">exponent</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="c1">//如果乘积的结果等于 (1ll &lt;&lt; 31)，即超出了 32 位有符号整数的范围，则进行一次右移操作，并将指数部分加 1，以保证结果可以正确表示。</span>
+<span class="w">  </span><span class="n">ICHECK_LE</span><span class="p">(</span><span class="n">significand_int64</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">());</span>
+<span class="w">  </span><span class="n">significand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">significand_int64</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span><span class="n">significand</span><span class="p">,</span><span class="w"> </span><span class="n">exponent</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>加法</strong></p>
+<p>乘法和加法都是二元操作，但是他们的量化计算方式却是不同的。如果仍然按照乘法的那个思路，会变成下面这样：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f_output</span> <span class="o">=</span> <span class="n">f_src0</span> <span class="o">*</span> <span class="n">f_src1</span>  <span class="o">//</span><span class="n">原始浮点计算</span>
+
+<span class="p">(</span><span class="n">i_output</span><span class="o">-</span><span class="n">zero_point_output</span><span class="p">)</span><span class="o">*</span><span class="n">scale_output</span> <span class="o">=</span><span class="p">((</span><span class="n">i_src0</span> <span class="o">-</span> <span class="n">zero_point_0</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale_0</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="n">i_src1</span> <span class="o">-</span> <span class="n">zero_point_1</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale_1</span><span class="p">)</span>
+
+<span class="o">//</span><span class="n">转换</span>
+<span class="n">i_output</span><span class="o">=</span><span class="p">((</span><span class="n">i_src0</span> <span class="o">-</span> <span class="n">zero_point_0</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale_0</span><span class="o">/</span><span class="n">scale_output</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="n">i_src1</span> <span class="o">-</span> <span class="n">zero_point_1</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale_1</span><span class="o">/</span><span class="n">scale_output</span><span class="p">)</span><span class="o">+</span><span class="n">zero_point_output</span>
+</pre></div>
+</div>
+<p>与上面的量化乘法不同，量化乘法可以在乘法之后加一个 requant 计算。但是量化加法的乘以一个浮点数无法提取出来，根据上面的计算公式，两个操作数需要在加法之前就做 requant 计算，之后再进行加法。concat 也是与 add 这样的方式。</p>
+</li>
+<li><p><strong>激活函数</strong></p>
+<p>激活函数有需要经过复杂计算的，比如 tanh、sigmoid、exp、softmax 等，也有简单的例如 relu、relu6 等。</p>
+<p>对于复杂的激活函数，一般有两种方法，一种是拟合，另一种是使用查找表。</p>
+<ul>
+<li><p><strong>拟合</strong></p>
+<p>拟合是使用一系列分段的多项式函数去逼近这一段的非线性计算的值。一般使用泰勒展开、傅里叶展开等形式，或者自己设计一个拟合函数。这个拟合函数的设计非常的影响精度，有时会使用一些魔法，看起来很不直观。</p>
+<p>例如对于 exp，其泰勒展开式为 <span class="math notranslate nohighlight">\( exp(x)=1+x+\frac{x^2}{2!}+\frac{x^3}{3!}+R_4 \)</span>。这里只展开到 3 次项，为了更高的精度可以继续展开，但是计算也更复杂，如何处理余项也需要考虑。</p>
+</li>
+<li><p><strong>查找表</strong></p>
+<p>好在如果使用 int8 量化，那么输入的数据只有[-128,127]这 256 个数，经过激活函数后产生 256 个输出值，这是个一对一的映射关系，因此可以使用查找表提前保存这 256 个值，在运算时直接查表即可。查找表的生成可以模拟浮点计算的过程：将 input 到 output 的过程看作大小为 256 的一对一映射，把 input（int8 的整数）看作索引，LUT 看作数组，直接取值即可</p>
+<p><img alt="img" src="../_images/07Practice04.jpg" /></p>
+<p>以 tanh 为例，获得 int8 范围内[-127,128]的 LUT 代码如下：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">get_tanh_lut</span><span class="p">(</span> <span class="n">data</span><span class="p">,</span><span class="n">scale</span><span class="p">):</span>
+
+
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">*</span><span class="n">scale</span> <span class="c1"># dequant   </span>
+    <span class="n">lut</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">tanh</span><span class="p">()</span> <span class="c1">#activation func</span>
+    <span class="n">lut</span><span class="o">=</span><span class="n">lut</span><span class="o">/</span><span class="n">scale</span> <span class="c1"># quant</span>
+
+    <span class="n">lut</span><span class="o">=</span><span class="n">lut</span><span class="o">.</span><span class="n">round</span><span class="p">()</span>
+    <span class="n">lut</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">lut</span><span class="p">,</span><span class="o">-</span><span class="mi">128</span><span class="p">,</span><span class="mi">127</span><span class="p">)</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lut</span>
+
+<span class="n">range_low</span><span class="o">=-</span><span class="mi">128</span>
+<span class="n">range_high</span><span class="o">=</span><span class="mi">127</span>
+<span class="n">scale</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">data</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">range_low</span><span class="p">,</span><span class="n">range_high</span><span class="p">,</span><span class="n">range_high</span><span class="o">-</span><span class="n">range_low</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">lut</span> <span class="o">=</span> <span class="n">get_tanh_lut</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">scale</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>在使用时也非常简单，伪代码如下：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">int8</span> <span class="n">get_tanh_result</span><span class="p">(</span><span class="n">int8</span> <span class="nb">input</span><span class="p">){</span>
+    <span class="c1"># 这里偏移 128 是因为存放查找表时是-128，-127，...，126，127 这样的顺序， 对应的索引是 0,1,2，...，需要偏移 128</span>
+    <span class="k">return</span> <span class="n">TANH_LUT</span><span class="p">[</span><span class="nb">input</span><span class="o">+</span><span class="mi">128</span><span class="p">];</span> 
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+<li><p><strong>被动量化算子</strong></p>
+<p>不是所有算子的运算都需要改变量化参数，例如对于 padding、relu、clip、maxpooling 等，输入和输出共享 scale，也就是 scale 不会发生改变，不需要 requant 操作。对于这类算子，计算形式有时要发生一些小小的变化：</p>
+<ul class="simple">
+<li><p>对于 padding，一般是填充 0 值，量化后要填充这个数据对应的 zero_point。</p></li>
+<li><p>对于 relu，形式为 <code class="docutils literal notranslate"><span class="pre">output</span> <span class="pre">=</span> <span class="pre">max(input,0)</span></code>，量化后其运算变为 <code class="docutils literal notranslate"><span class="pre">output</span> <span class="pre">=</span> <span class="pre">max(input,zero_point)</span></code></p></li>
+<li><p>涉及到常量的通常也要把常量值进行量化，例如 max，形式为<code class="docutils literal notranslate"><span class="pre">output=max(input,min)</span></code>，量化后为<code class="docutils literal notranslate"><span class="pre">output=max(input,min/scale+zero_point)</span></code>。add、mul 一个标量也需要这样。</p></li>
+</ul>
+<p>这些算子不需要使用 requant，因为没改变量化参数。</p>
+<p>在经过上面一系列逐算子的转换后，深度学习编译器或推理引擎还要经过计算图的优化，整个神经网络会被改写，增加或者删除或者更新一些算子。</p>
+</li>
+</ul>
+<p>在经过一系列的转换后，量化网络的结构会发生极大变化，这里有一个简要的示意图：</p>
+<p><img alt="" src="../_images/07Practice05.jpg" /></p>
+<p>左边的原始网络会变成右边的结构。标号处是值得关注的地方：</p>
+<ol class="arabic simple">
+<li><p>左边的 conv+relu6 可以组合为一个融合的大算子。右半部分是量化的大算子展开之后的计算。weight 和 bias 要在参与计算之前 quantize（编译器进行），这里 bias 要和 conv 的结果做加法，因此其量化的 scale 等于 input_scale x weight_scale。加完之后的结果的 scale 要转变为 output_scale，插入了 requantize 操作，即用定点乘法和移位模拟与（ input_scale x weight_scale / output_scale）这个浮点数的乘积。具体的原理在上一节量化网络算子如何计算有提到。最后一个操作是 clip，即数值截断指令。数值截断指令在每一个大算子结尾都有，因为 input、output 均是 int8，中间的计算数据类型是 int32（为了防止溢出），在数据 store 回 ddr 时，需要进行截断以保证 output 仍然是 int8 的范围。这里 relu6 和本来的数值截断指令融合了，因为 relu6 本质也是数值截断，和原有 int8 数值截断的范围取个交集就同时完成了二者的计算。</p></li>
+<li><p>乘法操作之后需要插入 requantize。</p></li>
+<li><p>maxpool 是被动量化算子，未改变量化参数。不用插入 requantize 节点。</p></li>
+<li><p>conv+relu6+tanh 也可以融合为一个大算子，因为 relu6 和 tanh 都是逐元素、一对一映射计算的。在经过图变换后，量化需要的节点都已插入。之后需要去做低层的优化和指令生成。</p></li>
+</ol>
+</section>
+<section id="id6">
+<h3>计算图优化<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
+<p>统计了 TVM 中前端一些关键 Pass 的作用，探究在高层次计算图优化中，编译器都做了哪些事。</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>名称</p></th>
+<th class="head"><p>含义</p></th>
+<th class="head"><p>作用</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>DeadCodeElimination</p></td>
+<td><p>死节点消除</p></td>
+<td><p>删除未被使用到的表达式。实现流程应该是用 UsageVisitor 遍历每个节点，计数每个节点被用到的次数，当其为 0 时，在 EliminatorMutator 中将其去除。</p></td>
+</tr>
+<tr class="row-odd"><td><p>LazyGradientInit</p></td>
+<td><p>梯度延迟初始化</p></td>
+<td><p>减小梯度张量的内存开销，对 ones, ones_like, zeros, zeros_like 这些算子只有使用到时再实例化</p></td>
+</tr>
+<tr class="row-even"><td><p>FoldConstant（还有个 FoldConstantExpr，针对常量表达式）</p></td>
+<td><p>常量折叠</p></td>
+<td><p>折叠 relay 中的常量。在编译器就已知输入、权重、属性等信息的算子可以在编译器就完成计算，运行时直接使用计算好的常量值。</p></td>
+</tr>
+<tr class="row-odd"><td><p>FuseOps（其逆操作为 DefuseOps）</p></td>
+<td><p>算子融合</p></td>
+<td><p>按照规则将算子融合为复合算子。</p></td>
+</tr>
+<tr class="row-even"><td><p>SimplifyInference</p></td>
+<td><p>简化推理</p></td>
+<td><p>对 batch_norm、dropout、instance_norm、layer_norm、group_norm、l2_norm 做了重写。</p></td>
+</tr>
+<tr class="row-odd"><td><p>FastMath</p></td>
+<td><p>快速数值计算</p></td>
+<td><p>将非线性激活函数用更快的近似方法代替。包括 exp（自然指数）、erf（误差函数）、tanh、softmax 的 fast 版本</p></td>
+</tr>
+<tr class="row-even"><td><p>DynamicToStatic</p></td>
+<td><p>动态转静态</p></td>
+<td><p>若动态算子的输入是静态，将其转换为静态算子，重新执行类型推理和常量折叠。包含算子：reshape、squeeze、tile、topk、broadcast_to、zeros、ones、one_hot、image.resize2d、full、nn.upsampling、nn.upsampling3d、nn.pad、strided_slice、sparse_to_dense</p></td>
+</tr>
+<tr class="row-odd"><td><p>InferType</p></td>
+<td><p>推断类型</p></td>
+<td><p>为输出等填入明确的类型信息。</p></td>
+</tr>
+<tr class="row-even"><td><p>EliminateCommonSubexpr</p></td>
+<td><p>消除公共子表达式</p></td>
+<td><p>若多个表达式是相同（属性相同且输入相同）的值且在多处使用，创建一个公共的变量替换这些表达式</p></td>
+</tr>
+<tr class="row-odd"><td><p>CombineParallelConv2D（CombineParallelBatchMatmul 类似）</p></td>
+<td><p>合并并行卷积</p></td>
+<td><p>将共享相同输入节点和相同参数的卷积（除了输出通道的数量可以不同）替换为单一的卷积。新的 2d 卷积的权重是原始权重的 concat。conv2d 之后的加法广播运算也会尽可能合并。这可以防止在有多个卷积分支的网络中启动多个内核，如 Inception。</p></td>
+</tr>
+<tr class="row-even"><td><p>CombineParallelDense</p></td>
+<td><p>合并并行 Dense 层</p></td>
+<td><p>取代了共享相同输入节点、相同形状、没有定义 &quot; units &quot;的 dense 操作，只用一个 batch MM 就可以。<br/>这可以防止在有多个 dense 分支的网络中启动多个内核，例如 BERT</p></td>
+</tr>
+<tr class="row-odd"><td><p>FoldScaleAxis（ForwardFoldScaleAxis、BackwardFoldScaleAxis 类似）</p></td>
+<td><p>折叠在轴上的缩放</p></td>
+<td><p>当某个轴上带有放缩时，将其融合进 dense 或 conv2d 的权重。</p></td>
+</tr>
+<tr class="row-even"><td><p>CanonicalizeOps</p></td>
+<td><p>规范化算子</p></td>
+<td><p>将算子转换为其简化版本，在实现中仅涉及 bias_add_op，将其转换为 expand_dims+boradcast_add</p></td>
+</tr>
+<tr class="row-odd"><td><p>AlterOpLayout（ConvertLayout 类似）</p></td>
+<td><p>替换算子布局</p></td>
+<td><p>用于计算自定义布局的卷积或其他通用权重的预变换。</p></td>
+</tr>
+<tr class="row-even"><td><p>Legalize</p></td>
+<td><p>合法化</p></td>
+<td><p>用另一个表达式替换一个表达式，以实现目标平台相关的优化。该 pass 主要用于 QNN。</p></td>
+</tr>
+<tr class="row-odd"><td><p>PartitionGraph</p></td>
+<td><p>划分图</p></td>
+<td><p>根据插入的标注节点（即 compiler_begin 和 compiler_end），将一个输入函数分割成多个函数。这些节点被用作边界，将 Relay 函数划分为多个区域，可以卸载到不同的加速器后端。 每一个被分割的函数，也就是区域，都将被视为外部函数，并且它们将使用所提供的编译器进行代码生成。</p></td>
+</tr>
+<tr class="row-even"><td><p>SimplifyExpr</p></td>
+<td><p>简化表达式</p></td>
+<td><p>基于模式匹配和重写的方式简化 Relay 表达式。</p></td>
+</tr>
+<tr class="row-odd"><td><p>AnnotateUsedMemory</p></td>
+<td><p>标注使用的存储</p></td>
+<td><p>通过分析每个函数调用的输入/输出张量的有效性并计算这些张量所需的总内存量，标注每个函数调用点的最小所需内存。不支持动态类型。</p></td>
+</tr>
+<tr class="row-even"><td><p>FlattenAtrousConv</p></td>
+<td><p>展平空洞卷积</p></td>
+<td><p>这种转换将空洞卷积扁平化，它对应于操作序列&quot;space_to_batch_nd&quot;-&gt;&quot;conv2d&quot;&quot;batch_to_space_nd&quot;，并将它们转换成带有修改过的 &quot;dilation &quot;和重新计算的 &quot;padding &quot;参数的卷积子图。</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>在实际开发中，这些 Pass 一般只需直接使用即可，前端优化已经比较收敛了。</p>
+</section>
+<section id="codegen">
+<h3>后端 Codegen 接入<a class="headerlink" href="#codegen" title="Link to this heading">#</a></h3>
+<p>TVM 推荐的 BYOC（Bring Your Own Codegen to Deep Learning Compiler）方式，提出了一个统一的框架，允许不同的硬件加速器供应商通过以即插即用的方式集成他们的代码工具，复用尽可能多的硬件无关的优化。为开发人员提供了灵活的接口，以便 1）对计算图进行标注和分区；2）对分区图应用特定于硬件的优化。</p>
+<p>该框架流程如下：</p>
+<p><img alt="" src="../_images/07Practice06.png" /></p>
+<p>流程：</p>
+<ol class="arabic simple">
+<li><p>模型加载，转换为统一的 IR 表示</p></li>
+<li><p>硬件无关的计算图优化，常数折叠、算子简化等</p></li>
+<li><p>图划分，划分为 host 和 accelerator 两个部分。</p></li>
+</ol>
+<section id="id7">
+<h4>图划分<a class="headerlink" href="#id7" title="Link to this heading">#</a></h4>
+<p>将模型切割为不同的子图，对加速器运行友好（例如加速器支持的算子，或者在加速器上执行效率更高的算子）的部分被卸载，其余部分仍然让 host 执行。深度学习编译器通常有多层 IR，比如 TVM 的 Relay 和 TensorIR，和 MLIR（顾名思义），因此需要决定在哪个 IR 级别进行划分。</p>
+<p>该框架在高层 IR（即仍旧保留算子名称和属性的 IR）进行划分，出于以下考虑：</p>
+<p>1）一些硬件供应商手工制作了一个内核库。在这种情况下，唯一需要的信息是将每个算子映射到对应的内核的名称和属性，而不是由低级 IR 合并的硬件信息。</p>
+<p>2)一些硬件供应商使用自己的低级 IR，需要从高层 IR 转换</p>
+<p><img alt="img" src="../_images/07Practice07.webp" /></p>
+<p><strong>基于模式的分组：</strong></p>
+<p>许多硬件加速器使用指令执行算子。例如 Conv2d、Add、Relu 的序列通常可以映射到单个算子，以最小化处理中间结果的开销（算子融合）。因此，硬件供应商需要使用模式匹配算法来匹配 IR 节点序列，并用复合指令替换他们。</p>
+<p>该框架提供了模式匹配机制，如下代码描述的匹配一个 Conv2d-add-relu</p>
+<p><img alt="" src="../_images/07Practice08.webp" /></p>
+<p>通过上述匹配模式表，可以将图 3（上）a 转换为 b</p>
+<p><strong>注解：</strong></p>
+<p>在根据模式将 node 进行分组后，下一步是根据编程模型指定支持的算子列表。例如下代码注册了一个函数，指示所有浮点类型的 Conv2D 节点被注释并卸载到 MyAccel 中</p>
+<p><img alt="" src="../_images/07Practice09.webp" /></p>
+<p>通过一组注解函数，在图中生成了多个区域，这些区域可以被卸载到目标加速器上，如上图 3（c） 。</p>
+<p>在上图例中将区域都卸载到一个目标 MyAcc 上，但该框架支持将区域卸载到多个目标上，并可以指定优先级，将算子卸载到最高优先级的目标上。</p>
+<p><strong>基于成本的划分：</strong></p>
+<p>贪心的合并支持的算子以进行充分的算子融合是理想的，但由于资源限制（如片上存储大小、计算单元数量），对于一些加速器来说不适用。除了注解外，该框架还提供另一种基于成本的划分。用户设置最大可融合的数量，例如将 3N 设为阈值，图 3（c）中的区域应当分割为图 3(d)中的区域 1 和 3。</p>
+<p>将一个区域从 host 卸载到 device 通常会引入数据传输和内核调用开销，如果没有耗时的计算，应该将区域留在 host 执行，该框架支持按用户指定的标准将区域回调到 host 上。</p>
+<p>最后，每个可卸载区域被封装成一个单独的函数，并用一个 target 属性标记，该属性指示执行后端，如图 3（e）。</p>
+</section>
+<section id="id8">
+<h4>特定加速器的处理<a class="headerlink" href="#id8" title="Link to this heading">#</a></h4>
+<p>在划分之后，一个图被分割成多个不同后端处理的区域，在 host 上的区域可以有效利用从现有的深度学习编译器中进行的标准优化，然而卸载到加速器的区域可能需要一些特定于硬件的优化（例如融合、替换、存储布局转换、量化等），这些优化通常是专有的，无法在深度学习编译器中处理。</p>
+<p><img alt="" src="../_images/07Practice11.png" /></p>
+<p>上图左边是量化，右边是存储布局转换。</p>
+</section>
+<section id="id9">
+<h4>代码生成<a class="headerlink" href="#id9" title="Link to this heading">#</a></h4>
+<p>编译流的最后一步是代码生成。</p>
+<p><img alt="" src="../_images/07Practice12.png" /></p>
+<p>该框架通过遍历图并为每个图节点调用相应的代码生成来生成一个子模块。当遍历到 host 上的节点时，可以利用现有深度学习编译器中的代码生成，如 TVM 和 XLA，它们能为通用设备（如 CPU 和 GPU）生成代码。当遍历到特定 target 标注的节点（即划分函数）时，生成一个外部函数调用作为运行时内核调用的 hook。同时调用加速器特定的代码生成，其包含了硬件供应商提供的代码生成工具和编译流，为该节点中的划分函数生成一个“加速器子模块”。</p>
+<p>加速器子模块中生成的代码必须以一定的格式表示，以便在运行时可以被加速器的执行引擎消耗。该框架提供了一下代码生成格式：</p>
+<ol class="arabic simple">
+<li><p><strong>标准图表示</strong> 使用 json 文件记录算子名称、属性和数据流，这种格式易读。例如 NVIDIA TensorRT 和 Arm 计算库使用该框架的 json 生成器来搭建与运行时之间的桥梁。</p></li>
+<li><p><strong>标准 C 代码</strong></p></li>
+</ol>
+<p>尽管选项 1 易于实现和部署，但它需要一个图引擎来包含所有受支持的算子的实现，这可能会导致较大的二进制大小。</p>
+<p>该框架提供了一个标准的 C 代码生成器，可以发射内核库函数调用并将它们与 host 子模块链接在一起来支持加速器的专有内核库，这个解决方案简化了代码打包，因为 host 代码通常是兼容 C 的。当库函数调用成为 host 子模块一部分时，硬件供应商可以充分利用现有的运行时系统。</p>
+<ol class="arabic simple" start="3">
+<li><p><strong>自定义图表示</strong></p></li>
+</ol>
+<p>某些加速器有专用格式来表示神经网络，如 ARM Ethos-N 和 Xilinx Vitis AI，为了满足这种需求，该框架提供了一组统一的 API 来定制序列化的代码格式：1）将生成的代码编译和序列化为一个 bit 流，以便其可以与其他子模块一起实例化；2）在运行时反序列化来自子模块的 bit 流</p>
+<p>至此，针对 DNN 模型的编译和打包模块已经完成，之后进入运行时系统加载模块并执行推理。</p>
+</section>
+<section id="id10">
+<h4>运行时<a class="headerlink" href="#id10" title="Link to this heading">#</a></h4>
+<p>运行时系统负责执行模型图的推理，并将算子和子图分发到目标平台。图执行引擎可以是一个简单的数据流图 visitor，处理大多数 CNN；也可以是一个虚拟机来执行字节码，处理现代模型中呈现出的动态性和控制流。</p>
+<p><img alt="img" src="../_images/07Practice10.webp" /></p>
+<p>运行时系统流程如下：</p>
+<ol class="arabic simple">
+<li><p><strong>初始化元数据模块</strong></p></li>
+</ol>
+<p>DNN 模型的大量权重参数在推理时一般是常数，应该包含在运行时模块中。不同的子模块都需要这些权重，该框架提供了一个统一的模块来管理，称为元数据模块。如上图 6（a）中，元数据模块被设计为一个包含所有常量、host 子模块、加速器子模块的层次化模块。在初始化时，元数据模块将这些常量加载到运行时数据项中，这是在 host 或加速器上预分配的一组内存 buffer。（如上图 6<strong>①</strong>）</p>
+<p>除了权重常量外，数据项还维护了模型的输入、输出以及中间结果。由于划分函数（即算子融合后的复合算子）已经是外部函数调用。因此其中间结果不会在数据项中得到维护。</p>
+<ol class="arabic simple" start="2">
+<li><p><strong>执行 host 上的图节点</strong></p></li>
+</ol>
+<p>当调用推理时，host 子模块加载模型图并启动执行引擎（上图 6<strong>②</strong>）,开始依次执行图节点。如上图 6<strong>③</strong>子模块可以直接访问数据项来读取输入，调用内核执行计算，将结果写入数据项</p>
+<ol class="arabic simple" start="3">
+<li><p><strong>执行加速器上的图节点</strong></p></li>
+</ol>
+<p>如上图 6（b），host 执行引擎执行 F1，这是对加速器的外部函数调用（图 6<strong>④</strong>）。执行细节如图 6（c）。</p>
+<p>执行过程包含两个步骤：1）加载模块后初始化硬件供应商定制的 F1 执行引擎；2）启动内核，与数据项做交互。</p>
+<p>基于该框架，目前已有 TensorRT、Xilinx Vitis AI 等多个推理引擎接入 TVM。</p>
+</section>
+</section>
+</section>
+<section id="id11">
+<h2>仿真层<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<section id="id12">
+<h3>算子仿真<a class="headerlink" href="#id12" title="Link to this heading">#</a></h3>
+<p>当涉及到新硬件平台、新算子时，需要保证算子到网络整个层级的正确性。</p>
+<p>在深度学习加速器的开发中，最小的运行单位是算子。在 TVM 测试新算子的正确性，有多个步骤：</p>
+<ol class="arabic simple">
+<li><p>计算的正确性：使用 TVM 的 DSL 编写算子的计算流程，然后生成一个默认的调度，这个调度是在 CPU 上计算的，硬件上是绝对正确的。使用 Pytorch 的结果作为基准，测试通过后，可以认为计算的编写没问题。</p></li>
+<li><p>编译器仿真器：使用 TVM 的 DSL 编写算子的调度流程，生成针对该硬件的指令流。使用 C++实现在 CPU 上计算的仿真器，这个仿真器的编写模仿硬件端的计算逻辑，尽可能使得计算、同步、访存的方式一致，来验证指令生成，各个字段的数值以及同步的方式是否正确。</p></li>
+<li><p>硬件仿真：验证指令的正确性后，将虚拟的 ddr（运算前后）、指令等保存下来，送到硬件端进行 CSIM 和 RTL 测试，此时基准为编译器仿真器运算后的虚拟 ddr 中的值。这里测试目标为加速器硬件的正确性。</p></li>
+<li><p>硬件实际测试：仿真通过后，编译器对接硬件进行实际的上板测试。</p></li>
+</ol>
+</section>
+<section id="id13">
+<h3>网络仿真<a class="headerlink" href="#id13" title="Link to this heading">#</a></h3>
+<p>在单个算子通过后，如果直接测试整个网络，则跨度太大。整个网络中间涉及到图优化、所有算子的组合，更容易出问题。好在许多神经网络都是由相似的模式堆叠而成的，可以将这些模式抽离出来测试。我们可以构建一个子网络的 Benchmark，将全部网络的各种模式抽离出来，形成多个子网络的集合，在算子单测全部通过后，逐个测试子网络。</p>
+<p>在子网络的 Benchmark 全部通过后，可以测试整个网络。这时有两个评价指标可供衡量。一个是与模型在 CPU 上的推理结果进行对比，得出相对 CPU 计算的误差。然而，有时这个误差不是重要的，例如在一些模型中关注的是结果向量中相对排序的大小（分类模型）。这时，可以完善模型的前后处理，在测试集上进行端到端的测试，得出基于该任务的 Metric，例如 accuracy，评估该指标的性能。</p>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./03Compiler04Backend"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+<div class="section ablog__blog_comments">
+  
+  
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="06AutoTuning.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Auto-Tuning 原理</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../03Compiler07CANN/README.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">CANN &amp; Ascend C</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">算法层</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">算子优化</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">量化</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">编译层</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">前端量化模型解析</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">计算图优化</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#codegen">后端 Codegen 接入</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">图划分</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">特定加速器的处理</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">代码生成</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">运行时</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">仿真层</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">算子仿真</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">网络仿真</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jun 15, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
