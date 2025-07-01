@@ -1,0 +1,888 @@
+
+<!DOCTYPE html>
+
+
+<html lang="cn" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="CUDA 编程模式" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="02Hardware07Thought/04NVSIMT.html" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
+<meta property="og:description" content="前面的小节对 AI 芯片 SIMD 和 SIMT 计算本质进行了分析，结合英伟达 CUDA 实现对 SIMD 和 SIMT 进行了对比，本节将以英伟达 GPU 为例，讲解 GPU 的编程模型。 GPU 编程模型 CUDA: 英伟达公司于 2007 年发布了 CUDA，支持编程人员利用更为通用的方式对 GPU 进行编程，更好地发挥底层硬件强大的计算能力，以英伟达 GPU 为例对 GPU 的编程..." />
+<meta name="description" content="前面的小节对 AI 芯片 SIMD 和 SIMT 计算本质进行了分析，结合英伟达 CUDA 实现对 SIMD 和 SIMT 进行了对比，本节将以英伟达 GPU 为例，讲解 GPU 的编程模型。 GPU 编程模型 CUDA: 英伟达公司于 2007 年发布了 CUDA，支持编程人员利用更为通用的方式对 GPU 进行编程，更好地发挥底层硬件强大的计算能力，以英伟达 GPU 为例对 GPU 的编程..." />
+
+    <title>CUDA 编程模式 &#8212; AI System</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=aabdd393"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/rtd-data.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '02Hardware07Thought/04NVSIMT';</script>
+    <script src="https://assets.readthedocs.org/static/javascript/readthedocs-doc-embed.js"></script>
+    <link rel="icon" href="../_static/logo-square.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="从 CUDA 对 AI 芯片思考" href="05DSA.html" />
+    <link rel="prev" title="SIMD &amp; SIMT 与 CUDA 关系" href="03SPMT.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="cn"/>
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../reference/blog/atom.xml"
+  title="Blog"
+/>
+  
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-wide.svg" class="logo__image only-light" alt="AI System - Home"/>
+    <script>document.write(`<img src="../_static/logo-wide.svg" class="logo__image only-dark" alt="AI System - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Youtube</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Blibili</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/01Introduction.html">课程内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/02ArchSlim.html">AI 计算模式（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/03MobileParallel.html">AI 计算模式（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/04Metrics.html">关键设计指标</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/05Matrix.html">核心计算之矩阵乘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/06BitWidth.html">计算之比特位宽</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware02ChipBase/README.html">AI 芯片基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/01CPUBase.html">CPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/02CPUISA.html">CPU 指令集架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/03CPUData.html">CPU 计算本质</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/04CPULatency.html">CPU 计算时延</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/05GPUBase.html">GPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/06NPUBase.html">NPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/07Future.html">超异构计算</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware03GPUBase/README.html">图形处理器 GPU</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/01Works.html">GPU 工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/02Principle.html">为什么 GPU 适用于 AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/03Concept.html">GPU 架构与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/04History.html">GPU 架构回顾</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware04NVIDIA/README.html">英伟达 GPU 详解</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/01BasicTC.html">Tensor Core 基本原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/02HistoryTC.html">Tensor Core 架构演进</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/03DeepTC.html">Tensor Core 深度剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/04BasicNvlink.html">分布式通信与 NVLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/05DeepNvlink.html">NVLink 原理剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/06DeepNvswitch.html">NV Switch 深度解析</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware05Abroad/README.html">国外 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/04TPUIntrol.html">谷歌 TPU 历史发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/05TPU1.html">谷歌 TPU v1-脉动阵列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/06TPU2.html">谷歌 TPUv2 训练芯片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/07TPU3.html">谷歌 TPUv3 POD 形态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/08TPU4.html">谷歌 TPU v4 与光路交换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware06Domestic/README.html">国内 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/04Cambricon.html">寒武纪介绍</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/08AscendBase.html">昇腾 AI 架构介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/09AscendSOC.html">昇腾 AI 处理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/10AscendCube.html">昇腾 AI 核心单元</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/11AscendLayout.html">昇腾数据布局转换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">AI 芯片黄金十年</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01Introduction.html">芯片的编程体系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02SIMTSIMD.html">SIMD &amp; SIMT 与芯片架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03SPMT.html">SIMD &amp; SIMT 与 CUDA 关系</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">CUDA 编程模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05DSA.html">从 CUDA 对 AI 芯片思考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06AIChip.html">AI 芯片的思考</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/01Introduction.html">编译器基础介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/02History.html">传统编译器发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/03GCC.html">GCC 主要特征</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/04LLVM.html">LLVM 架构设计和原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/05LLVMIR.html">LLVM IR 基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/06LLVMDetail.html">LLVM IR 详解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/07LLVMFrontend.html">LLVM 前端和优化层</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/08LLVMBackend.html">LLVM 后端代码生成</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler02AICompiler/README.html">AI 编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/01Appear.html">为什么需要 AI 编译器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/02Stage.html">AI 编译器历史阶段</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/03Architecture.html">AI 编译器基本架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/04Future.html">AI 编译器挑战与思考</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler03Frontend/README.html">前端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/01Introduction.html">AI 编译器前端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/02GraphIR.html">图算 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/03OPFusion.html">算子融合</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/04LayoutPrinc.html">布局转换原理与算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/06Memory.html">内存分配算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/07ConstantFold.html">常量折叠原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/08CSE.html">公共表达式消除原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/09DCE.html">死代码消除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/10algebraic.html">代数简化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler04Backend/README.html">后端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/01Introduction.html">AI 编译器后端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/02OPSCompute.html">计算与调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/03Optimization.html">算子手工优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/04LoopOpt.html">算子循环优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 四. 推理系统&amp;引擎 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../04Inference/README.html">推理系统&amp;引擎概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference01Inference/README.html">推理系统</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/01Introduction.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/02Constraints.html">推理系统介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/03Workflow.html">推理流程全景</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/04System.html">推理系统架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/05Inference.html">推理引擎架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/07MindIEIntro.html">昇腾推理引擎 MindIE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/08AscendCL.html">推理引擎示例：AscendCL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference02Mobilenet/README.html">模型轻量化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/01Introduction.html">推理参数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/021Squeezenet.html">SqueezeNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/022Shufflenet.html">ShuffleNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/023Mobilenet.html">MobileNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/024ESPNet.html">ESPNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/025FBNet.html">FBNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/026EfficientNet.html">EfficientNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/027GhostNet.html">GhostNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/02Cnn.html">CNN 模型小型化（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/031MobileVit.html">MobileVit 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/032MobileFormer.html">MobileFormer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/033EfficientFormer.html">EfficientFormer 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Cnn.html">CNN 模型小型化（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Transformer.html">Transformer 小型化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/04Transformer.html">Transformer 模型小型化</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference03Slim/README.html">模型压缩</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/02Quant.html">低比特量化原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/03QAT.html">感知量化训练 QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/04PTQ.html">训练后量化与部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/05Pruning.html">模型剪枝</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/06Distillation.html">知识蒸馏原理</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference04Converter/README.html">模型转换</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/02Principle.html">推理文件格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/03IR.html">自定义计算图 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/04Detail.html">模型转换流程</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference05Optimize/README.html">模型优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/01Optimizer.html">计算图优化架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/02Basic.html">离线图优化技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/03Extend.html">其他计算图优化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference06Kernel/README.html">Kernel 优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/01Introduction.html">Kernel 层架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/02Conv.html">卷积操作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/03Im2col.html">Im2Col 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/04Winograd.html">Winograd 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/05Qnnpack.html">QNNPack 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/06Memory.html">推理内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/08Others.html">汇编与循环优化</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 五. AI 框架核心模块 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../05Framework/README.html">AI 框架核心概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework01Foundation/README.html">AI 框架基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/01Introduction.html">内容介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/02Fundamentals.html">AI 框架作用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/03History.html">AI 框架之争</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/04Programing.html">框架编程范式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/05MindSpore.html">昇思 MindSore 关键特性</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework02AutoDiff/README.html">自动微分</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/01Introduction.html">自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/02BaseConcept.html">什么是微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/03GradMode.html">微分计算模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/04Implement.html">微分实现方式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/05ForwardMode.html">动手实现自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/06ReversedMode.html">动手实现 PyTorch 微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/07Challenge.html">自动微分的挑战&amp;未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework03DataFlow/README.html">计算图</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/02Computegraph.html">计算图原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/03Atuodiff.html">计算图与自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/04Dispatch.html">计算图的调度与执行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/05ControlFlow.html">计算图的控制流实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/06StaticGraph.html">动态图与静态图转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/07Future.html">计算图挑战与未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework04Parallel/README.html">分布式并行</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/02DataParallel.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/03ZeRODP.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/04TensorParallel.html">张量并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/05PipelineParallel.html">流水并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/06HybridParallel.html">混合并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/07MSParallel.html">昇思MindSpore并行</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/blob/master/02Hardware07Thought/04NVSIMT.md?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/edit/master/02Hardware07Thought/04NVSIMT.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/issues/new?title=Issue%20on%20page%20%2F02Hardware07Thought/04NVSIMT.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/02Hardware07Thought/04NVSIMT.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>CUDA 编程模式</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu-cuda">GPU 编程模型 CUDA</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simd-vs-simt">SIMD vs SIMT 执行模式</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#warps-warp-level-fgmt">Warps 和 Warp-Level FGMT 关系</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#amd">AMD 编程模型</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">本节视频</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <!--Copyright 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+<section class="tex2jax_ignore mathjax_ignore" id="cuda">
+<h1>CUDA 编程模式<a class="headerlink" href="#cuda" title="Link to this heading">#</a></h1>
+<p>前面的小节对 AI 芯片 SIMD 和 SIMT 计算本质进行了分析，结合英伟达 CUDA 实现对 SIMD 和 SIMT 进行了对比，本节将以英伟达 GPU 为例，讲解 GPU 的编程模型。</p>
+<section id="gpu-cuda">
+<h2>GPU 编程模型 CUDA<a class="headerlink" href="#gpu-cuda" title="Link to this heading">#</a></h2>
+<p>英伟达公司于 2007 年发布了 CUDA，支持编程人员利用更为通用的方式对 GPU 进行编程，更好地发挥底层硬件强大的计算能力，以英伟达 GPU 为例对 GPU 的编程模型进行讲解。</p>
+<section id="simd-vs-simt">
+<h3>SIMD vs SIMT 执行模式<a class="headerlink" href="#simd-vs-simt" title="Link to this heading">#</a></h3>
+<p>SIMD 是单顺序的指令流执行，每条指令多个数据输入并同时执行，大多数 AI 芯片采用的硬件架构体系，向量加法的 SIMD 执行指令如下：</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">VLD</span><span class="p">,</span><span class="w"> </span><span class="n">VLD</span><span class="p">,</span><span class="w"> </span><span class="n">VADD</span><span class="p">,</span><span class="w"> </span><span class="n">VST</span><span class="p">],</span><span class="w"> </span><span class="n">VLEN</span>
+</pre></div>
+</div>
+<p>SIMT 是标量指令的多个指令流，可以动态地把线程按 wrap 分组执行，向量加法的 SIMT 执行指令如下：</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">LD</span><span class="p">,</span><span class="w"> </span><span class="n">LD</span><span class="p">,</span><span class="w"> </span><span class="n">ADD</span><span class="p">,</span><span class="w"> </span><span class="n">ST</span><span class="p">],</span><span class="w"> </span><span class="n">NumThreads</span>
+</pre></div>
+</div>
+<p>英伟达 GPU 采用了 SIMT 的指令执行模式，给相关产品带来以下优势：</p>
+<ul class="simple">
+<li><p>相比较 SIMD 无需开发者费时费力地把数据凑成合适的矢量长度，然后再传入硬件中；</p></li>
+<li><p>从硬件设计上解决大部分 SIMD Data Path 的流水编排问题，对编译器和程序开发者在流水编排时更加友好；</p></li>
+<li><p>线程可以独立执行，使得每个线程相对灵活，允许每个线程有不同的分支，这也是 SIMT 的核心；</p></li>
+<li><p>一组执行相同指令的线程由硬件动态组织成线程组 warp，加快了 SIMD 的计算并行度。</p></li>
+</ul>
+<p>假设一个 Warp 包含 32 个线程，如果需要进行 32000 次迭代，每个迭代执行一个线程，因此需要 1000 个 warp。第一个迭代 Warp0 执行第 0~32 个线程，第二个迭代 Warp1 执行第 33~64 个线程，第二十一个迭代 Warp20 执行第 20x33+1 ~ 20x33+32 个线程，可以看出 SIMT 是标量指令的多个指令流，可以动态地把线程按 Wrap 分组执行，使并行度增加。</p>
+<p>第一个迭代 Warp0 执行第 0~32 个线程：</p>
+<p><img alt="第一个迭代 Warp0" src="../_images/04NVSIMT01.png" /></p>
+<p>第二个迭代 Warp1 执行第 33~64 个线程：</p>
+<p><img alt="第二个迭代 Warp1" src="../_images/04NVSIMT02.png" /></p>
+<p>以此类推，第二十一个迭代 Warp20 执行第 20x33+1 ~ 20x33+32 个线程：</p>
+<p><img alt="第二十一个迭代 Warp20" src="../_images/04NVSIMT03.png" /></p>
+<p>由于程序并行执行最大的瓶颈是访存和控制流，因此 SIMD 架构中单线程 CPU 通过大量控制逻辑进行超前执行、缓存、预取等机制来强行缓解计算瓶颈。</p>
+</section>
+<section id="warps-warp-level-fgmt">
+<h3>Warps 和 Warp-Level FGMT 关系<a class="headerlink" href="#warps-warp-level-fgmt" title="Link to this heading">#</a></h3>
+<p>SIMT 架构 GPU 通过细粒度的多线程（Fine-Grained Multi-Threading，FGMT）调度，将处理器的执行流水线细分为更小的单元，使得不同线程的指令可以交错执行，从而减少指令执行的等待时间和资源浪费，以此来实现访存和计算并行。</p>
+<p>Warp 是在不同地址数据下，执行相同指令的线程集合，所有线程执行相同的代码，可以看出 Thread Warp 中有很多个 Thread，多个 Warp 组成 SIMD Pipeline 执行对应的操作。</p>
+<p><img alt="Thread Warp" src="../_images/04NVSIMT04.png" /></p>
+<p>SIMT 架构通过细粒度多线程（FGMT）隐藏延迟，SIMD Pipeline 中每个线程一次执行一条指令，Warp 支持乱序执行以隐藏访存延迟，并不是通过顺序的方式调度执行，此外线程寄存器值都保留在 RF（Register File）中，并且 FGMT 允许长延迟。英伟达通过添加 Warp Schedluer 硬件调度，使 Warp 先访存完毕之后交给 SIMD Pipeline 去执行尽可能多的指令，隐藏其它 Warp 的访存时间。</p>
+<p><img alt="细粒度多线程（FGMT）" src="../_images/04NVSIMT05.png" /></p>
+<p>SIMT 相比 SIMD 在可编程性上最根本性的优势在于硬件层面解决了大部分流水编排的问题，Warp 指令级并行中每个 warp 有 32 个线程和 8 条执行通道，每个时钟周期执行一次 Warp，一次 Warp 完成 24 次操作。</p>
+<p><img alt="warp 指令执行的时序图" src="../_images/04NVSIMT06.png" /></p>
+<p>在 GPU 宏观架构层面，GDDR 里面的数据通过内存控制器（Memory Controller）传输到片内总线（Interconnection Network），然后分发到具体的核心（Cuda Core/Tensor Core），在每个执行核心中会有 SIMD 执行单元，从而实现并行计算。</p>
+<p><img alt="GPU 数据存取与并行计算" src="../_images/04NVSIMT07.png" /></p>
+</section>
+</section>
+<section id="amd">
+<h2>AMD 编程模型<a class="headerlink" href="#amd" title="Link to this heading">#</a></h2>
+<p>AMD 的显卡也是有大量的计算单元和计算核心，为什么没有 SIMT 的编程模式？</p>
+<p>2016 年 AMD 推出开放计算平台（Radeon Open Computing platform，ROCm），对全新 Radeon GPU 硬件的软件支持，全新数学库和基础雄厚的现代编程语言，旨在加速高性能，高能效异构计算系统开发。在相当大的程度上兼容 CUDA，目标是建立替代 CUDA 生态。</p>
+<p>在 2020 年 CDNA 架构面世前，AMD 数据中心 GPU 一直使用的是 GCN 系列架构，搭载 GCN 系列架构的产品在 2012 年就已推出，虽然在游戏机等场景获得较高市场份额，但在数据中心市场并未取得显著成果，这与其性能表现有关。目前 AMD 将其 GPU 架构开发分为单独的 CDNA 和 RDNA 线路，分别专门用于计算和图形。</p>
+<p>2023 年 AMD 发布 MI300X，将计算拆分到加速器复合芯片 (XCD) 上，每个 XCD 包含一组核心和一个共享缓存。具体来说，每个 XCD 物理上都有 40 个 CDNA 3 计算单元，其中 38 个在 MI300X 上的每个 XCD 上启用。XCD 上也有一个 4 MB 二级缓存，为芯片的所有 CU 提供服务。MI300X 有 8 个 XCD，总共有 304 个计算单元。以 CDNA 3 架构的 MI300X 可以将所有这些 CU 公开为单个 GPU。</p>
+<p><img alt="ADM CDNA3 架构" src="../_images/04NVSIMT08.png" /></p>
+<p>每个 CU 有 4 个 SIMD 计算单元，每个周期 CU 调度程序会从 4 个 SIMD 中选择一个进行执行，并检查线程是否准备好执行。AMD MI300 支持 ROCm 6，支持 TF32 和 FP8 数据类型，Transformer Engine 和结构化稀疏性，AI/ML 框架等。</p>
+<p><img alt="ADM CDNA3 CU 架构" src="../_images/04NVSIMT09.png" /></p>
+<p>英伟达的 H100 由 132 个流式多处理器 （SM）组成，作为一个大型统一的 GPU 呈现给程序员。计算通过 CUDA 程序分发到具体的核心（Cuda Core/Tensor Core），每个执行核心有 SIMD 执行单元，从而实现并行计算。</p>
+<p><img alt="NVIDIA Hopper 架构" src="../_images/04NVSIMT10.png" /></p>
+</section>
+<section id="id1">
+<h2>小结与思考<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>NVIDIA CUDA 允许开发者以更通用的方式编程 GPU，利用 GPU 的 SIMT 执行模式来提高计算性能和灵活性。</p></li>
+<li><p>SIMD 适合向量化指令执行，而 SIMT 通过线程动态分组（Warp）执行相同指令，提高了并行度和硬件的灵活性。</p></li>
+<li><p>AMD 通过 ROCm 平台支持类似 CUDA 的编程体验，而英伟达的 Hopper 架构通过大量流式多处理器（SM）和 CUDA 核心实现并行计算。</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>本节视频<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<html>
+<iframe src="http://player.bilibili.com/player.html?aid=282100205&bvid=BV16c41117vp&cid=1361312451&p=1&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</html>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./02Hardware07Thought"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="03SPMT.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">SIMD &amp; SIMT 与 CUDA 关系</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="05DSA.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">从 CUDA 对 AI 芯片思考</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu-cuda">GPU 编程模型 CUDA</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#simd-vs-simt">SIMD vs SIMT 执行模式</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#warps-warp-level-fgmt">Warps 和 Warp-Level FGMT 关系</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#amd">AMD 编程模型</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">本节视频</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 01, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

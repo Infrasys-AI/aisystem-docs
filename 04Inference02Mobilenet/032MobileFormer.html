@@ -1,0 +1,1027 @@
+
+<!DOCTYPE html>
+
+
+<html lang="cn" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="MobileFormer" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="04Inference02Mobilenet/032MobileFormer.html" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
+<meta property="og:description" content="在本节中，将介绍一种新的网络-MobileFormer，它实现了 Transformer 全局特征与 CNN 局部特征的融合，在较低的成本内，创造一个高效的网络。通过本节，让大家去了解如何将 CNN 与 Transformer 更好的结合起来，同时实现模型的轻量化。 MobileFormer: MobileFormer:一种通过双线桥将 MobileNet 和 Transformer 并行的..." />
+<meta name="description" content="在本节中，将介绍一种新的网络-MobileFormer，它实现了 Transformer 全局特征与 CNN 局部特征的融合，在较低的成本内，创造一个高效的网络。通过本节，让大家去了解如何将 CNN 与 Transformer 更好的结合起来，同时实现模型的轻量化。 MobileFormer: MobileFormer:一种通过双线桥将 MobileNet 和 Transformer 并行的..." />
+
+    <title>MobileFormer &#8212; AI System</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=aabdd393"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/rtd-data.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '04Inference02Mobilenet/032MobileFormer';</script>
+    <script src="https://assets.readthedocs.org/static/javascript/readthedocs-doc-embed.js"></script>
+    <link rel="icon" href="../_static/logo-square.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="EfficientFormer 系列" href="033EfficientFormer.html" />
+    <link rel="prev" title="MobileVit 系列" href="031MobileVit.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="cn"/>
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../reference/blog/atom.xml"
+  title="Blog"
+/>
+  
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-wide.svg" class="logo__image only-light" alt="AI System - Home"/>
+    <script>document.write(`<img src="../_static/logo-wide.svg" class="logo__image only-dark" alt="AI System - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Youtube</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Blibili</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/01Introduction.html">课程内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/02ArchSlim.html">AI 计算模式（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/03MobileParallel.html">AI 计算模式（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/04Metrics.html">关键设计指标</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/05Matrix.html">核心计算之矩阵乘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/06BitWidth.html">计算之比特位宽</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware02ChipBase/README.html">AI 芯片基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/01CPUBase.html">CPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/02CPUISA.html">CPU 指令集架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/03CPUData.html">CPU 计算本质</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/04CPULatency.html">CPU 计算时延</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/05GPUBase.html">GPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/06NPUBase.html">NPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/07Future.html">超异构计算</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware03GPUBase/README.html">图形处理器 GPU</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/01Works.html">GPU 工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/02Principle.html">为什么 GPU 适用于 AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/03Concept.html">GPU 架构与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/04History.html">GPU 架构回顾</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware04NVIDIA/README.html">英伟达 GPU 详解</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/01BasicTC.html">Tensor Core 基本原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/02HistoryTC.html">Tensor Core 架构演进</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/03DeepTC.html">Tensor Core 深度剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/04BasicNvlink.html">分布式通信与 NVLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/05DeepNvlink.html">NVLink 原理剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/06DeepNvswitch.html">NV Switch 深度解析</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware05Abroad/README.html">国外 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/04TPUIntrol.html">谷歌 TPU 历史发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/05TPU1.html">谷歌 TPU v1-脉动阵列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/06TPU2.html">谷歌 TPUv2 训练芯片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/07TPU3.html">谷歌 TPUv3 POD 形态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/08TPU4.html">谷歌 TPU v4 与光路交换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware06Domestic/README.html">国内 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/04Cambricon.html">寒武纪介绍</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/08AscendBase.html">昇腾 AI 架构介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/09AscendSOC.html">昇腾 AI 处理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/10AscendCube.html">昇腾 AI 核心单元</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/11AscendLayout.html">昇腾数据布局转换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware07Thought/README.html">AI 芯片黄金十年</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/01Introduction.html">芯片的编程体系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/02SIMTSIMD.html">SIMD &amp; SIMT 与芯片架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/03SPMT.html">SIMD &amp; SIMT 与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/04NVSIMT.html">CUDA 编程模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/05DSA.html">从 CUDA 对 AI 芯片思考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/06AIChip.html">AI 芯片的思考</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/01Introduction.html">编译器基础介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/02History.html">传统编译器发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/03GCC.html">GCC 主要特征</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/04LLVM.html">LLVM 架构设计和原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/05LLVMIR.html">LLVM IR 基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/06LLVMDetail.html">LLVM IR 详解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/07LLVMFrontend.html">LLVM 前端和优化层</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/08LLVMBackend.html">LLVM 后端代码生成</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler02AICompiler/README.html">AI 编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/01Appear.html">为什么需要 AI 编译器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/02Stage.html">AI 编译器历史阶段</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/03Architecture.html">AI 编译器基本架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/04Future.html">AI 编译器挑战与思考</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler03Frontend/README.html">前端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/01Introduction.html">AI 编译器前端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/02GraphIR.html">图算 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/03OPFusion.html">算子融合</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/04LayoutPrinc.html">布局转换原理与算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/06Memory.html">内存分配算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/07ConstantFold.html">常量折叠原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/08CSE.html">公共表达式消除原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/09DCE.html">死代码消除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/10algebraic.html">代数简化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler04Backend/README.html">后端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/01Introduction.html">AI 编译器后端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/02OPSCompute.html">计算与调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/03Optimization.html">算子手工优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/04LoopOpt.html">算子循环优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 四. 推理系统&amp;引擎 ===</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../04Inference/README.html">推理系统&amp;引擎概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference01Inference/README.html">推理系统</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/01Introduction.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/02Constraints.html">推理系统介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/03Workflow.html">推理流程全景</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/04System.html">推理系统架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/05Inference.html">推理引擎架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/07MindIEIntro.html">昇腾推理引擎 MindIE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/08AscendCL.html">推理引擎示例：AscendCL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">模型轻量化</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01Introduction.html">推理参数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="021Squeezenet.html">SqueezeNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="022Shufflenet.html">ShuffleNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="023Mobilenet.html">MobileNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="024ESPNet.html">ESPNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="025FBNet.html">FBNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="026EfficientNet.html">EfficientNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="027GhostNet.html">GhostNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02Cnn.html">CNN 模型小型化（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="031MobileVit.html">MobileVit 系列</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">MobileFormer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="033EfficientFormer.html">EfficientFormer 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Cnn.html">CNN 模型小型化（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Transformer.html">Transformer 小型化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04Transformer.html">Transformer 模型小型化</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference03Slim/README.html">模型压缩</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/02Quant.html">低比特量化原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/03QAT.html">感知量化训练 QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/04PTQ.html">训练后量化与部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/05Pruning.html">模型剪枝</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/06Distillation.html">知识蒸馏原理</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference04Converter/README.html">模型转换</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/02Principle.html">推理文件格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/03IR.html">自定义计算图 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/04Detail.html">模型转换流程</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference05Optimize/README.html">模型优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/01Optimizer.html">计算图优化架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/02Basic.html">离线图优化技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/03Extend.html">其他计算图优化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference06Kernel/README.html">Kernel 优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/01Introduction.html">Kernel 层架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/02Conv.html">卷积操作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/03Im2col.html">Im2Col 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/04Winograd.html">Winograd 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/05Qnnpack.html">QNNPack 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/06Memory.html">推理内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/08Others.html">汇编与循环优化</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 五. AI 框架核心模块 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../05Framework/README.html">AI 框架核心概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework01Foundation/README.html">AI 框架基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/01Introduction.html">内容介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/02Fundamentals.html">AI 框架作用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/03History.html">AI 框架之争</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/04Programing.html">框架编程范式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/05MindSpore.html">昇思 MindSore 关键特性</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework02AutoDiff/README.html">自动微分</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/01Introduction.html">自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/02BaseConcept.html">什么是微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/03GradMode.html">微分计算模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/04Implement.html">微分实现方式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/05ForwardMode.html">动手实现自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/06ReversedMode.html">动手实现 PyTorch 微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/07Challenge.html">自动微分的挑战&amp;未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework03DataFlow/README.html">计算图</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/02Computegraph.html">计算图原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/03Atuodiff.html">计算图与自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/04Dispatch.html">计算图的调度与执行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/05ControlFlow.html">计算图的控制流实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/06StaticGraph.html">动态图与静态图转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/07Future.html">计算图挑战与未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework04Parallel/README.html">分布式并行</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/02DataParallel.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/03ZeRODP.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/04TensorParallel.html">张量并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/05PipelineParallel.html">流水并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/06HybridParallel.html">混合并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/07MSParallel.html">昇思MindSpore并行</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/blob/master/04Inference02Mobilenet/032MobileFormer.md?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/edit/master/04Inference02Mobilenet/032MobileFormer.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/issues/new?title=Issue%20on%20page%20%2F04Inference02Mobilenet/032MobileFormer.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/04Inference02Mobilenet/032MobileFormer.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>MobileFormer</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">MobileFormer</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">并行结构</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">低成本双线桥</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mobile-former">Mobile-Former 块</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">网络结构</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">本节视频</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <!--Copyright © XcodeHw 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+<section class="tex2jax_ignore mathjax_ignore" id="mobileformer">
+<h1>MobileFormer<a class="headerlink" href="#mobileformer" title="Link to this heading">#</a></h1>
+<p>在本节中，将介绍一种新的网络-MobileFormer，它实现了 Transformer 全局特征与 CNN 局部特征的融合，在较低的成本内，创造一个高效的网络。通过本节，让大家去了解如何将 CNN 与 Transformer 更好的结合起来，同时实现模型的轻量化。</p>
+<section id="id1">
+<h2>MobileFormer<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<p><strong>MobileFormer</strong>:一种通过双线桥将 MobileNet 和 Transformer 并行的结构。这种方式融合了 MobileNet 局部性表达能力和 Transformer 全局表达能力的优点，这个桥能将局部性和全局性双向融合。和现有 Transformer 不同，Mobile-Former 使用很少的 tokens(例如 6 个或者更少)随机初始化学习全局先验，计算量更小。</p>
+<section id="id2">
+<h3>并行结构<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>Mobile-Former 将 MobileNet 和 Transformer 并行化，并通过双向交叉注意力连接（下见图）。Mobile（指 MobileNet）采用图像作为输入（<span class="math notranslate nohighlight">\(X\in R^{HW \times 3}\)</span>），并应用反向瓶颈块提取局部特征。Former（指 Transformers）将可学习的参数（或 tokens）作为输入，表示为 <span class="math notranslate nohighlight">\(Z\in R^{M\times d}\)</span>，其中 M 和 d 分别是 tokens 的数量和维度，这些 tokens 随机初始化。与视觉 Transformer（ViT）不同，其中 tokens 将局部图像 patch 线性化，Former 的 tokens 明显较少（M≤6），每个代表图像的全局先验知识。这使得计算成本大大降低。</p>
+<p><img alt="MobileFormer" src="../_images/10Mobileformer01.png" /></p>
+</section>
+<section id="id3">
+<h3>低成本双线桥<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>Mobile 和 Former 通过双线桥将局部和全局特征双向融合。这两个方向分别表示为 Mobile→Former 和 Mobile←Former。我们提出了一种轻量级的交叉注意力模型，其中映射（<span class="math notranslate nohighlight">\(W^{Q}\)</span>,<span class="math notranslate nohighlight">\(W^{K}\)</span>,<span class="math notranslate nohighlight">\(W^{V}\)</span>)从 Mobile 中移除，以节省计算，但在 Former 中保留。在通道数较少的 Mobile 瓶颈处计算交叉注意力。具体而言，从局部特征图 X 到全局 tokens Z 的轻量级交叉注意力计算如下：</p>
+<div class="math notranslate nohighlight">
+\[
+A_{X-&gt;Z} = [Attn(\widetilde{z_{i}}W_{i}^{Q},\widetilde{x_{i}},\widetilde{x_{i}})]_{i=1:h}W^{o}\tag{1}
+\]</div>
+<p>其中局部特征 X 和全局 tokens Z 被拆分进入 h 个头，即 <span class="math notranslate nohighlight">\(X=[\widetilde{x_{1}}...\widetilde{x_{h}}],Z=[\widetilde{z_{1}}...\widetilde{z_{h}}]\)</span> 表示多头注意力。第 i 个头的拆分 <span class="math notranslate nohighlight">\(\widetilde{z_{1}}\in R^{M \times \frac {d}{h} }\)</span> 与第 i 个 token<span class="math notranslate nohighlight">\(\widetilde{z_{1}}\in R^{d}\)</span> 不同。<span class="math notranslate nohighlight">\(W_{i}^{Q}\)</span> 是第 i 个头的查询映射矩阵。<span class="math notranslate nohighlight">\(W^{O}\)</span> 用于将多个头组合在一起。Attn(Q,K,V)是查询 Q、键 K 和值 V 的标准注意力函数，即：</p>
+<div class="math notranslate nohighlight">
+\[
+softmax(\frac{QK^{T}}{\sqrt{d_{k}}})
+\]</div>
+<p>其中 <span class="math notranslate nohighlight">\([.]_{1:h}\)</span> 表示将 h 个元素 concat 到一起。需要注意的是，键和值的映射矩阵从 Mobile 中移除，而查询的映射矩阵 <span class="math notranslate nohighlight">\(W_{i}^{Q}\)</span> 在 Former 中保留。类似地从全局到局部的交叉注意力计算如下：</p>
+<div class="math notranslate nohighlight">
+\[
+A_{Z-&gt;X} = [Attn(\widetilde{x_{i}},\widetilde{z_{i}}\odot W_{i}^{K},\widetilde{z_{i}}\odot W_{i}^{V})]_{i=1:h}\tag{2}
+\]</div>
+<p>其中 <span class="math notranslate nohighlight">\(W_{i}^{K}\)</span> 和 <span class="math notranslate nohighlight">\(W_{i}^{V}\)</span> 分别是 Former 中键和值的映射矩阵。而查询的映射矩阵从 Mobile 中移除。</p>
+</section>
+<section id="mobile-former">
+<h3>Mobile-Former 块<a class="headerlink" href="#mobile-former" title="Link to this heading">#</a></h3>
+<p>Mobile-Former 由 Mobile-Former 块组成。每个块包含四部分：Mobile 子块、Former 子块以及双向交叉注意力 Mobile←Former 和 Mobile→Former（如下图所示）。</p>
+<p><img alt="MobileFormer" src="../_images/10Mobileformer02.png" /></p>
+<p>输入和输出：Mobile-Former 块有两个输入：(a) 局部特征图 <span class="math notranslate nohighlight">\(X\in R^{HW\times C}\)</span>，为 C 通道、高度 H 和宽度 W，以及(b) 全局 tokens <span class="math notranslate nohighlight">\(Z\in R^{M\times d}\)</span>，其中 M 和 d 是分别是 tokens 的数量和维度，M 和 d 在所有块中一样。Mobile-Former 块输出更新的局部特征图 <span class="math notranslate nohighlight">\(X\)</span> 和全局 tokens<span class="math notranslate nohighlight">\(Z\)</span>，用作下一个块的输入。</p>
+<p>Mobile 子块：如上图所示，Mobile 子块将特征图 <span class="math notranslate nohighlight">\(X\)</span> 作为输入，并将其输出作为 Mobile←Former 的输入。这和反向瓶颈块略有不同，其用动态 ReLU 替换 ReLU 作为激活函数。不同于原始的动态 ReLU，在平均池化特征图上应用两个 MLP 以生成参数。我们从 Former 的第一个全局 tokens 的输出 <span class="math notranslate nohighlight">\(z'_{1}\)</span> 应用两个 MLP 层（上图中的θ）保存平均池化。其中所有块的 depth-wise 卷积的核大小为 3×3。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Mobile</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channel</span><span class="p">,</span> <span class="n">expand_size</span><span class="p">,</span> <span class="n">out_channel</span><span class="p">,</span> <span class="n">token_demension</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Mobile</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_channel</span> <span class="o">=</span> <span class="n">in_channel</span><span class="p">,</span> <span class="n">expand_size</span><span class="p">,</span> <span class="n">out_channel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_demension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">token_demension</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="n">k</span>
+
+        <span class="k">if</span> <span class="n">stride</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strided_conv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+                <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span> <span class="n">groups</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">(),</span>
+                <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">(),</span>
+                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU6</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bn1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ac1</span> <span class="o">=</span> <span class="n">DynamicReLU</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_demension</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>      
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bn2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ac2</span> <span class="o">=</span> <span class="n">DynamicReLU</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_demension</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>          
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_channel</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bn3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_channel</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bn1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ac1</span> <span class="o">=</span> <span class="n">DynamicReLU</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_demension</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>      
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bn2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ac2</span> <span class="o">=</span> <span class="n">DynamicReLU</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_demension</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>          
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_channel</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bn3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_channel</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">first_token</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strided_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bn1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ac1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">first_token</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bn2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ac2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">first_token</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bn3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conv3</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Former 子块：Former 子块是一个标准的 Transformer 块，包括一个多头注意力（MHA）和一个前馈网络（FFN）。在 FFN 中，膨胀率为 2（代替 4）。使用 post 层归一化。Former 在 Mobile→Former 和 Mobile←Former 之间处理（见上图）。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Former</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">head</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">expand_ratio</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Former</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span> <span class="o">=</span> <span class="n">d_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expand_ratio</span> <span class="o">=</span> <span class="n">expand_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">head</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_per_head</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">QVK</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span> <span class="o">*</span> <span class="mi">3</span><span class="p">],</span> <span class="n">bn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q_to_heads</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">],</span> <span class="n">bn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">K_to_heads</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">],</span> <span class="n">bn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V_to_heads</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">],</span> <span class="n">bn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">heads_to_o</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">],</span> <span class="n">bn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_ratio</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">],</span> <span class="n">bn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp_norm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">QVK</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">QVK</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">QVK</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">]</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q_to_heads</span><span class="p">(</span><span class="n">Q</span><span class="p">),</span> <span class="s1">&#39;n m ( d h ) -&gt; n m d h&#39;</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>  
+        <span class="n">K</span> <span class="o">=</span> <span class="n">QVK</span><span class="p">[:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">]</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K_to_heads</span><span class="p">(</span><span class="n">K</span><span class="p">),</span> <span class="s1">&#39;n m ( d h ) -&gt; n m d h&#39;</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>   
+        <span class="n">V</span> <span class="o">=</span> <span class="n">QVK</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">:</span> <span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">]</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V_to_heads</span><span class="p">(</span><span class="n">V</span><span class="p">),</span> <span class="s1">&#39;n m ( d h ) -&gt; n m d h&#39;</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>  
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;nqdh, nkdh -&gt; nhqk&#39;</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_per_head</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>   
+        <span class="n">scores_map</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">v_heads</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;nkdh, nhqk -&gt; nhqd&#39;</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">scores_map</span><span class="p">)</span> 
+        <span class="n">v_heads</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="n">v_heads</span><span class="p">,</span> <span class="s1">&#39;n h q d -&gt; n q ( h d )&#39;</span><span class="p">)</span>
+        <span class="n">attout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heads_to_o</span><span class="p">(</span><span class="n">v_heads</span><span class="p">)</span>
+        <span class="n">attout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">attout</span><span class="p">)</span>  
+        <span class="n">attout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">attout</span><span class="p">)</span>
+        <span class="n">attout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp_norm</span><span class="p">(</span><span class="n">attout</span><span class="p">)</span>  
+        <span class="k">return</span> <span class="n">attout</span>  
+</pre></div>
+</div>
+<p>Mobile→Former：文章提出的轻量级交叉注意力（式 1）用于将局部特征 X 融合到全局特征 tokens Z。与标准注意力相比，映射矩阵的键 <span class="math notranslate nohighlight">\(W^{K}\)</span> 和值 <span class="math notranslate nohighlight">\(W^{V}\)</span>（在局部特征 X 上）被移除以节省计算（见上图）。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Mobile_Former</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;局部特征 -&gt; 全局特征&#39;&#39;&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">in_channel</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Mobile_Former</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span> <span class="o">=</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">in_channel</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">project_Q</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unproject</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shortcut</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">()</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_feature</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">local_feature</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">local_feature</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="n">local_feature</span><span class="p">,</span> <span class="s1">&#39;n c h w -&gt; n ( h w ) c&#39;</span><span class="p">)</span>   
+        <span class="n">project_Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_Q</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>   
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;nmc , nlc -&gt; nml&#39;</span><span class="p">,</span> <span class="n">project_Q</span><span class="p">,</span> <span class="n">local_feature</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">c</span> <span class="o">**</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">scores_map</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  
+        <span class="n">fushion</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;nml, nlc -&gt; nmc&#39;</span><span class="p">,</span> <span class="n">scores_map</span><span class="p">,</span> <span class="n">local_feature</span><span class="p">)</span>
+        <span class="n">unproject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unproject</span><span class="p">(</span><span class="n">fushion</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="n">unproject</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortcut</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Mobile-Former：这里的交叉注意力（式 2）与 Mobile→Former 的方向相反，其将全局 tokens 融入本地特征。局部特征是查询，全局 tokens 是键和值。因此，我们保留键 <span class="math notranslate nohighlight">\(W^{K}\)</span> 和值 <span class="math notranslate nohighlight">\(W^{V}\)</span> 中的映射矩阵，但移除查询 <span class="math notranslate nohighlight">\(W^{Q}\)</span> 的映射矩阵以节省计算，如上图所示。</p>
+<p>计算复杂度：Mobile-Former 块的四个核心部分具有不同的计算成本。给定输入大小为 <span class="math notranslate nohighlight">\(HW\times C\)</span> 的特征图，以及尺寸为 d 的 M 个全局 tokens，Mobile 占据了大部分的计算量 <span class="math notranslate nohighlight">\(O(HWC^{2})\)</span>。Former 和双线桥是重量级的，占据不到总计算成本的 20%。具体而言，Former 的自注意力和 FFN 具有复杂度 <span class="math notranslate nohighlight">\(O(M^{2}d+Md^{2})\)</span>。Mobile→Former 和 Mobile←Former 共享交叉注意力的复杂度 <span class="math notranslate nohighlight">\(O(MHWC+MdC)\)</span>。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Former_Mobile</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;全局特征 -&gt; 局部特征&#39;&#39;&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">in_channel</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Former_Mobile</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span> <span class="o">=</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">in_channel</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">project_KV</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">],</span> <span class="n">bn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shortcut</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">()</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">global_feature</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortcut</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">project_kv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_KV</span><span class="p">(</span><span class="n">global_feature</span><span class="p">)</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="n">project_kv</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="n">c</span><span class="p">]</span>  
+        <span class="n">V</span> <span class="o">=</span> <span class="n">project_kv</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">c</span> <span class="p">:</span> <span class="p">]</span>  
+        <span class="n">x</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;n c h w -&gt; n ( h w ) c&#39;</span><span class="p">)</span> 
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;nqc, nkc -&gt; nqk&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span> 
+        <span class="n">scores_map</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> 
+        <span class="n">v_agg</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;nqk, nkc -&gt; nqc&#39;</span><span class="p">,</span> <span class="n">scores_map</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>  
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">rearrange</span><span class="p">(</span><span class="n">v_agg</span><span class="p">,</span> <span class="s1">&#39;n ( h w ) c -&gt; n c h w&#39;</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">feature</span> <span class="o">+</span> <span class="n">res</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h3>网络结构<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<p>一个 Mobile-Former 架构，图像大小为 224×224，294M FLOPs，以不同的输入分辨率堆叠 11 个 Mobile-Former 块。所有块都有 6 个维度为 192 的全局 tokens。它以一个 3×3 的卷积作为 stem 和第一阶段的轻量瓶颈块，首先膨胀，然后通过 3×3 depth-wise 卷积和 point-wise 卷积压缩通道数。第 2-5 阶段包括 Mobile-Former 块。每个阶段的下采样，表示为 Mobile-Former 分类头在局部特征应用平均池化，首先和全局 tokens concat 到一起，然后经过两个全连接层，中间是 h-swish 激活函数。Mobile-Former 有七种模型，计算成本从 26M 到 508M FLOPs。它们的结构相似，但宽度和高度不同。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MobileFormerBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channel</span><span class="p">,</span> <span class="n">expand_size</span><span class="p">,</span> <span class="n">out_channel</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">head</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">expand_ratio</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MobileFormerBlock</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_channel</span> <span class="o">=</span> <span class="n">in_channel</span><span class="p">,</span> <span class="n">expand_size</span><span class="p">,</span> <span class="n">out_channel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_ratio</span> <span class="o">=</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">head</span><span class="p">,</span> <span class="n">expand_ratio</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mobile</span> <span class="o">=</span> <span class="n">Mobile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">former</span> <span class="o">=</span> <span class="n">Former</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">expand_ratio</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">expand_ratio</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mobile_former</span> <span class="o">=</span> <span class="n">Mobile_Former</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_channel</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">former_mobile</span> <span class="o">=</span> <span class="n">Former_Mobile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_channel</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_feature</span><span class="p">,</span> <span class="n">global_feature</span><span class="p">):</span>
+        <span class="n">z_hidden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mobile_former</span><span class="p">(</span><span class="n">local_feature</span><span class="p">,</span> <span class="n">global_feature</span><span class="p">)</span>
+        <span class="n">z_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">former</span><span class="p">(</span><span class="n">z_hidden</span><span class="p">)</span>
+        <span class="n">x_hidden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mobile</span><span class="p">(</span><span class="n">local_feature</span><span class="p">,</span> <span class="n">z_out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">x_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">former_mobile</span><span class="p">(</span><span class="n">x_hidden</span><span class="p">,</span> <span class="n">z_out</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x_out</span><span class="p">,</span> <span class="n">z_out</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id5">
+<h2>小结与思考<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>MobileFormer 通过并行的 MobileNet 和 Transformer 结构以及双线桥技术，实现了局部和全局特征的有效融合。</p></li>
+<li><p>MobileFormer 网络利用轻量级的交叉注意力机制，显著降低了计算成本，同时保持了高效的特征表达能力。</p></li>
+<li><p>MobileFormer 提供了多种模型变体，适应不同计算需求，最高可达 508M FLOPs，为移动和边缘设备上的高效视觉任务提供了灵活的解决方案。</p></li>
+</ul>
+</section>
+<section id="id6">
+<h2>本节视频<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<html>
+<iframe src="https:&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</html>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./04Inference02Mobilenet"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="031MobileVit.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">MobileVit 系列</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="033EfficientFormer.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">EfficientFormer 系列</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">MobileFormer</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">并行结构</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">低成本双线桥</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mobile-former">Mobile-Former 块</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">网络结构</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">本节视频</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 01, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

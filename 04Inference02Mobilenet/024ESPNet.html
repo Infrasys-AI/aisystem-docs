@@ -1,0 +1,1103 @@
+
+<!DOCTYPE html>
+
+
+<html lang="cn" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="ESPNet 系列" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="04Inference02Mobilenet/024ESPNet.html" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
+<meta property="og:description" content="本节将会介绍 ESPNet 系列，该网络主要应用在高分辨率图像下的语义分割，在计算内存占用、功耗方面都非常高效，重点介绍一种高效的空间金字塔卷积模块（ESP Module）；而在 ESPNet V2 上则是会更进一步给大家呈现如何利用分组卷积核，深度空洞分离卷积学习巨大有效感受野，进一步降低浮点计算量和参数量。 ESPNet V1 模型: ESPNet V1 ：应用在高分辨图像下的语义分割，..." />
+<meta name="description" content="本节将会介绍 ESPNet 系列，该网络主要应用在高分辨率图像下的语义分割，在计算内存占用、功耗方面都非常高效，重点介绍一种高效的空间金字塔卷积模块（ESP Module）；而在 ESPNet V2 上则是会更进一步给大家呈现如何利用分组卷积核，深度空洞分离卷积学习巨大有效感受野，进一步降低浮点计算量和参数量。 ESPNet V1 模型: ESPNet V1 ：应用在高分辨图像下的语义分割，..." />
+
+    <title>ESPNet 系列 &#8212; AI System</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=aabdd393"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/rtd-data.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '04Inference02Mobilenet/024ESPNet';</script>
+    <script src="https://assets.readthedocs.org/static/javascript/readthedocs-doc-embed.js"></script>
+    <link rel="icon" href="../_static/logo-square.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="FBNet 系列" href="025FBNet.html" />
+    <link rel="prev" title="MobileNet 系列" href="023Mobilenet.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="cn"/>
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../reference/blog/atom.xml"
+  title="Blog"
+/>
+  
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-wide.svg" class="logo__image only-light" alt="AI System - Home"/>
+    <script>document.write(`<img src="../_static/logo-wide.svg" class="logo__image only-dark" alt="AI System - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Youtube</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Blibili</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/01Introduction.html">课程内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/02ArchSlim.html">AI 计算模式（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/03MobileParallel.html">AI 计算模式（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/04Metrics.html">关键设计指标</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/05Matrix.html">核心计算之矩阵乘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/06BitWidth.html">计算之比特位宽</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware02ChipBase/README.html">AI 芯片基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/01CPUBase.html">CPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/02CPUISA.html">CPU 指令集架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/03CPUData.html">CPU 计算本质</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/04CPULatency.html">CPU 计算时延</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/05GPUBase.html">GPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/06NPUBase.html">NPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/07Future.html">超异构计算</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware03GPUBase/README.html">图形处理器 GPU</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/01Works.html">GPU 工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/02Principle.html">为什么 GPU 适用于 AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/03Concept.html">GPU 架构与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/04History.html">GPU 架构回顾</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware04NVIDIA/README.html">英伟达 GPU 详解</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/01BasicTC.html">Tensor Core 基本原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/02HistoryTC.html">Tensor Core 架构演进</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/03DeepTC.html">Tensor Core 深度剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/04BasicNvlink.html">分布式通信与 NVLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/05DeepNvlink.html">NVLink 原理剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/06DeepNvswitch.html">NV Switch 深度解析</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware05Abroad/README.html">国外 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/04TPUIntrol.html">谷歌 TPU 历史发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/05TPU1.html">谷歌 TPU v1-脉动阵列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/06TPU2.html">谷歌 TPUv2 训练芯片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/07TPU3.html">谷歌 TPUv3 POD 形态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/08TPU4.html">谷歌 TPU v4 与光路交换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware06Domestic/README.html">国内 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/04Cambricon.html">寒武纪介绍</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/08AscendBase.html">昇腾 AI 架构介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/09AscendSOC.html">昇腾 AI 处理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/10AscendCube.html">昇腾 AI 核心单元</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/11AscendLayout.html">昇腾数据布局转换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware07Thought/README.html">AI 芯片黄金十年</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/01Introduction.html">芯片的编程体系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/02SIMTSIMD.html">SIMD &amp; SIMT 与芯片架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/03SPMT.html">SIMD &amp; SIMT 与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/04NVSIMT.html">CUDA 编程模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/05DSA.html">从 CUDA 对 AI 芯片思考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/06AIChip.html">AI 芯片的思考</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/01Introduction.html">编译器基础介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/02History.html">传统编译器发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/03GCC.html">GCC 主要特征</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/04LLVM.html">LLVM 架构设计和原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/05LLVMIR.html">LLVM IR 基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/06LLVMDetail.html">LLVM IR 详解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/07LLVMFrontend.html">LLVM 前端和优化层</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/08LLVMBackend.html">LLVM 后端代码生成</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler02AICompiler/README.html">AI 编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/01Appear.html">为什么需要 AI 编译器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/02Stage.html">AI 编译器历史阶段</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/03Architecture.html">AI 编译器基本架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/04Future.html">AI 编译器挑战与思考</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler03Frontend/README.html">前端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/01Introduction.html">AI 编译器前端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/02GraphIR.html">图算 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/03OPFusion.html">算子融合</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/04LayoutPrinc.html">布局转换原理与算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/06Memory.html">内存分配算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/07ConstantFold.html">常量折叠原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/08CSE.html">公共表达式消除原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/09DCE.html">死代码消除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/10algebraic.html">代数简化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler04Backend/README.html">后端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/01Introduction.html">AI 编译器后端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/02OPSCompute.html">计算与调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/03Optimization.html">算子手工优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/04LoopOpt.html">算子循环优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 四. 推理系统&amp;引擎 ===</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../04Inference/README.html">推理系统&amp;引擎概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference01Inference/README.html">推理系统</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/01Introduction.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/02Constraints.html">推理系统介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/03Workflow.html">推理流程全景</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/04System.html">推理系统架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/05Inference.html">推理引擎架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/07MindIEIntro.html">昇腾推理引擎 MindIE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/08AscendCL.html">推理引擎示例：AscendCL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">模型轻量化</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01Introduction.html">推理参数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="021Squeezenet.html">SqueezeNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="022Shufflenet.html">ShuffleNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="023Mobilenet.html">MobileNet 系列</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">ESPNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="025FBNet.html">FBNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="026EfficientNet.html">EfficientNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="027GhostNet.html">GhostNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02Cnn.html">CNN 模型小型化（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="031MobileVit.html">MobileVit 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="032MobileFormer.html">MobileFormer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="033EfficientFormer.html">EfficientFormer 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Cnn.html">CNN 模型小型化（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Transformer.html">Transformer 小型化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04Transformer.html">Transformer 模型小型化</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference03Slim/README.html">模型压缩</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/02Quant.html">低比特量化原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/03QAT.html">感知量化训练 QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/04PTQ.html">训练后量化与部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/05Pruning.html">模型剪枝</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/06Distillation.html">知识蒸馏原理</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference04Converter/README.html">模型转换</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/02Principle.html">推理文件格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/03IR.html">自定义计算图 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/04Detail.html">模型转换流程</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference05Optimize/README.html">模型优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/01Optimizer.html">计算图优化架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/02Basic.html">离线图优化技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/03Extend.html">其他计算图优化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference06Kernel/README.html">Kernel 优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/01Introduction.html">Kernel 层架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/02Conv.html">卷积操作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/03Im2col.html">Im2Col 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/04Winograd.html">Winograd 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/05Qnnpack.html">QNNPack 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/06Memory.html">推理内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/08Others.html">汇编与循环优化</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 五. AI 框架核心模块 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../05Framework/README.html">AI 框架核心概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework01Foundation/README.html">AI 框架基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/01Introduction.html">内容介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/02Fundamentals.html">AI 框架作用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/03History.html">AI 框架之争</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/04Programing.html">框架编程范式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/05MindSpore.html">昇思 MindSore 关键特性</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework02AutoDiff/README.html">自动微分</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/01Introduction.html">自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/02BaseConcept.html">什么是微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/03GradMode.html">微分计算模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/04Implement.html">微分实现方式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/05ForwardMode.html">动手实现自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/06ReversedMode.html">动手实现 PyTorch 微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/07Challenge.html">自动微分的挑战&amp;未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework03DataFlow/README.html">计算图</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/02Computegraph.html">计算图原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/03Atuodiff.html">计算图与自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/04Dispatch.html">计算图的调度与执行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/05ControlFlow.html">计算图的控制流实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/06StaticGraph.html">动态图与静态图转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/07Future.html">计算图挑战与未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework04Parallel/README.html">分布式并行</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/02DataParallel.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/03ZeRODP.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/04TensorParallel.html">张量并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/05PipelineParallel.html">流水并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/06HybridParallel.html">混合并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/07MSParallel.html">昇思MindSpore并行</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/blob/master/04Inference02Mobilenet/024ESPNet.md?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/edit/master/04Inference02Mobilenet/024ESPNet.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/issues/new?title=Issue%20on%20page%20%2F04Inference02Mobilenet/024ESPNet.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/04Inference02Mobilenet/024ESPNet.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>ESPNet 系列</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#espnet-v1">ESPNet V1 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#esp">ESP 模块</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hff">HFF 特性</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">网络结构与实现</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#espnet-v2">ESPNet V2 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ddconv">DDConv 模块</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eesp">EESP 模块</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strided-eesp">Strided EESP 模块</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">本节视频</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <!--Copyright © XcodeHw 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+<section class="tex2jax_ignore mathjax_ignore" id="espnet">
+<h1>ESPNet 系列<a class="headerlink" href="#espnet" title="Link to this heading">#</a></h1>
+<p>本节将会介绍 ESPNet 系列，该网络主要应用在高分辨率图像下的语义分割，在计算内存占用、功耗方面都非常高效，重点介绍一种高效的空间金字塔卷积模块（ESP Module）；而在 ESPNet V2 上则是会更进一步给大家呈现如何利用分组卷积核，深度空洞分离卷积学习巨大有效感受野，进一步降低浮点计算量和参数量。</p>
+<section id="espnet-v1">
+<h2>ESPNet V1 模型<a class="headerlink" href="#espnet-v1" title="Link to this heading">#</a></h2>
+<p><strong>ESPNet V1</strong>：应用在高分辨图像下的语义分割，在计算、内存占用、功耗方面都非常高效。主要贡献在于基于传统卷积模块，提出高效空间金子塔卷积模块（ESP Module），有助于减少模型运算量和内存、功率消耗，来提升终端设备适用性，方便部署到移动端。</p>
+<section id="esp">
+<h3>ESP 模块<a class="headerlink" href="#esp" title="Link to this heading">#</a></h3>
+<p>基于卷积因子分解的原则，ESP（Efficient spatial pyramid）模块将标准卷积分解成 point-wise 卷积和空洞卷积金字塔（spatial pyramid of dilated convolutions）。point-wise 卷积将输入的特征映射到低维特征空间，即采用 K 个 1x1xM 的小卷积核对输入的特征进行卷积操作，1x1 卷积的作用其实就是为了降低维度，这样就可以减少参数。空洞卷积金字塔使用 K 组空洞卷积的同时下采样得到低维特征，这种分解方法能够大量减少 ESP 模块的参数和内存，并且保证了较大的感受野(如下图 a 所示)。</p>
+<p><img alt="ESPNet" src="../_images/05Espnet01.png" /></p>
+<p>上图 (b) 展示了 ESP 模块采用的减少-分裂-转换-合并策略。下面来计算下一共包含的参数，其实在效果上，以这种轻量级的网络作为 backbone 效果肯定不如那些参数量大的网络模型，比如 Resnet，但是在运行速度上有很大优势。</p>
+<p>如上图所示，对 ESP 模块的第一部分来说，<span class="math notranslate nohighlight">\(d\)</span> 个 <span class="math notranslate nohighlight">\(1\times 1\times M\)</span> 的卷积核，将 M 维的输入特征降至 d 维。此时参数为：<span class="math notranslate nohighlight">\(M*N/K\)</span>，第二部分参数量为 <span class="math notranslate nohighlight">\(K*n^{2}*(N/K)^{2}\)</span>，和标准卷积结构相比，参数数量降低很多。</p>
+<p>为了减少计算量，又引入了一个简单的超参数 K，它的作用是统一收缩网络中各个 ESP 模块的特征映射维数。Reduce 对于给定 K，ESP 模块首先通过逐点卷积将特征映射从 m 维空间缩减到 <span class="math notranslate nohighlight">\(N/K\)</span> 维空间（上图 a 中的步骤 1）。通过 Split 将低维特征映射拆分到 K 个并行分支上。</p>
+<p>然后每个分支使用 <span class="math notranslate nohighlight">\(2^{k-1}，k=1,...,k-1\)</span> 给出的 <span class="math notranslate nohighlight">\(n\times n\)</span> 个扩张速率不同的卷积核同时处理这些特征映射（上图 a 中的步骤 2）。最后将 K 个并行扩展卷积核的输出连接起来，产生一个 n 维输出特征图。</p>
+<p>下面代码使用 PyTorch 来实现具体的 ESP 模块：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ESPModule</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">ks</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">act_type</span><span class="o">=</span><span class="s1">&#39;prelu&#39;</span><span class="p">,):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ESPModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">=</span> <span class="n">K</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">=</span> <span class="n">stride</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_skip</span> <span class="o">=</span> <span class="p">(</span><span class="n">in_channels</span> <span class="o">==</span> <span class="n">out_channels</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">stride</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">channel_kn</span> <span class="o">=</span> <span class="n">out_channels</span> <span class="o">//</span> <span class="n">K</span>
+        <span class="n">channel_k1</span> <span class="o">=</span> <span class="n">out_channels</span> <span class="o">-</span> <span class="p">(</span><span class="n">K</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">channel_kn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">perfect_divisor</span> <span class="o">=</span> <span class="n">channel_k1</span> <span class="o">==</span> <span class="n">channel_kn</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">perfect_divisor</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv_kn</span> <span class="o">=</span> <span class="n">conv1x1</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">channel_kn</span><span class="p">,</span> <span class="n">stride</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv_kn</span> <span class="o">=</span> <span class="n">conv1x1</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">channel_kn</span><span class="p">,</span> <span class="n">stride</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conv_k1</span> <span class="o">=</span> <span class="n">conv1x1</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">channel_k1</span><span class="p">,</span> <span class="n">stride</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>       <span class="c1"># dilation</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="n">channel_k1</span> <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">channel_kn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ConvBNAct</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">act_type</span><span class="o">=</span><span class="n">act_type</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_skip</span><span class="p">:</span>
+            <span class="n">residual</span> <span class="o">=</span> <span class="n">x</span>
+
+        <span class="n">transform_feats</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">perfect_divisor</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv_kn</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>     <span class="c1"># Reduce</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">):</span>
+                <span class="n">transform_feats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">x</span><span class="p">))</span>   <span class="c1"># Split --&gt; Transform</span>
+                
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">):</span>
+                <span class="n">transform_feats</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">transform_feats</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>      <span class="c1"># Merge: Sum</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv_k1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>    <span class="c1"># Reduce</span>
+            <span class="n">xn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv_kn</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>    <span class="c1"># Reduce</span>
+            <span class="n">transform_feats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">x1</span><span class="p">))</span>      <span class="c1"># Split --&gt; Transform</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">):</span>
+                <span class="n">transform_feats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">xn</span><span class="p">))</span>   <span class="c1"># Split --&gt; Transform</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">):</span>
+                <span class="n">transform_feats</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">transform_feats</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>      <span class="c1"># Merge: Sum</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">transform_feats</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>               <span class="c1"># Merge: Concat</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_skip</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">+=</span> <span class="n">residual</span>
+
+        <span class="k">return</span> <span class="n">x</span>
+</pre></div>
+</div>
+</section>
+<section id="hff">
+<h3>HFF 特性<a class="headerlink" href="#hff" title="Link to this heading">#</a></h3>
+<p>虽然将扩张卷积的输出拼接在一起会给 ESP 模块带来一个较大的有效感受野，但也会引入不必要的棋盘或网格假象，如下图所示。</p>
+<p><img alt="ESPNet" src="../_images/05Espnet02.png" /></p>
+<p>上图(a)举例说明一个网格伪像，其中单个活动像素（红色）与膨胀率 r = 2 的 3×3 膨胀卷积核卷积。</p>
+<p>上图(b)具有和不具有层次特征融合（Hierarchical feature fusion，HFF）的 ESP 模块特征图可视化。ESP 中的 HFF 消除了网格伪影。彩色观看效果最佳。</p>
+<p>为了解决 ESP 中的网格问题，使用不同膨胀率的核获得的特征映射在拼接之前会进行层次化添加（上图 b 中的 HFF）。该解决方案简单有效，且不会增加 ESP 模块的复杂性，这与现有方法不同，现有方法通过使用膨胀率较小的卷积核学习更多参数来消除网格误差[Dilated residual networks,Understanding convolution for semantic segmentation]。为了改善网络内部的梯度流动，ESP 模块的输入和输出特征映射使用元素求和[Deep residual learning for image recognition]进行组合。</p>
+</section>
+<section id="id1">
+<h3>网络结构与实现<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<p>ESPNet 使用 ESP 模块学习卷积核以及下采样操作，除了第一层是标准的大步卷积。所有层(卷积和 ESP 模块)后面都有一个批归一化和一个 PReLU 非线性，除了最后一个点卷积，它既没有批归一化，也没有非线性。最后一层输入 softmax 进行像素级分类。</p>
+<p>ESPNet 的不同变体如下图所示。第一个变体，ESPNet-A(图 a)，是一种标准网络，它以 RGB 图像作为输入，并使用 ESP 模块学习不同空间层次的表示，以产生一个分割掩码。第二种 ESP - b(图 b)通过在之前的跨步 ESP 模块和之前的 ESP 模块之间共享特征映射，改善了 ESPNet-A 内部的信息流。第三种变体，ESPNet-C(图 c)，加强了 ESPNet-B 内部的输入图像，以进一步改善信息的流动。这三种变量产生的输出的空间维度是输入图像的 1 / 8。第四种变体，ESPNet(图 d)，在 ESPNet- c 中添加了一个轻量级解码器(使用 reduceupsample-merge 的原理构建)，输出与输入图像相同空间分辨率的分割 mask。</p>
+<p><img alt="ESPNet" src="../_images/05Espnet03.png" /></p>
+<p>从 ESPNet- a 到 ESPNet 的路径。红色和绿色色框分别代表负责下采样和上采样操作的模块。空间级别的 l 在(a)中的每个模块的左侧。本文将每个模块表示为（#输入通道，#输出通道）。这里，conv-n 表示 n × n 卷积。</p>
+<p>为了在不改变网络拓扑结构的情况下构建具有较深计算效率的边缘设备网络，超参数α控制网络的深度;ESP 模块在空间层次 l 上重复 <span class="math notranslate nohighlight">\(α_{l}\)</span> 次。在更高的空间层次（l = 0 和 l = 1），cnn 需要更多的内存，因为这些层次的特征图的空间维数较高。为了节省内存，ESP 和卷积模块都不会在这些空间级别上重复。</p>
+</section>
+</section>
+<section id="espnet-v2">
+<h2>ESPNet V2 模型<a class="headerlink" href="#espnet-v2" title="Link to this heading">#</a></h2>
+<p><strong>ESPNet V2</strong>：是由 ESPNet V1 改进来的，一种轻量级、能耗高效、通用的卷积神经网络，利用分组卷积核深度空洞分离卷积学习巨大有效感受野，进一步降低浮点计算量和参数量。同时在图像分类、目标检测、语义分割等任务上检验了模型效果。</p>
+<p>ESPNet V2 与 V1 版本相比，其特点如下：</p>
+<ol class="arabic simple">
+<li><p>将原来 ESPNet 的 point-wise convolutions 替换为 group point-wise convolutions；</p></li>
+<li><p>将原来 ESPNet 的 dilated convolutions 替换为 depth-wise dilated convolution；</p></li>
+<li><p>HFF 加在 depth-wise dilated separable convolutions 和 point-wise (or 1 × 1)卷积之间，去除 gridding artifacts；</p></li>
+<li><p>使用 group point-wise convolution 替换 K 个 point-wise convolutions；</p></li>
+<li><p>加入平均池化（average pooling ），将输入图片信息加入 EESP 中；</p></li>
+<li><p>使用级联（concatenation）取代对应元素加法操作（element-wise addition operation ）</p></li>
+</ol>
+<section id="ddconv">
+<h3>DDConv 模块<a class="headerlink" href="#ddconv" title="Link to this heading">#</a></h3>
+<p>深度分离空洞卷积（Depth-wise dilated separable convolution，DDConv）分两步：</p>
+<ul class="simple">
+<li><p>对每个输入通道执行空洞率为 r 的 DDConv，从有效感受野学习代表性特征。</p></li>
+<li><p>标准 1x1 卷积学习 DDConv 输出的线性组合特征。</p></li>
+</ul>
+<p>深度分离空洞卷积与其他卷积的参数量与感受野对比如下表所示。</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Convolution type</p></th>
+<th class="head"><p>Parameters</p></th>
+<th class="head"><p>Eff.receptive field</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Standard</p></td>
+<td><p><span class="math notranslate nohighlight">\(n^{2}c\hat{c}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(n\times n\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>Group</p></td>
+<td><p><span class="math notranslate nohighlight">\(\frac{n^{2}c\hat{c}}{g}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(n\times n\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>Depth-wise separable</p></td>
+<td><p><span class="math notranslate nohighlight">\(n^{2}c+c\hat{c}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(n\times n\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>Depth-wise dilated separable</p></td>
+<td><p><span class="math notranslate nohighlight">\(n^{2}c+c\hat{c}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(n_{r}\times n_{r}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="eesp">
+<h3>EESP 模块<a class="headerlink" href="#eesp" title="Link to this heading">#</a></h3>
+<p>EESP 模块结构如下图，图 b 中相比于 ESPNet，输入层采用分组卷积，DDConv+Conv1x1 取代标准空洞卷积，依然采用 HFF 的融合方式，（c）是（b）的等价模式。当输入通道数 M=240，g=K=4, d=M/K=60，EESP 比 ESP 少 7 倍的参数。</p>
+<p><img alt="ESPNet" src="../_images/05ESPNet04.png" /></p>
+<p>描述了一个新的网络模块 EESP，它利用深度可分离扩张和组逐点卷积设计，专为边缘设备而设计。该模块受 ESPNet 架构的启发，基于 ESP 模块构建，使用了减少-分割-变换-合并的策略。通过组逐点和深度可分离扩张卷积，该模块的计算复杂度得到了显著的降低。进一步，描述了一种带有捷径连接到输入图像的分层 EESP 模块，以更有效地学习多尺度的表示。</p>
+<p>如上图中 b 所示，能够降低 <span class="math notranslate nohighlight">\(\frac{Md+n^{2}d^{2}K}{\frac{Md}{g}+(n^{2}+d)dK}\)</span> 倍计算复杂度，K 为空洞卷积金字塔层数。考虑到单独计算 K 个 point-wise 卷积等同于单个分组数为 K 的 point-wise 分组卷积，而分组卷积的在实现上更高效，于是改进为上图 c 的最终结构。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">EESP</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">       按照 REDUCE ---&gt; SPLIT ---&gt; TRANSFORM --&gt; MERGE </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nIn</span><span class="p">,</span> <span class="n">nOut</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">r_lim</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">down_method</span><span class="o">=</span><span class="s1">&#39;esp&#39;</span><span class="p">):</span>                   
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">=</span> <span class="n">stride</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nOut</span> <span class="o">/</span> <span class="n">k</span><span class="p">)</span>
+        <span class="n">n1</span> <span class="o">=</span> <span class="n">nOut</span> <span class="o">-</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">n</span>
+        <span class="k">assert</span> <span class="n">down_method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;avg&#39;</span><span class="p">,</span> <span class="s1">&#39;esp&#39;</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">n</span> <span class="o">==</span> <span class="n">n1</span><span class="p">,</span> <span class="s2">&quot;n(=</span><span class="si">{}</span><span class="s2">) and n1(=</span><span class="si">{}</span><span class="s2">) should be equal for Depth-wise Convolution &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj_1x1</span> <span class="o">=</span> <span class="n">CBR</span><span class="p">(</span><span class="n">nIn</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+
+        <span class="c1">#3x3 核的膨胀率和感受野之间的映射</span>
+        <span class="n">map_receptive_ksize</span> <span class="o">=</span> <span class="p">{</span><span class="mi">3</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">13</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">17</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k_sizes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+            <span class="n">ksize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span>
+            <span class="c1"># 达到感受野极限后，回落到 3x3，膨胀率为 1 的基础卷积</span>
+            <span class="n">ksize</span> <span class="o">=</span> <span class="n">ksize</span> <span class="k">if</span> <span class="n">ksize</span> <span class="o">&lt;=</span> <span class="n">r_lim</span> <span class="k">else</span> <span class="mi">3</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k_sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ksize</span><span class="p">)</span>
+        <span class="c1">#根据感受野对这些核大小进行排序（升序）</span>
+        <span class="c1">#这使我们能够忽略分层中具有相同有效感受野的核（在例子中为 3×3）</span>
+        <span class="c1"># 特征融合，因为 3x3 感受野的核不具有网格伪影。</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k_sizes</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spp_dw</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">()</span>
+     
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+            <span class="n">d_rate</span> <span class="o">=</span> <span class="n">map_receptive_ksize</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">k_sizes</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spp_dw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CDilated</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">kSize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">d_rate</span><span class="p">))</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv_1x1_exp</span> <span class="o">=</span> <span class="n">CB</span><span class="p">(</span><span class="n">nOut</span><span class="p">,</span> <span class="n">nOut</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">br_after_cat</span> <span class="o">=</span> <span class="n">BR</span><span class="p">(</span><span class="n">nOut</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_act</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">PReLU</span><span class="p">(</span><span class="n">nOut</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">downAvg</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">down_method</span> <span class="o">==</span> <span class="s1">&#39;avg&#39;</span> <span class="k">else</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+
+        <span class="c1"># Reduce --&gt; 将高维特征映射投影到低维空间</span>
+        <span class="n">output1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_1x1</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spp_dw</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">output1</span><span class="p">)]</span>
+        <span class="c1"># 计算每个分支的输出并分层融合它们</span>
+        <span class="c1"># i.e. Split --&gt; Transform --&gt; HFF</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spp_dw</span><span class="p">)):</span>
+            <span class="n">out_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spp_dw</span><span class="p">[</span><span class="n">k</span><span class="p">](</span><span class="n">output1</span><span class="p">)</span>
+            <span class="c1"># HFF</span>
+            <span class="c1">#我们不组合具有相同感受野的分支(在例子中是 3x3)</span>
+         
+            <span class="n">out_k</span> <span class="o">=</span> <span class="n">out_k</span> <span class="o">+</span> <span class="n">output</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="c1">#融合后应用批量定额，然后添加到列表中</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_k</span><span class="p">)</span>
+        <span class="c1"># Merge</span>
+        <span class="n">expanded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv_1x1_exp</span><span class="p">(</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">br_after_cat</span><span class="p">(</span> 
+                <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> 
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">del</span> <span class="n">output</span>
+        <span class="c1"># 如果下采样，则返回连接的向量</span>
+        <span class="c1"># 因为下采样功能会将其与 avg 合并。合并特征图，然后对其进行阈值处理</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">downAvg</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">expanded</span>
+
+        <span class="c1"># 如果输入向量和连接向量的维数相同，则将它们相加 (RESIDUAL LINK)</span>
+        <span class="k">if</span> <span class="n">expanded</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="nb">input</span><span class="o">.</span><span class="n">size</span><span class="p">():</span>
+            <span class="n">expanded</span> <span class="o">=</span> <span class="n">expanded</span> <span class="o">+</span> <span class="nb">input</span>
+
+        <span class="c1"># 使用激活函数对特征图进行阈值处理 (PReLU in this case)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_act</span><span class="p">(</span><span class="n">expanded</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="strided-eesp">
+<h3>Strided EESP 模块<a class="headerlink" href="#strided-eesp" title="Link to this heading">#</a></h3>
+<p>为了在多尺度下能够有效地学习特征，对上图 1c 的网络做了四点改动（如下图所示）：</p>
+<p>1.对 DDConv 添加 stride 属性。</p>
+<p>2.右边的 shortcut 中带了平均池化操作，实现维度匹配。</p>
+<p>3.将相加的特征融合方式替换为 concat 形式，增加特征的维度。</p>
+<p>4.融合原始输入图像的下采样信息，使得特征信息更加丰富。具体做法是先将图像下采样到与特征图的尺寸相同的尺寸，然后使用第一个卷积，一个标准的 3×3 卷积，用于学习空间表示。再使用第二个卷积，一个逐点卷积，用于学习输入之间的线性组合，并将其投影到高维空间。</p>
+<p><img alt="ESPNet" src="../_images/05Espnet05.png" /></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DownSampler</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">   具有两个并行分支的下采样功能：平均池和步长为 2 的 EESP 块。然后，使用激活函数将这些分支的输出特征图连接起来并进行阈值处理，以产生最终输出。</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nin</span><span class="p">,</span> <span class="n">nout</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">r_lim</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">reinf</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="n">nout_new</span> <span class="o">=</span> <span class="n">nout</span> <span class="o">-</span> <span class="n">nin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eesp</span> <span class="o">=</span> <span class="n">EESP</span><span class="p">(</span><span class="n">nin</span><span class="p">,</span> <span class="n">nout_new</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">r_lim</span><span class="o">=</span><span class="n">r_lim</span><span class="p">,</span> <span class="n">down_method</span><span class="o">=</span><span class="s1">&#39;avg&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">avg</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">AvgPool2d</span><span class="p">(</span><span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reinf</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inp_reinf</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+                <span class="n">CBR</span><span class="p">(</span><span class="n">config_inp_reinf</span><span class="p">,</span> <span class="n">config_inp_reinf</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="n">CB</span><span class="p">(</span><span class="n">config_inp_reinf</span><span class="p">,</span> <span class="n">nout</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">act</span> <span class="o">=</span>  <span class="n">nn</span><span class="o">.</span><span class="n">PReLU</span><span class="p">(</span><span class="n">nout</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">input2</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+ 
+        <span class="n">avg_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">avg</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+        <span class="n">eesp_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eesp</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">avg_out</span><span class="p">,</span> <span class="n">eesp_out</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">input2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            
+            <span class="n">w1</span> <span class="o">=</span> <span class="n">avg_out</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">input2</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">avg_pool2d</span><span class="p">(</span><span class="n">input2</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">w2</span> <span class="o">=</span> <span class="n">input2</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">w2</span> <span class="o">==</span> <span class="n">w1</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">output</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_reinf</span><span class="p">(</span><span class="n">input2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">output</span><span class="p">)</span> 
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id2">
+<h2>小结与思考<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>ESPNet V1 模型专注于高分辨率图像的语义分割任务，通过引入高效的空间金字塔卷积模块（ESP Module），显著降低了模型的运算量和内存功耗，提升了在终端设备上的适用性。</p></li>
+<li><p>ESP Module 利用逐点卷积和空洞卷积金字塔减少参数量和内存消耗，同时通过层次化特征融合（HFF）解决卷积输出的棋盘格效应，保持了较大的感受野和有效的特征学习。</p></li>
+<li><p>ESPNet V2 在 V1 的基础上进一步优化，采用分组卷积和深度分离卷积学习更大的有效感受野，减少浮点计算量和参数量，同时通过级联和平均池化融合多尺度特征，提升了模型在不同视觉任务上的性能和通用性。</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>本节视频<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<iframe src="https://player.bilibili.com/player.html?bvid=BV1DK411k7qt&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./04Inference02Mobilenet"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="023Mobilenet.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">MobileNet 系列</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="025FBNet.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">FBNet 系列</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#espnet-v1">ESPNet V1 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#esp">ESP 模块</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hff">HFF 特性</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">网络结构与实现</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#espnet-v2">ESPNet V2 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ddconv">DDConv 模块</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eesp">EESP 模块</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strided-eesp">Strided EESP 模块</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">本节视频</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 01, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

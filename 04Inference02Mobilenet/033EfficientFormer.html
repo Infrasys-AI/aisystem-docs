@@ -1,0 +1,1526 @@
+
+<!DOCTYPE html>
+
+
+<html lang="cn" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="EfficientFormer 系列" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="04Inference02Mobilenet/033EfficientFormer.html" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
+<meta property="og:description" content="本节主要介绍一种轻量化的 Transformer 结构，在获得高性能的同时，能够保持一定的推理速度。以延迟为目标进行优化设计。通过延迟分析重新探讨 ViT 及其变体的设计原则。 EfficientFormer V1 模型: EfficientFormer V1:基于 ViT 的模型中使用的网络架构和具体的算子，找到端侧低效的原因。然后引入了维度一致的 Transformer Block 作为..." />
+<meta name="description" content="本节主要介绍一种轻量化的 Transformer 结构，在获得高性能的同时，能够保持一定的推理速度。以延迟为目标进行优化设计。通过延迟分析重新探讨 ViT 及其变体的设计原则。 EfficientFormer V1 模型: EfficientFormer V1:基于 ViT 的模型中使用的网络架构和具体的算子，找到端侧低效的原因。然后引入了维度一致的 Transformer Block 作为..." />
+
+    <title>EfficientFormer 系列 &#8212; AI System</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=aabdd393"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/rtd-data.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '04Inference02Mobilenet/033EfficientFormer';</script>
+    <script src="https://assets.readthedocs.org/static/javascript/readthedocs-doc-embed.js"></script>
+    <link rel="icon" href="../_static/logo-square.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="CNN 模型小型化（下）" href="03Cnn.html" />
+    <link rel="prev" title="MobileFormer" href="032MobileFormer.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="cn"/>
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../reference/blog/atom.xml"
+  title="Blog"
+/>
+  
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-wide.svg" class="logo__image only-light" alt="AI System - Home"/>
+    <script>document.write(`<img src="../_static/logo-wide.svg" class="logo__image only-dark" alt="AI System - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Youtube</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Blibili</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/01Introduction.html">课程内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/02ArchSlim.html">AI 计算模式（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/03MobileParallel.html">AI 计算模式（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/04Metrics.html">关键设计指标</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/05Matrix.html">核心计算之矩阵乘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/06BitWidth.html">计算之比特位宽</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware02ChipBase/README.html">AI 芯片基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/01CPUBase.html">CPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/02CPUISA.html">CPU 指令集架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/03CPUData.html">CPU 计算本质</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/04CPULatency.html">CPU 计算时延</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/05GPUBase.html">GPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/06NPUBase.html">NPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/07Future.html">超异构计算</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware03GPUBase/README.html">图形处理器 GPU</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/01Works.html">GPU 工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/02Principle.html">为什么 GPU 适用于 AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/03Concept.html">GPU 架构与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/04History.html">GPU 架构回顾</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware04NVIDIA/README.html">英伟达 GPU 详解</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/01BasicTC.html">Tensor Core 基本原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/02HistoryTC.html">Tensor Core 架构演进</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/03DeepTC.html">Tensor Core 深度剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/04BasicNvlink.html">分布式通信与 NVLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/05DeepNvlink.html">NVLink 原理剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/06DeepNvswitch.html">NV Switch 深度解析</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware05Abroad/README.html">国外 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/04TPUIntrol.html">谷歌 TPU 历史发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/05TPU1.html">谷歌 TPU v1-脉动阵列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/06TPU2.html">谷歌 TPUv2 训练芯片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/07TPU3.html">谷歌 TPUv3 POD 形态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/08TPU4.html">谷歌 TPU v4 与光路交换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware06Domestic/README.html">国内 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/04Cambricon.html">寒武纪介绍</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/08AscendBase.html">昇腾 AI 架构介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/09AscendSOC.html">昇腾 AI 处理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/10AscendCube.html">昇腾 AI 核心单元</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/11AscendLayout.html">昇腾数据布局转换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware07Thought/README.html">AI 芯片黄金十年</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/01Introduction.html">芯片的编程体系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/02SIMTSIMD.html">SIMD &amp; SIMT 与芯片架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/03SPMT.html">SIMD &amp; SIMT 与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/04NVSIMT.html">CUDA 编程模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/05DSA.html">从 CUDA 对 AI 芯片思考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/06AIChip.html">AI 芯片的思考</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/01Introduction.html">编译器基础介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/02History.html">传统编译器发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/03GCC.html">GCC 主要特征</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/04LLVM.html">LLVM 架构设计和原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/05LLVMIR.html">LLVM IR 基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/06LLVMDetail.html">LLVM IR 详解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/07LLVMFrontend.html">LLVM 前端和优化层</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/08LLVMBackend.html">LLVM 后端代码生成</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler02AICompiler/README.html">AI 编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/01Appear.html">为什么需要 AI 编译器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/02Stage.html">AI 编译器历史阶段</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/03Architecture.html">AI 编译器基本架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/04Future.html">AI 编译器挑战与思考</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler03Frontend/README.html">前端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/01Introduction.html">AI 编译器前端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/02GraphIR.html">图算 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/03OPFusion.html">算子融合</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/04LayoutPrinc.html">布局转换原理与算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/06Memory.html">内存分配算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/07ConstantFold.html">常量折叠原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/08CSE.html">公共表达式消除原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/09DCE.html">死代码消除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/10algebraic.html">代数简化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler04Backend/README.html">后端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/01Introduction.html">AI 编译器后端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/02OPSCompute.html">计算与调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/03Optimization.html">算子手工优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/04LoopOpt.html">算子循环优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 四. 推理系统&amp;引擎 ===</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../04Inference/README.html">推理系统&amp;引擎概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference01Inference/README.html">推理系统</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/01Introduction.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/02Constraints.html">推理系统介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/03Workflow.html">推理流程全景</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/04System.html">推理系统架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/05Inference.html">推理引擎架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/07MindIEIntro.html">昇腾推理引擎 MindIE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/08AscendCL.html">推理引擎示例：AscendCL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">模型轻量化</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01Introduction.html">推理参数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="021Squeezenet.html">SqueezeNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="022Shufflenet.html">ShuffleNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="023Mobilenet.html">MobileNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="024ESPNet.html">ESPNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="025FBNet.html">FBNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="026EfficientNet.html">EfficientNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="027GhostNet.html">GhostNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02Cnn.html">CNN 模型小型化（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="031MobileVit.html">MobileVit 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="032MobileFormer.html">MobileFormer</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">EfficientFormer 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Cnn.html">CNN 模型小型化（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Transformer.html">Transformer 小型化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04Transformer.html">Transformer 模型小型化</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference03Slim/README.html">模型压缩</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/02Quant.html">低比特量化原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/03QAT.html">感知量化训练 QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/04PTQ.html">训练后量化与部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/05Pruning.html">模型剪枝</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/06Distillation.html">知识蒸馏原理</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference04Converter/README.html">模型转换</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/02Principle.html">推理文件格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/03IR.html">自定义计算图 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/04Detail.html">模型转换流程</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference05Optimize/README.html">模型优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/01Optimizer.html">计算图优化架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/02Basic.html">离线图优化技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/03Extend.html">其他计算图优化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference06Kernel/README.html">Kernel 优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/01Introduction.html">Kernel 层架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/02Conv.html">卷积操作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/03Im2col.html">Im2Col 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/04Winograd.html">Winograd 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/05Qnnpack.html">QNNPack 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/06Memory.html">推理内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/08Others.html">汇编与循环优化</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 五. AI 框架核心模块 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../05Framework/README.html">AI 框架核心概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework01Foundation/README.html">AI 框架基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/01Introduction.html">内容介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/02Fundamentals.html">AI 框架作用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/03History.html">AI 框架之争</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/04Programing.html">框架编程范式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/05MindSpore.html">昇思 MindSore 关键特性</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework02AutoDiff/README.html">自动微分</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/01Introduction.html">自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/02BaseConcept.html">什么是微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/03GradMode.html">微分计算模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/04Implement.html">微分实现方式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/05ForwardMode.html">动手实现自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/06ReversedMode.html">动手实现 PyTorch 微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/07Challenge.html">自动微分的挑战&amp;未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework03DataFlow/README.html">计算图</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/02Computegraph.html">计算图原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/03Atuodiff.html">计算图与自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/04Dispatch.html">计算图的调度与执行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/05ControlFlow.html">计算图的控制流实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/06StaticGraph.html">动态图与静态图转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/07Future.html">计算图挑战与未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework04Parallel/README.html">分布式并行</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/02DataParallel.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/03ZeRODP.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/04TensorParallel.html">张量并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/05PipelineParallel.html">流水并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/06HybridParallel.html">混合并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/07MSParallel.html">昇思MindSpore并行</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/blob/master/04Inference02Mobilenet/033EfficientFormer.md?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/edit/master/04Inference02Mobilenet/033EfficientFormer.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/issues/new?title=Issue%20on%20page%20%2F04Inference02Mobilenet/033EfficientFormer.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/04Inference02Mobilenet/033EfficientFormer.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>EfficientFormer 系列</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#efficientformer-v1">EfficientFormer V1 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">EfficientFormer 结构</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#efficientformer-v2">EfficientFormer V2 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">搜索空间优化</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">多头注意力改进</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">更高分辨率注意力</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">注意力降采样</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">模型设计</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">优化模型</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">网络结构</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">本节视频</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <!--Copyright © XcodeHw 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+<section class="tex2jax_ignore mathjax_ignore" id="efficientformer">
+<h1>EfficientFormer 系列<a class="headerlink" href="#efficientformer" title="Link to this heading">#</a></h1>
+<p>本节主要介绍一种轻量化的 Transformer 结构，在获得高性能的同时，能够保持一定的推理速度。以延迟为目标进行优化设计。通过延迟分析重新探讨 ViT 及其变体的设计原则。</p>
+<section id="efficientformer-v1">
+<h2>EfficientFormer V1 模型<a class="headerlink" href="#efficientformer-v1" title="Link to this heading">#</a></h2>
+<p><strong>EfficientFormer V1</strong>:基于 ViT 的模型中使用的网络架构和具体的算子，找到端侧低效的原因。然后引入了维度一致的 Transformer Block 作为设计范式。最后，通过网络模型搜索获得不同系列的模型 —— EfficientFormer。</p>
+<p>大多数现有方法通过从服务器 GPU 获得的计算复杂性（MAC）或吞吐量（图像/秒）来优化 Transformer 的推理速度。但是这些指标不能反映实际的设备延迟。为了清楚地了解哪些操作和设计选择会减慢边缘设备上 VIT 的推断，在下图中作者作者对不同模型在端侧运行进行了一些分析，主要是分为 ViT 对图像进行分块的 Patch Embedding、Transformer 中的 Attention 和 MLP，另外还有 LeViT 提出的 Reshape 和一些激活等。提出了下面几个猜想。</p>
+<p><img alt="EfficientFormer" src="../_images/11Efficientformer01.png" /></p>
+<p><strong>观察 1：在移动设备上，具有大核和步长的 patch 嵌入是一个速度瓶颈。</strong></p>
+<p>patch 嵌入通常使用一个不重叠的卷积层来实现，该层具有较大的内核大小和步长。一种普遍的看法是，Transformer 网络中 patch 嵌入层的计算成本不显著或可以忽略不计。然而，在上图中比较了具有大核和大步长的 patch 嵌入模型，即 DeiT-S 和 PoolFormer-s24，以及没有它的模型，即 LeViT-256 和 EfficientFormer，结果表明，patch 嵌入反而是移动设备上的速度瓶颈。</p>
+<p>大多数编译器都不支持大型内核卷积，并且无法通过 Winograd 等现有算法来加速。或者，非重叠 patch 嵌入可以由一个具有快速下采样的卷积 stem 代替，该卷积 stem 由几个硬件效率高的 3×3 卷积组成。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#stem 以一些普通卷积组成</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">stem</span><span class="p">(</span><span class="n">in_chs</span><span class="p">,</span> <span class="n">out_chs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+        <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_chs</span><span class="p">,</span> <span class="n">out_chs</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">out_chs</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+        <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">out_chs</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">out_chs</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">out_chs</span><span class="p">),</span>
+        <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>观察 2：一致的特征维度对于选择 token 混合器很重要。MHSA 不一定是速度瓶颈。</strong></p>
+<p>最近的工作将基于 ViT 的模型扩展到 MetaFormer，该架构由 MLP 块和未指定的 token 混合器组成。在构建基于 ViT 的模型时，选择 token 混合器是一个重要的设计选择。token 混合器的选择有很多：传统的 MHSA 混合器，它们具有全局感受野；更复杂的移位窗口注意；或者像池化这样的非参数化操作符。</p>
+<p>作者将比较范围缩小到两种 token 混合器，池化和 MHSA，其中选择前者是为了简单和高效，而后者是为了更好的性能。大多数公开的移动编译器目前不支持更复杂的 token 混合器，如移位窗口，因此作者将其排除在范围之外。此外，由于本文专注于在没有轻量级卷积帮助的情况下构建体系结构，因此没有使用深度卷积来取代池化。</p>
+<p>为了解两个 token 混合器的延迟，作者执行以下两个比较：</p>
+<p>首先，通过比较 PoolFormer-s24 和 LeViT-256，作者发现 reshape 操作是 LeViT-256 的一个瓶颈。LeViT-256 的大部分是用 CONV on 4D tensor 实现的，在特征转发到 MHSA 时需要频繁的 reshape 操作，因为 MHSA 必须在 3D tensor 上进行注意（丢弃注意力头的额外尺寸）。reshape 的广泛使用限制了 LeViT 在移动设备上的速度。另一方面，当网络主要由基于 CONV 的实现组成时，池化自然适合 4D 张量，例如，CONV 1×1 作为 MLP 实现，CONV stem 用于下采样。因此，PoolFormer 具有更快的推理速度。
+其次，通过比较 DeiT-S 和 LeViT-256，作者发现，如果特征尺寸一致且不需要 reshape，MHSA 不会给手机带来显著的开销。虽然计算量更大，但具有一致 3D 特征的 DeiT-S 可以达到与新 ViT 变体（即 LeViT-256）相当的速度。</p>
+<p><strong>观察 3：CONV-BN 比 LN-Linear 更适合延迟，准确性缺陷通常是可以接受的。</strong></p>
+<p>选择 MLP 实现是另一个重要的设计选择。通常，会选择两个选项之一：带 3D 线性投影（proj）的 LayerNorm（LN）和带 BatchNorm（BN）的 CONV1×1。CONV-BN 更适合低延迟，因为 BN 可以折叠到之前的卷积用于推理加速，而 LN 仍在推理阶段收集运行统计信息，从而导致延迟。根据本文的实验结果和之前的工作，LN 引入的延迟约占整个网络延迟的 10%-20%。</p>
+<p><strong>观察 4：非线性延迟取决于硬件和编译器。</strong></p>
+<p>最后，作者研究了非线性，包括 GeLU、ReLU 和 HardSwish。之前的工作表明 GeLU 在硬件上效率不高，会减慢推理速度。然而，作者观察到，GeLU 受到 iPhone 12 的良好支持，几乎不比它的对手 ReLU 慢。</p>
+<p>相反，在本文的实验中，HardSwish 的速度惊人地慢，编译器可能无法很好地支持它（LeViT-256 使用 HardSwish 的延迟为 44.5 ms，而使用 GeLU 的延迟为 11.9 ms）。作者的结论是，考虑到手头的特定硬件和编译器，非线性应该根据具体情况来确定。</p>
+<section id="id1">
+<h3>EfficientFormer 结构<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<p><img alt="EfficientFormer" src="../_images/11Efficientformer02.png" /></p>
+<p>基于延迟分析，作者提出了 EfficientFormer 的设计，如上图所示。该网络由 patch 嵌入（PatchEmbed）和 meta transformer 块堆栈组成，表示为 MB：</p>
+<div class="math notranslate nohighlight">
+\[
+y = \prod_{i}^{m}MB_{i}(PatchEmbed(X_{0}^{B,3,H,W}))
+\]</div>
+<p>其中 <span class="math notranslate nohighlight">\(X_{0}\)</span> 是 Batch 大小为 B、空间大小为 <span class="math notranslate nohighlight">\([H，W]\)</span> 的输入图像，<span class="math notranslate nohighlight">\(y\)</span> 是所需输出，<span class="math notranslate nohighlight">\(m\)</span> 是块的总数（深度）。<span class="math notranslate nohighlight">\(MB\)</span> 由未指定的 token 混合器（TokenMixer）和一个 MLP 块组成，可以表示为：</p>
+<div class="math notranslate nohighlight">
+\[
+X_{i+1} = MB_{i}(X_{i})=MLP(TokenMixer(X_{i}))
+\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(X_{i|i&gt;0}\)</span> 是输入到第 <span class="math notranslate nohighlight">\(i\)</span> 个 <span class="math notranslate nohighlight">\(MB\)</span> 的中间特征。作者进一步将 Stage（或 S）定义为多个 MetaBlocks 的堆栈，这些 MetaBlocks 处理具有相同空间大小的特征，如上图中的 <span class="math notranslate nohighlight">\(N1×\)</span> 表示 <span class="math notranslate nohighlight">\(S1\)</span> 具有 <span class="math notranslate nohighlight">\(N1\)</span> 个 MetaBlocks。该网络包括 4 个阶段。在每个阶段中，都有一个嵌入操作来投影嵌入维度和下采样 token 长度，如上图所示。在上述架构中，EfficientFormer 是一个完全基于 Transformer 的模型，无需集成 MobileNet 结构。接下来，作者深入研究了网络设计的细节。</p>
+<p><strong>Dimension-consistent Design</strong></p>
+<p>作者提出了一种维度一致性设计，该设计将网络分割为 4D 分区，其中操作符以卷积网络样式实现（MB4D），以及一个 3D 分区，其中线性投影和注意力在 3D 张量上执行，以在不牺牲效率的情况下享受 MHSA 的全局建模能力（MB3D），如上图所示。具体来说，网络从 4D 分区开始，而 3D 分区应用于最后阶段。注意，上图只是一个实例，4D 和 3D 分区的实际长度稍后通过架构搜索指定。</p>
+<p>首先，输入图像由一个具有两个步长为 2，感受野为 3×3 卷积的 Conv stem 处理：</p>
+<div class="math notranslate nohighlight">
+\[
+X_{1}^{B,C_{j|j=1,\frac{H}{4},\frac{W}{4}}} = PatchEmbed(X_{0}^{B,3,H,W})
+\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(C_{j}\)</span> 是第 j 级的通道数量。然后，网络从 MB4D 开始，使用一个简单的池化混合器来提取低级特征：</p>
+<div class="math notranslate nohighlight">
+\[
+I_{i} = Pool(X_{i}^{B,C,\frac{H}{2^{j+1}},\frac{W}{2^{j+1}}})+X_{i}^{B,C,\frac{H}{2^{j+1}},\frac{W}{2^{j+1}}}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+X_{i+1}^{B,C,\frac{H}{2^{j+1}},\frac{W}{2^{j+1}}}=Conv_{B}(Conv_{B,G(I_{i}))}+I_{i}
+\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(Conv_{B,G}\)</span> 表示卷积后分别接 BN 和 GeLU。注意，这里作者没有在池化混合器之前使用 LN，因为 4D 分区是基于 CONV-BN 的设计，因此每个池化混合器前面都有一个 BN。</p>
+<p>在处理完所有 MB4D 块后，作者执行一次 reshape 以变换特征大小并进入 3D 分区。MB3D 遵循传统 ViT 结构，如上图所示：</p>
+<div class="math notranslate nohighlight">
+\[
+I_{i} = Linear(MHSA(Linear(LN(X_{i}^{B,\frac{HW}{4^{j+1}},C_{j}}))))+X_{i}^{B,\frac{HW}{4^{j+1}},C_{j}}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+X_{i+1}^{B,\frac{HW}{4^{j+1}},C_{j}} = Linear(Linear_{G}(LN(I_{i})))+I_{i}
+\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(Linear_{G}\)</span> 表示线性，后跟 GeLU。</p>
+<div class="math notranslate nohighlight">
+\[
+MHSA(Q,K,V) = Softamax(\frac{Q\odot K^{T}}{\sqrt{C_{j}}}). V
+\]</div>
+<p>其中 Q、K、V 表示通过线性投影学习的查询、键和值，b 表示作为位置编码的参数化注意力 bias。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#以 1x1 卷积为主的 MLP</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Mlp</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">out_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="n">out_features</span> <span class="o">=</span> <span class="n">out_features</span> <span class="ow">or</span> <span class="n">in_features</span>
+        <span class="n">hidden_features</span> <span class="o">=</span> <span class="n">hidden_features</span> <span class="ow">or</span> <span class="n">in_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">act</span> <span class="o">=</span> <span class="n">act_layer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">hidden_features</span><span class="p">,</span> <span class="n">out_features</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">drop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_weights</span><span class="p">)</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">hidden_features</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">out_features</span><span class="p">)</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">):</span>
+            <span class="n">trunc_normal_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">.02</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">constant_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> 
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Meta4D</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
+                 <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span>
+                 <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">drop_path</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">use_layer_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layer_scale_init_value</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_mixer</span> <span class="o">=</span> <span class="n">Pooling</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="n">pool_size</span><span class="p">)</span>
+        <span class="n">mlp_hidden_dim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim</span> <span class="o">*</span> <span class="n">mlp_ratio</span><span class="p">)</span>
+        <span class="c1">#MLP 层</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="n">Mlp</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">hidden_features</span><span class="o">=</span><span class="n">mlp_hidden_dim</span><span class="p">,</span>
+                       <span class="n">act_layer</span><span class="o">=</span><span class="n">act_layer</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">)</span>
+        <span class="c1">#drop_path 目的是在一个 batch 里面随机去除一部分样本，起正则化作用</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span> <span class="o">=</span> <span class="n">DropPath</span><span class="p">(</span><span class="n">drop_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">drop_path</span> <span class="o">&gt;</span> <span class="mf">0.</span> \
+            <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span> <span class="o">=</span> <span class="n">use_layer_scale</span> <span class="c1">#可学习的参数,提供一个特征的缩放</span>
+        <span class="k">if</span> <span class="n">use_layer_scale</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+                <span class="n">layer_scale_init_value</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dim</span><span class="p">)),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+                <span class="n">layer_scale_init_value</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dim</span><span class="p">)),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_1</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_mixer</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_mixer</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">x</span>
+</pre></div>
+</div>
+<p><strong>Latency Driven Slimming</strong></p>
+<p>Design of Supernet</p>
+<p>基于维度一致性设计，作者构建了一个超网，用于搜索上图所示网络架构的有效模型（上图显示了搜索的最终网络的示例）。为了表示这样的超网，作者定义了元路径（MetaPath，MP），它是可能的块的集合：</p>
+<div class="math notranslate nohighlight">
+\[
+MP_{i,j=1,2} \in {MB_{i}^{4D},I_{i}}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+MP_{i,j=3,4} \in {MB_{i}^{4D},MB_{i}^{3D},I_{i}}
+\]</div>
+<p>其中 <span class="math notranslate nohighlight">\(I\)</span> 表示 identity path，<span class="math notranslate nohighlight">\(j\)</span> 表示第 <span class="math notranslate nohighlight">\(j\)</span> 阶段，<span class="math notranslate nohighlight">\(i\)</span> 表示第 <span class="math notranslate nohighlight">\(i\)</span> 个块。</p>
+<p>在超网的 <span class="math notranslate nohighlight">\(S_{1}\)</span> 和 <span class="math notranslate nohighlight">\(S_{2}\)</span> 中，每个块可以从 MB4D 或 I 中选择，而在 <span class="math notranslate nohighlight">\(S_{3}\)</span> 和 <span class="math notranslate nohighlight">\(S_{4}\)</span> 中，块可以是 MB3D、MB4D 或 I。出于两个原因，作者仅在最后两个阶段启用 MB3D：首先，由于 MHSA 的计算相对于 token 长度呈二次增长，因此在早期阶段对其进行集成将大大增加计算成本。其次，将全局 MHSA 应用于最后阶段符合这样一种直觉，即网络的早期阶段捕获低级特征，而后期阶段学习长期依赖性。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Meta3D 与 Meta4D 在 MLP 有不同，Meta3D 使用如下的 LinearMLP，主要以线性层为主</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinearMlp</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; MLP as used in Vision Transformer, MLP-Mixer and related networks</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="n">out_features</span> <span class="o">=</span> <span class="n">out_features</span> <span class="ow">or</span> <span class="n">in_features</span>
+        <span class="n">hidden_features</span> <span class="o">=</span> <span class="n">hidden_features</span> <span class="ow">or</span> <span class="n">in_features</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">act</span> <span class="o">=</span> <span class="n">act_layer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">drop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_features</span><span class="p">,</span> <span class="n">out_features</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">drop</span><span class="p">)</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+    
+<span class="k">class</span><span class="w"> </span><span class="nc">Meta3D</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
+                 <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span> <span class="n">norm_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">,</span>
+                 <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">drop_path</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">use_layer_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layer_scale_init_value</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span> <span class="o">=</span> <span class="n">norm_layer</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_mixer</span> <span class="o">=</span> <span class="n">Attention</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span> <span class="o">=</span> <span class="n">norm_layer</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="n">mlp_hidden_dim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim</span> <span class="o">*</span> <span class="n">mlp_ratio</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="n">LinearMlp</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">hidden_features</span><span class="o">=</span><span class="n">mlp_hidden_dim</span><span class="p">,</span>
+                             <span class="n">act_layer</span><span class="o">=</span><span class="n">act_layer</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">)</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span> <span class="o">=</span> <span class="n">DropPath</span><span class="p">(</span><span class="n">drop_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">drop_path</span> <span class="o">&gt;</span> <span class="mf">0.</span> \
+            <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span> <span class="o">=</span> <span class="n">use_layer_scale</span>
+        <span class="k">if</span> <span class="n">use_layer_scale</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+                <span class="n">layer_scale_init_value</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dim</span><span class="p">)),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+                <span class="n">layer_scale_init_value</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dim</span><span class="p">)),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_1</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_mixer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm1</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm2</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_mixer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm1</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm2</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">x</span>
+</pre></div>
+</div>
+<p><strong>Searching Space</strong></p>
+<p>本文的搜索空间包括 <span class="math notranslate nohighlight">\(C_{j}\)</span>（每个阶段的宽度）、<span class="math notranslate nohighlight">\(N_{j}\)</span>（每个阶段的块数，即深度）和最后个应用 MB3D 的块。</p>
+<p><strong>Searching Algorithm</strong></p>
+<p>以前的硬件感知网络搜索方法通常依赖于在搜索空间中部署每个候选对象的硬件来获得延迟，这非常耗时。在这项工作中，作者提出了一种简单、快速但有效的基于梯度的搜索算法，以获得只需训练一次超网的候选网络。该算法有三个主要步骤。</p>
+<p>首先，作者使用 Gumble Softmax 采样对超网进行训练，以获得每个 MP 内块的重要性得分，可以表示为：</p>
+<div class="math notranslate nohighlight">
+\[
+X_{i+1} = \sum_{n} \frac{e^{(a_{i}^{n}+\epsilon_{i}^{n})}/ \tau}{\sum_{n} e^{(a_{i}^{n}+\epsilon_{i}^{n})}} . MP_{i,j}(X_{i})
+\]</div>
+<p>其中，α评估 MP 中每个块的重要性，因为它表示选择块的概率；<span class="math notranslate nohighlight">\(\epsilon ~U(0,1)\)</span>；τ是温度；n 代表 MP 中的块体类型，即对于 <span class="math notranslate nohighlight">\(S_{1}\)</span> 和 <span class="math notranslate nohighlight">\(S_{2}\)</span>，<span class="math notranslate nohighlight">\(n\in{4D,I}\)</span>；对于 S_{3}和 S_{4}，。通过训练之后，以获得经过训练的权重和结构参数α。</p>
+<p>其次，作者通过收集不同宽度（16 的倍数）的 MB4D 和 MB3D 的设备上延迟来构建延迟查找表。</p>
+<p>最后，作者使用查找表在第一步通过延迟评估获得的超网上执行网络瘦身。典型的基于梯度的搜索算法仅选择α最大的块，这不符合本文的范围，因为它无法搜索宽度 <span class="math notranslate nohighlight">\(C_{j}\)</span>。事实上，构造一个多宽度的超网需要消耗显存，甚至是不现实的，因为在本文的设计中，每个 MP 都有几个分支。作者不在复杂的搜索空间上直接搜索，而是在单宽度超网上执行逐步瘦身，如下所示。</p>
+<p>作者首先将 S_{1,2}和 S_{3,4}的 <span class="math notranslate nohighlight">\(MP_{i}\)</span> 重要性得分分别定义为和 <span class="math notranslate nohighlight">\(\frac{α_{i}^{4D}}{α_{i}^{I}}\)</span> 和 <span class="math notranslate nohighlight">\(\frac{α_{i}^{3D}+α_{i}^{4D}}{α_{i}^{I}}\)</span>。同样，每个阶段的重要性得分可以通过将该阶段内所有 MP 的得分相加得到。根据重要性得分，作者定义了包含三个选项的动作空间：1）选择 I 作为最小导入 MP，2）删除第一个 MB3D，3）减少最不重要阶段的宽度（乘以 16）。然后，通过查找表计算每个动作的延迟，并评估每个动作的准确度下降。最后，根据每延迟准确度下降 <span class="math notranslate nohighlight">\((\frac{-%}{ms})\)</span> 来选择操作。此过程将迭代执行，直到达到目标延迟。</p>
+<p>EfficientFormer 一共有 4 个阶段。每个阶段都有一个 Embeding（两个 3x3 的 Conv 组成一个 Embeding）来投影 Token 长度（可以理解为 CNN 中的 feature map）。EfficientFormer 是一个完全基于 Transformer 设计的模型，并没有集成 MobileNet 相关内容。最后通过 AUTOML 来搜索 MB_3D 和 MB_4D block 相关参数。最后堆叠 block 形成最终网络。</p>
+</section>
+</section>
+<section id="efficientformer-v2">
+<h2>EfficientFormer V2 模型<a class="headerlink" href="#efficientformer-v2" title="Link to this heading">#</a></h2>
+<p>** EfficientFormer V2**:论文重新审视了 ViT 的设计选择，并提出了一种具有低延迟和高参数效率的改进型超网络。论文进一步引入了一种细粒度联合搜索策略，该策略可以通过同时优化延迟和参数量来找到有效的架构。所提出的模型 EfficientFormerV2 在 ImageNet-1K 上实现了比 MobileNetV2 和 MobileNetV1 高约 4%的 top-1 精度，具有相似的延迟和参数。</p>
+<p>EfficientFormerV2 相对于 EfficientFormer 的主要改进如下图所示。</p>
+<p><img alt="EfficientFormer" src="../_images/11Efficientformer03.png" /></p>
+<p>结合局部信息可以提高性能，并使 ViT 在缺少显式位置嵌入的情况下更加鲁棒。PoolFormer 和 EfficientFormer 使用 3×3 平均池化层（作为 local token 混合器。用相同内核大小的 depth-wise 卷积）替换这些层不会引入耗时开销，而使用可忽略的额外参数（0.02M），性能提高了 0.6%。此外。在 ViT 中的前馈网络（FFN）中注入局部信息建模层也有利于以较小的开销提高性能。值得注意的是，通过在 FFN 中放置额外的 depth-wise 3×3 卷积来捕获局部信息，复制了原始局部混合器（池或卷积）的功能。基于这些观察，论文移除了显式残差连接的 local token 混合器，并将 depth-wise 3×3 CONV 移动到 FFN 中，以获得 locality enabled 的统一 FFN（上图（b））。论文将统一的 FFN 应用于网络的所有阶段，如上图（a，b）所示。这种设计修改将网络架构简化为仅两种类型的 block（local FFN 和 global attention），并在相同的耗时（见表 1）下将精度提高到 80.3%，参数开销较小（0.1M）。更重要的是，该修改允许直接使用模块的确切数量搜索网络深度，以提取局部和全局信息，尤其是在网络的后期阶段。</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>#Params(M)</p></th>
+<th class="head"><p>MACs(G)</p></th>
+<th class="head"><p>Latency(ms)</p></th>
+<th class="head"><p>Top-1(%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>EfficientFormer-L1</p></td>
+<td><p>12.25</p></td>
+<td><p>1.30</p></td>
+<td><p>1.4</p></td>
+<td><p>79.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pool Mixer → <span class="math notranslate nohighlight">\(DWCONV_{3×3}\)</span></p></td>
+<td><p>12.27</p></td>
+<td><p>1.30</p></td>
+<td><p>1.4</p></td>
+<td><p>79.8</p></td>
+</tr>
+<tr class="row-even"><td><p>✓ Feed Forward Network</p></td>
+<td><p>12.37</p></td>
+<td><p>1.33</p></td>
+<td><p>1.4</p></td>
+<td><p>80.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>✓ Vary Depth and Width</p></td>
+<td><p>12.24</p></td>
+<td><p>1.20</p></td>
+<td><p>1.3</p></td>
+<td><p>80.5</p></td>
+</tr>
+<tr class="row-even"><td><p>5-Stage Network</p></td>
+<td><p>12.63</p></td>
+<td><p>1.08</p></td>
+<td><p>1.5</p></td>
+<td><p>80.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>✓ Locality in V &amp; Talking Head</p></td>
+<td><p>12.25</p></td>
+<td><p>1.21</p></td>
+<td><p>1.3</p></td>
+<td><p>80.8</p></td>
+</tr>
+<tr class="row-even"><td><p>Attention at Higher Resolution</p></td>
+<td><p>13.10</p></td>
+<td><p>1.48</p></td>
+<td><p>3.5</p></td>
+<td><p>81.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>✓ Stride Attention</p></td>
+<td><p>13.10</p></td>
+<td><p>1.31</p></td>
+<td><p>1.5</p></td>
+<td><p>81.5</p></td>
+</tr>
+<tr class="row-even"><td><p>✓ Attention Downsampling</p></td>
+<td><p>12.40</p></td>
+<td><p>1.35</p></td>
+<td><p>1.6</p></td>
+<td><p>81.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="id2">
+<h3>搜索空间优化<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>通过统一的 FFN 和删除残差连接的 token mixer，V2 检查来自 EfficientFormer 的搜索空间是否仍然足够，特别是在深度方面。论文改变了网络深度（每个阶段中的 block 数）和宽度（通道数），并发现更深和更窄的网络会带来更好的精度（0.2%的改进）、更少的参数（0.3M 的减少）和更少的耗时（0.1ms 的加速），如上表所示。因此，论文将此网络设置为新的基线（精度 80.5%），以验证后续的设计修改，并为架构搜索提供更深入的超网络。</p>
+<p>此外，具有进一步缩小的空间分辨率（1/64）的 5 阶段模型已广泛用于有效的 ViT 工作。为了证明是否应该从一个 5 阶段超网络中搜索，论文在当前的基线网络中添加了一个额外的阶段，并验证了性能增益和开销。值得注意的是，尽管考虑到小的特征分辨率，计算开销不是一个问题，但附加阶段是参数密集型的。因此需要缩小网络维度（深度或宽度），以将参数和延迟与基线模型对齐，以便进行公平比较。如上表所示，尽管节省了 MACs（0.12G），但 5 阶段模型的最佳性能在更多参数（0.39M）和延迟开销（0.2ms）的情况下意外降至 80.31%。这符合直觉，即五阶段计算效率高，但参数密集。鉴于 5 阶段网络无法在现有的规模和速度范围内引入更多潜力，论文坚持 4 阶段设计。这一分析也解释了为什么某些 ViT 在 MACs 精度方面提供了出色的 Pareto curve，但在大小上往往非常冗余。作为最重要的一点，优化单一度量很容易陷入困境。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 深度卷积前馈网络(局部模块)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FFN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
+                 <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span>
+                 <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">drop_path</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">use_layer_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layer_scale_init_value</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+ 
+        <span class="n">mlp_hidden_dim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim</span> <span class="o">*</span> <span class="n">mlp_ratio</span><span class="p">)</span>       <span class="c1"># 隐藏层维度</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="n">Mlp</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">hidden_features</span><span class="o">=</span><span class="n">mlp_hidden_dim</span><span class="p">,</span>
+                       <span class="n">act_layer</span><span class="o">=</span><span class="n">act_layer</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">,</span> <span class="n">mid_conv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>       <span class="c1"># 多层感知机</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span> <span class="o">=</span> <span class="n">DropPath</span><span class="p">(</span><span class="n">drop_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">drop_path</span> <span class="o">&gt;</span> <span class="mf">0.</span> \
+            <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span> <span class="o">=</span> <span class="n">use_layer_scale</span>
+        <span class="k">if</span> <span class="n">use_layer_scale</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+                <span class="n">layer_scale_init_value</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># 缩放因子</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>    <span class="c1"># 残差连接</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">x</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h3>多头注意力改进<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>然后，论文研究了在不增加模型大小和耗时的额外开销的情况下提高注意力模块性能的技术。如图（c）所示，论文研究了 MHSA 的两种方法。首先通过添加 depth-wise 3×3 CONV 将局部信息注入到 Value 矩阵（V）中，也采用了这种方法。其次通过在 head 维度上添加全连接层来实现注意力头之间的通信，如图 2（c）所示。通过这些修改，进一步将性能提高到 80.8%，与基线模型相比，具有相似的参数和延迟。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Attention4D</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">384</span><span class="p">,</span> <span class="n">key_dim</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+                 <span class="n">attn_ratio</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                 <span class="n">resolution</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+                 <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
+                 <span class="n">stride</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">=</span> <span class="n">num_heads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">key_dim</span> <span class="o">**</span> <span class="o">-</span><span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_dim</span> <span class="o">=</span> <span class="n">key_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nh_kd</span> <span class="o">=</span> <span class="n">nh_kd</span> <span class="o">=</span> <span class="n">key_dim</span> <span class="o">*</span> <span class="n">num_heads</span>
+ 
+        <span class="k">if</span> <span class="n">stride</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">resolution</span> <span class="o">/</span> <span class="n">stride</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stride_conv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="n">dim</span><span class="p">),</span>
+                                             <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">dim</span><span class="p">),</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">upsample</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Upsample</span><span class="p">(</span><span class="n">scale_factor</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;bilinear&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stride_conv</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">upsample</span> <span class="o">=</span> <span class="kc">None</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">N2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">attn_ratio</span> <span class="o">*</span> <span class="n">key_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dh</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">attn_ratio</span> <span class="o">*</span> <span class="n">key_dim</span><span class="p">)</span> <span class="o">*</span> <span class="n">num_heads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attn_ratio</span> <span class="o">=</span> <span class="n">attn_ratio</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dh</span> <span class="o">+</span> <span class="n">nh_kd</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                               <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_dim</span><span class="p">),</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                               <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_dim</span><span class="p">),</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                               <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">),</span>
+                               <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v_local</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>
+                                               <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">),</span>
+                                     <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">),</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">talking_head1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">talking_head2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">act_layer</span><span class="p">(),</span>
+                                  <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dh</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                                  <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">dim</span><span class="p">),</span> <span class="p">)</span>
+ 
+        <span class="n">points</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)))</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">attention_offsets</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">idxs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p1</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">p2</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="k">if</span> <span class="n">offset</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attention_offsets</span><span class="p">:</span>
+                    <span class="n">attention_offsets</span><span class="p">[</span><span class="n">offset</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">attention_offsets</span><span class="p">)</span>
+                <span class="n">idxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attention_offsets</span><span class="p">[</span><span class="n">offset</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attention_biases</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_heads</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">attention_offsets</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s1">&#39;attention_bias_idxs&#39;</span><span class="p">,</span>
+                             <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">(</span><span class="n">idxs</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+ 
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ab&#39;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">ab</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_biases</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_bias_idxs</span><span class="p">]</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  <span class="c1"># x (B,N,C)</span>
+        <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stride_conv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stride_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+ 
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>     <span class="c1"># 降维为 2 维，转置</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">v_local</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_local</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>       <span class="c1"># 通过一个 3x3 的卷积将局部信息注入 V 中</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>     <span class="c1"># 降维为 2 维，转置</span>
+ 
+        <span class="n">attn</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">q</span> <span class="o">@</span> <span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>    <span class="c1"># 矩阵乘法，计算相似度</span>
+                <span class="o">+</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attention_biases</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_bias_idxs</span><span class="p">]</span>     <span class="c1"># 融合一个位置编码</span>
+                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">ab</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># attn = (q @ k) * self.scale</span>
+        <span class="n">attn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">talking_head1</span><span class="p">(</span><span class="n">attn</span><span class="p">)</span>     <span class="c1"># 1x1 卷积-&gt;全连接，实现注意力头部之间的通信</span>
+        <span class="n">attn</span> <span class="o">=</span> <span class="n">attn</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">attn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">talking_head2</span><span class="p">(</span><span class="n">attn</span><span class="p">)</span>     <span class="c1"># 同上</span>
+ 
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">attn</span> <span class="o">@</span> <span class="n">v</span><span class="p">)</span>      <span class="c1"># 注意力融合</span>
+ 
+        <span class="n">out</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span> <span class="o">+</span> <span class="n">v_local</span>     <span class="c1"># 最后再与 v_local 融合</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upsample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upsample</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+ 
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>    <span class="c1"># 输出再进行激活 + 卷积 + 正则</span>
+        <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#AttnFFN（Local Global 模块）</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AttnFFN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
+                 <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span> <span class="n">norm_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">,</span>
+                 <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">drop_path</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">use_layer_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layer_scale_init_value</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
+                 <span class="n">resolution</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+ 
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_mixer</span> <span class="o">=</span> <span class="n">Attention4D</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span> <span class="n">act_layer</span><span class="o">=</span><span class="n">act_layer</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">)</span>      <span class="c1"># MHSA 多头自注意力</span>
+        <span class="n">mlp_hidden_dim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim</span> <span class="o">*</span> <span class="n">mlp_ratio</span><span class="p">)</span>       <span class="c1"># 隐藏层维度</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="n">Mlp</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">hidden_features</span><span class="o">=</span><span class="n">mlp_hidden_dim</span><span class="p">,</span>
+                       <span class="n">act_layer</span><span class="o">=</span><span class="n">act_layer</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">,</span> <span class="n">mid_conv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>       <span class="c1"># 深度卷积</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span> <span class="o">=</span> <span class="n">DropPath</span><span class="p">(</span><span class="n">drop_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">drop_path</span> <span class="o">&gt;</span> <span class="mf">0.</span> \
+            <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>      <span class="c1"># drop_path 概率</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span> <span class="o">=</span> <span class="n">use_layer_scale</span>
+        <span class="k">if</span> <span class="n">use_layer_scale</span><span class="p">:</span>     <span class="c1"># 缩放因子</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+                <span class="n">layer_scale_init_value</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+                <span class="n">layer_scale_init_value</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_mixer</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>    <span class="c1"># 多头自注意力 + 残差连接</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>    <span class="c1"># mlp 深度卷积 + 残差连接</span>
+ 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token_mixer</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">x</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h3>更高分辨率注意力<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<p>注意机制有利于性能。然而，将其应用于高分辨率特征会损害部署效率，因为它具有与空间分辨率相对应的二次时间复杂度。论文研究了将 MHSA 有效应用于更高分辨率（早期阶段）的策略。回想一下，在当前基线网络中，MHSA 仅在输入图像空间分辨率为 1/32 的最后阶段使用。论文将额外的 MHSA 应用于具有 1/16 特征大小的倒数第二个阶段，并观察到准确度提高了 0.9%。另一方面，推理速度减慢了几乎 2.7 倍。因此，有必要适当降低注意力模块的复杂性。</p>
+<p>尽管一些工作提出了基于窗口的注意力，或下采样 Key 和 Value 来缓解这个问题，但论文发现它们不是最适合移动部署的选项。由于复杂的窗口划分和重新排序，基于窗口的注意力很难在移动设备上加速。对于[40]中的下采样 Key（K）和 Value（V），需要全分辨率查询（Q）来保持注意力矩阵乘法后的输出分辨率（Out）：</p>
+<div class="math notranslate nohighlight">
+\[
+Out_{[B,H,N,C]} = (Q_{[B,H,N,C]}.K^{T}_{[B,H,C,\frac{N}{2}]}).V_{[B,H,\frac{N}{2},C]}\tag{1}
+\]</div>
+<p>根据测试该模型的耗时仅下降到 2.8ms，仍然比基线模型慢 2 倍。因此，为了在网络的早期阶段执行 MHSA，论文将所有 Query、Key 和 Value 降采样到固定的空间分辨率（1/32），并将注意力的输出插值回原始分辨率，以馈送到下一层，如图所示（（d）和（e））。我们称这种方法为“Stride Attention”。如表所示，这种简单的近似值将延迟从 3.5ms 显著降低到 1.5ms，并保持了具有竞争力的准确性（81.5%对 81.7%）。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Attention4DDownsample</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">384</span><span class="p">,</span> <span class="n">key_dim</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+                 <span class="n">attn_ratio</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                 <span class="n">resolution</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+                 <span class="n">out_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">act_layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">=</span> <span class="n">num_heads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">key_dim</span> <span class="o">**</span> <span class="o">-</span><span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_dim</span> <span class="o">=</span> <span class="n">key_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nh_kd</span> <span class="o">=</span> <span class="n">nh_kd</span> <span class="o">=</span> <span class="n">key_dim</span> <span class="o">*</span> <span class="n">num_heads</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">attn_ratio</span> <span class="o">*</span> <span class="n">key_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dh</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">attn_ratio</span> <span class="o">*</span> <span class="n">key_dim</span><span class="p">)</span> <span class="o">*</span> <span class="n">num_heads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attn_ratio</span> <span class="o">=</span> <span class="n">attn_ratio</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dh</span> <span class="o">+</span> <span class="n">nh_kd</span> <span class="o">*</span> <span class="mi">2</span>
+ 
+        <span class="k">if</span> <span class="n">out_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">out_dim</span> <span class="o">=</span> <span class="n">out_dim</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">out_dim</span> <span class="o">=</span> <span class="n">dim</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">LGQuery</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution2</span><span class="p">)</span>         <span class="c1"># 双注意力下采样</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">N2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution2</span> <span class="o">**</span> <span class="mi">2</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                               <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_dim</span><span class="p">),</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                               <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">),</span>
+                               <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v_local</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>
+                                               <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">),</span>
+                                     <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">),</span> <span class="p">)</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">act_layer</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dim</span><span class="p">),</span> <span class="p">)</span>
+ 
+        <span class="n">points</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)))</span>
+        <span class="n">points_</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span>
+            <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution2</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution2</span><span class="p">)))</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">N_</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">points_</span><span class="p">)</span>
+        <span class="n">attention_offsets</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">idxs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p1</span> <span class="ow">in</span> <span class="n">points_</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">p2</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="nb">abs</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution2</span><span class="p">)</span> <span class="o">-</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                    <span class="nb">abs</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution2</span><span class="p">)</span> <span class="o">-</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">offset</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attention_offsets</span><span class="p">:</span>
+                    <span class="n">attention_offsets</span><span class="p">[</span><span class="n">offset</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">attention_offsets</span><span class="p">)</span>
+                <span class="n">idxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attention_offsets</span><span class="p">[</span><span class="n">offset</span><span class="p">])</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s1">&#39;attention_biases&#39;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_heads</span><span class="p">,</span> <span class="mi">196</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s1">&#39;attention_bias_idxs&#39;</span><span class="p">,</span>
+                             <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">49</span><span class="p">,</span> <span class="mi">196</span><span class="p">)</span><span class="o">.</span><span class="n">long</span><span class="p">())</span>
+ 
+        <span class="bp">self</span><span class="o">.</span><span class="n">attention_biases_seg</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_heads</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">attention_offsets</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s1">&#39;attention_bias_idxs_seg&#39;</span><span class="p">,</span>
+                             <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">(</span><span class="n">idxs</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">N_</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+ 
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ab&#39;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">ab</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_biases_seg</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_bias_idxs_seg</span><span class="p">]</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  <span class="c1"># x (B,N,C)</span>
+        <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+ 
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">H</span> <span class="o">*</span> <span class="n">W</span> <span class="o">//</span> <span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">H</span> <span class="o">*</span> <span class="n">W</span><span class="p">)</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">v_local</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_local</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">H</span> <span class="o">*</span> <span class="n">W</span><span class="p">)</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+ 
+        <span class="n">attn</span> <span class="o">=</span> <span class="p">(</span><span class="n">q</span> <span class="o">@</span> <span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>                     <span class="c1"># (H * W // 4, H * W)</span>
+        <span class="n">bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_biases_seg</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_bias_idxs_seg</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">ab</span>
+        <span class="n">bias</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">bias</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">attn</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">attn</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;bicubic&#39;</span><span class="p">)</span>
+        <span class="n">attn</span> <span class="o">=</span> <span class="n">attn</span> <span class="o">+</span> <span class="n">bias</span>
+ 
+        <span class="n">attn</span> <span class="o">=</span> <span class="n">attn</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+ 
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">attn</span> <span class="o">@</span> <span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>                  <span class="c1"># (H * W // 4, H * W)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dh</span><span class="p">,</span> <span class="n">H</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">W</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">v_local</span>
+ 
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h3>注意力降采样<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>大多数视觉主干利用跨步卷积或池化层来执行静态和局部下采样，并形成分层结构。最近的一些研究开始探索注意力下采样。例如，LeViT 和 UniNet 建议通过注意力机制将特征分辨率减半，以实现全局感受野的上下文感知下采样。具体而言，Query 中的 token 数量减少一半，以便对注意力模块的输出进行下采样：</p>
+<div class="math notranslate nohighlight">
+\[
+Out_{[B,H,\frac{N}{2},C]} = (Q_{[B,H,\frac{N}{2},C]}.K^{T}_{[B,H,C,N]}).V_{[B,H,N,C]}\tag{2}
+\]</div>
+<p>然而，决定如何减少 Query 中的 token 数量是非常重要的。Graham 等人根据经验使用池化对 Query 进行下采样，而 Liu 等人建议搜索局部或全局方法。为了在移动设备上实现可接受的推理速度，将注意力下采样应用于具有高分辨率的早期阶段是不利的，这限制了以更高分辨率搜索不同下采样方法的现有工作的价值。</p>
+<p>相反，论文提出了一种同时使用局部性和全局依赖性的组合策略，如图(f)所示。为了获得下采样的 Query，论文使用池化层作为静态局部下采样，使用 3×3 DWCONV 作为可学习的局部下采样。此外，注意力下采样模块残差连接到 regular strided CONV，以形成 local-global 方式，类似于下采样 bottlenecks 或 inverted bottlenecks。如表所示，通过略微增加参数和耗时开销，论文进一步将注意力下采样的准确率提高到 81.8%。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">LGQuery</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">,</span> <span class="n">resolution1</span><span class="p">,</span> <span class="n">resolution2</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution1</span> <span class="o">=</span> <span class="n">resolution1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution2</span> <span class="o">=</span> <span class="n">resolution2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">AvgPool2d</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_dim</span><span class="p">,</span> <span class="n">in_dim</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="n">in_dim</span><span class="p">),</span>
+                                   <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                                  <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">out_dim</span><span class="p">),</span> <span class="p">)</span>
+ 
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">local_q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">pool_q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">local_q</span> <span class="o">+</span> <span class="n">pool_q</span>            <span class="c1"># 双路径下采</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">q</span>
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h3>模型设计<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
+<p>如前文所述，论文采用了四阶段分层设计，其获得的特征尺寸为输入分辨率的{1/4，1/8，1/16，1/32}。EfficientFormerV2 从一个小的内核卷积 stem 开始嵌入输入图像，而不是使用非重叠 patch 的低效嵌入，
+$<span class="math notranslate nohighlight">\(
+X_{i|i=1,j|j=1}^{B,C_{j|j=1},\frac{H}{4},\frac{W}{4}} = stem(X_{0}^{B,3,H,W}) \tag{3}
+\)</span>$</p>
+<p>前两个阶段捕获高分辨率的局部信息；因此论文只使用统一的 FFN（FFN，图（b））：</p>
+<div class="math notranslate nohighlight">
+\[
+X_{i+1,j}^{B,C_{j},\frac{H}{2^{j+1}},\frac{W}{2^{j+1}}} = S_{i,j}.FFN^{C_{j},E_{i,j}(X_{i,j})}+X_{i,j} \tag{4}
+\]</div>
+<p>在最后两个阶段，使用局部 FFN 和全局 MHSA 块。因此式 4，global blocks 定义为：</p>
+<div class="math notranslate nohighlight">
+\[
+X_{i+1,j}^{B,C_{j},\frac{H}{2^{j+1}},\frac{W}{2^{j+1}}} = S_{i,j}.MHSA(Proj(X_{i,j}))+X_{i,j} \tag{5}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+MHSA(Q,K,V) = Softmax(Q.K^{T}+ab).V \tag{6}
+\]</div>
+</section>
+<section id="id7">
+<h3>优化模型<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
+<p>尽管基线网络 EfficientFormer 是通过耗时驱动搜索发现的，并且在移动设备上具有快速的推理速度，但搜索算法有两个主要缺点。首先，搜索过程仅受速度限制，导致最终模型是参数冗余的，如图 1 所示。其次，它仅搜索深度（每个阶段的 blocks 数）和阶段宽度，这是一种粗粒度的方式。事实上，网络的大多数计算和参数都在 FFN 中，并且参数和计算复杂度与其扩展比线性相关。可以针对每个 FFN 独立地指定，而不必相同。因此，搜索实现了更细粒度的搜索空间，其中计算和参数可以在每个阶段内灵活且非均匀地分布。其中在每个阶段保持相同。论文提出了一种搜索算法，该算法实现了灵活的 per-block 配置，并对大小和速度进行了联合约束，并找到了最适合移动设备的视觉主干。</p>
+<p><strong>搜索目标</strong></p>
+<p>首先，论文介绍了指导联合搜索算法的度量。考虑到在评估移动友好模型时网络的大小和延迟都很重要，我们考虑了一个通用的、公平的度量标准，它可以更好地理解移动设备上网络的性能。在不失一般性的情况下，我们定义了 Mobile Efficiency Score（MES）：
+$<span class="math notranslate nohighlight">\(
+MES = Score.\prod_{i=1}(\frac{M_{i}}{U_{i}})^{\alpha_{i}}\tag{7}
+\)</span>$
+分数是为简单起见设置为 100 的预定义基础分数。模型大小是通过参数的数量来计算的，延迟是在设备上部署模型时的运行时间。论文在 MES 精度上搜索 Pareto optimality。MES 的形式是通用的，可以扩展到其他感兴趣的度量，例如推理时间内存占用和能耗。此外，通过适当定义，可以轻松调整每个度量的重要性。</p>
+<p><strong>搜索空间和 SuperNet</strong></p>
+<p>搜索空间组成：</p>
+<p>网络的深度，由每个阶段的 blocks 数测量；</p>
+<p>网络的宽度，即每阶段的通道维度；</p>
+<p>每个 FFN 的膨胀率。</p>
+<p>MHSA 的数量可以在深度搜索期间无缝地确定，这控制了超网络中 block 的保存或删除。因此，论文在超网络的最后两个阶段将每个 block 设置为 MHSA，然后是 FFN，并通过深度搜索获得具有所需数量的全局 MHSA 的子网络。</p>
+<p>SuperNet 是通过使用在弹性深度和宽度上执行的可精简网络[78]来构建的，以实现纯基于评估的搜索算法。弹性深度可以通过 stochastic drop path augmentation 实现[32]。关于宽度和扩展比，论文遵循 Yu 等人[78]构建具有共享权重但独立规正则化层的可切换层，使得相应层可以在预定义集合的不同通道数量上（即 16 或 32 的倍数）执行。具体而言，膨胀比由每个 FFN 中的 depth-wise 3×3 Conv 的通道确定，并且 stage 宽度通过对齐 FFN 和 MHSA block 的最后投影（1×1 Conv）的输出通道确定。可切换执行可以表示为：</p>
+<div class="math notranslate nohighlight">
+\[
+\hat{X_{i}} = γ_{c}.\frac{w^{c}.X_{i}-u_{c}}{\sqrt{σ_{c}^{2}+ϵ}}+β_{c} \tag{8}
+\]</div>
+<p>通过在每次迭代中训练最大、最小和随机采样的两个子网（论文在算法 1 中将这些子网表示为 max、min、rand-1 和 rand-2），使用 Sandwich Rule 对超网络进行预训练。</p>
+<p><strong>搜索算法</strong></p>
+<p>现在，搜索目标、搜索空间和超网络集合都已公式化，论文提出了搜索算法。由于超网络在弹性深度和可切换宽度下可执行，论文可以通过分析每个效率增益和精度下降来搜索具有最佳 Pareto 曲线的子网络。行动池定义为：</p>
+<div class="math notranslate nohighlight">
+\[
+A\in{A_{N[i,j]},A_{C[j]},A_{E[i,j]}} \tag{9}
+\]</div>
+<p>使用全深度和全宽度（最大子网）初始化状态，论文评估 ImageNet-1K 验证集上每个前沿操作的精度结果，这只需要大约 4 GPU 分钟。同时，参数缩减可以直接从层属性（即 kernel 大小、输入通道和输出通道）计算。论文通过使用 CoreMLTools 在 iPhone 12 上测量的预先构建的耗时查找表来获得耗时减少。有了这些度量就可以通过和计算，并选择每个 MES 精度下降最小的动作。值得注意的是，尽管动作组合非常庞大，但只需要在每个 step 评估前，这在复杂性上是线性的。</p>
+</section>
+<section id="id8">
+<h3>网络结构<a class="headerlink" href="#id8" title="Link to this heading">#</a></h3>
+<p>对于模型大小，EfficientFormerV 2-S0 比 EdgeViT-XXS 超出了 1.3%的 top-1 精度，甚至少了 0.6M 参数，比 MobileNetV 2 ×1.0 优于 3.5%的 top-1，参数数量相似。对于大模型，EfficientFormerV 2-L 模型实现了与最近的 EfficientFormerL 7 相同的精度，同时小 3.1 倍。在速度方面，在延迟相当或更低的情况下，EfficientFormerV2-S2 的性能分别优于 UniNet-B1，EdgeViT-S 和 EfficientFormerL 1，分别为 0.8%，0.6%和 2.4%。EiffcientFormer V2-S1 的效率分别比 MobileViT-XS、EdgeViT-XXS 和 EdgeViTXS 高出 4.2%、4.6%和 1.5%，其中 MES 要高得多。</p>
+</section>
+</section>
+<section id="id9">
+<h2>小结与思考<a class="headerlink" href="#id9" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>EfficientFormerV1 证明了视觉的 Transformer 可以在移动设备上以 MobileNet 速度运行。经全面的延迟分析，在一系列基于 VIT 的架构中识别低效的运算符，指导新的设计范式。</p></li>
+<li><p>EfficientFormerV2 进一步提出了在大小和速度上的细粒度联合搜索，并获得了轻量级和推理速度超快的模型。</p></li>
+</ul>
+</section>
+<section id="id10">
+<h2>本节视频<a class="headerlink" href="#id10" title="Link to this heading">#</a></h2>
+<html>
+<iframe src="https:&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</html>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./04Inference02Mobilenet"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="032MobileFormer.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">MobileFormer</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="03Cnn.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">CNN 模型小型化（下）</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#efficientformer-v1">EfficientFormer V1 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">EfficientFormer 结构</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#efficientformer-v2">EfficientFormer V2 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">搜索空间优化</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">多头注意力改进</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">更高分辨率注意力</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">注意力降采样</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">模型设计</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">优化模型</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">网络结构</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">本节视频</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 01, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

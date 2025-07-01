@@ -1,0 +1,1082 @@
+
+<!DOCTYPE html>
+
+
+<html lang="cn" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Winograd 算法" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="04Inference06Kernel/04Winograd.html" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
+<meta property="og:description" content="在上一节的介绍中，介绍了 Im2Col 技术，它通过将三维张量重新排列成矩阵形式，然后利用基于内存访问局部性的优化库如 GEMM（通用矩阵乘法库）加速计算。随后，还探讨了空间组合优化，这一种利用局部性原理来提升效率的技术。 在本节将重点介绍 Winograd 优化算法，它是矩阵乘优化方法中 Coppersmith–Winograd 算法的一种应用，按照 Winograd 算法的原理将卷积的运..." />
+<meta name="description" content="在上一节的介绍中，介绍了 Im2Col 技术，它通过将三维张量重新排列成矩阵形式，然后利用基于内存访问局部性的优化库如 GEMM（通用矩阵乘法库）加速计算。随后，还探讨了空间组合优化，这一种利用局部性原理来提升效率的技术。 在本节将重点介绍 Winograd 优化算法，它是矩阵乘优化方法中 Coppersmith–Winograd 算法的一种应用，按照 Winograd 算法的原理将卷积的运..." />
+
+    <title>Winograd 算法 &#8212; AI System</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=aabdd393"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/rtd-data.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '04Inference06Kernel/04Winograd';</script>
+    <script src="https://assets.readthedocs.org/static/javascript/readthedocs-doc-embed.js"></script>
+    <link rel="icon" href="../_static/logo-square.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="QNNPack 算法" href="05Qnnpack.html" />
+    <link rel="prev" title="Im2Col 算法" href="03Im2col.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="cn"/>
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../reference/blog/atom.xml"
+  title="Blog"
+/>
+  
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-wide.svg" class="logo__image only-light" alt="AI System - Home"/>
+    <script>document.write(`<img src="../_static/logo-wide.svg" class="logo__image only-dark" alt="AI System - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Youtube</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Blibili</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/01Introduction.html">课程内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/02ArchSlim.html">AI 计算模式（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/03MobileParallel.html">AI 计算模式（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/04Metrics.html">关键设计指标</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/05Matrix.html">核心计算之矩阵乘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/06BitWidth.html">计算之比特位宽</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware02ChipBase/README.html">AI 芯片基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/01CPUBase.html">CPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/02CPUISA.html">CPU 指令集架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/03CPUData.html">CPU 计算本质</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/04CPULatency.html">CPU 计算时延</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/05GPUBase.html">GPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/06NPUBase.html">NPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/07Future.html">超异构计算</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware03GPUBase/README.html">图形处理器 GPU</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/01Works.html">GPU 工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/02Principle.html">为什么 GPU 适用于 AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/03Concept.html">GPU 架构与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/04History.html">GPU 架构回顾</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware04NVIDIA/README.html">英伟达 GPU 详解</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/01BasicTC.html">Tensor Core 基本原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/02HistoryTC.html">Tensor Core 架构演进</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/03DeepTC.html">Tensor Core 深度剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/04BasicNvlink.html">分布式通信与 NVLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/05DeepNvlink.html">NVLink 原理剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/06DeepNvswitch.html">NV Switch 深度解析</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware05Abroad/README.html">国外 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/04TPUIntrol.html">谷歌 TPU 历史发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/05TPU1.html">谷歌 TPU v1-脉动阵列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/06TPU2.html">谷歌 TPUv2 训练芯片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/07TPU3.html">谷歌 TPUv3 POD 形态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/08TPU4.html">谷歌 TPU v4 与光路交换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware06Domestic/README.html">国内 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/04Cambricon.html">寒武纪介绍</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/08AscendBase.html">昇腾 AI 架构介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/09AscendSOC.html">昇腾 AI 处理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/10AscendCube.html">昇腾 AI 核心单元</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/11AscendLayout.html">昇腾数据布局转换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware07Thought/README.html">AI 芯片黄金十年</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/01Introduction.html">芯片的编程体系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/02SIMTSIMD.html">SIMD &amp; SIMT 与芯片架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/03SPMT.html">SIMD &amp; SIMT 与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/04NVSIMT.html">CUDA 编程模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/05DSA.html">从 CUDA 对 AI 芯片思考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/06AIChip.html">AI 芯片的思考</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/01Introduction.html">编译器基础介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/02History.html">传统编译器发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/03GCC.html">GCC 主要特征</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/04LLVM.html">LLVM 架构设计和原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/05LLVMIR.html">LLVM IR 基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/06LLVMDetail.html">LLVM IR 详解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/07LLVMFrontend.html">LLVM 前端和优化层</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/08LLVMBackend.html">LLVM 后端代码生成</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler02AICompiler/README.html">AI 编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/01Appear.html">为什么需要 AI 编译器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/02Stage.html">AI 编译器历史阶段</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/03Architecture.html">AI 编译器基本架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/04Future.html">AI 编译器挑战与思考</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler03Frontend/README.html">前端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/01Introduction.html">AI 编译器前端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/02GraphIR.html">图算 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/03OPFusion.html">算子融合</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/04LayoutPrinc.html">布局转换原理与算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/06Memory.html">内存分配算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/07ConstantFold.html">常量折叠原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/08CSE.html">公共表达式消除原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/09DCE.html">死代码消除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/10algebraic.html">代数简化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler04Backend/README.html">后端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/01Introduction.html">AI 编译器后端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/02OPSCompute.html">计算与调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/03Optimization.html">算子手工优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/04LoopOpt.html">算子循环优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 四. 推理系统&amp;引擎 ===</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../04Inference/README.html">推理系统&amp;引擎概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference01Inference/README.html">推理系统</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/01Introduction.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/02Constraints.html">推理系统介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/03Workflow.html">推理流程全景</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/04System.html">推理系统架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/05Inference.html">推理引擎架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/07MindIEIntro.html">昇腾推理引擎 MindIE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/08AscendCL.html">推理引擎示例：AscendCL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference02Mobilenet/README.html">模型轻量化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/01Introduction.html">推理参数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/021Squeezenet.html">SqueezeNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/022Shufflenet.html">ShuffleNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/023Mobilenet.html">MobileNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/024ESPNet.html">ESPNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/025FBNet.html">FBNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/026EfficientNet.html">EfficientNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/027GhostNet.html">GhostNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/02Cnn.html">CNN 模型小型化（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/031MobileVit.html">MobileVit 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/032MobileFormer.html">MobileFormer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/033EfficientFormer.html">EfficientFormer 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Cnn.html">CNN 模型小型化（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Transformer.html">Transformer 小型化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/04Transformer.html">Transformer 模型小型化</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference03Slim/README.html">模型压缩</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/02Quant.html">低比特量化原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/03QAT.html">感知量化训练 QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/04PTQ.html">训练后量化与部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/05Pruning.html">模型剪枝</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/06Distillation.html">知识蒸馏原理</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference04Converter/README.html">模型转换</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/02Principle.html">推理文件格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/03IR.html">自定义计算图 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/04Detail.html">模型转换流程</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference05Optimize/README.html">模型优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/01Optimizer.html">计算图优化架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/02Basic.html">离线图优化技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/03Extend.html">其他计算图优化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">Kernel 优化</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01Introduction.html">Kernel 层架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02Conv.html">卷积操作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Im2col.html">Im2Col 算法</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Winograd 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05Qnnpack.html">QNNPack 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06Memory.html">推理内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08Others.html">汇编与循环优化</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 五. AI 框架核心模块 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../05Framework/README.html">AI 框架核心概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework01Foundation/README.html">AI 框架基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/01Introduction.html">内容介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/02Fundamentals.html">AI 框架作用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/03History.html">AI 框架之争</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/04Programing.html">框架编程范式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/05MindSpore.html">昇思 MindSore 关键特性</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework02AutoDiff/README.html">自动微分</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/01Introduction.html">自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/02BaseConcept.html">什么是微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/03GradMode.html">微分计算模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/04Implement.html">微分实现方式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/05ForwardMode.html">动手实现自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/06ReversedMode.html">动手实现 PyTorch 微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/07Challenge.html">自动微分的挑战&amp;未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework03DataFlow/README.html">计算图</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/02Computegraph.html">计算图原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/03Atuodiff.html">计算图与自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/04Dispatch.html">计算图的调度与执行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/05ControlFlow.html">计算图的控制流实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/06StaticGraph.html">动态图与静态图转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/07Future.html">计算图挑战与未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework04Parallel/README.html">分布式并行</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/02DataParallel.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/03ZeRODP.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/04TensorParallel.html">张量并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/05PipelineParallel.html">流水并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/06HybridParallel.html">混合并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/07MSParallel.html">昇思MindSpore并行</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/blob/master/04Inference06Kernel/04Winograd.md?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/edit/master/04Inference06Kernel/04Winograd.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/issues/new?title=Issue%20on%20page%20%2F04Inference06Kernel/04Winograd.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/04Inference06Kernel/04Winograd.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Winograd 算法</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Winograd 算法原理</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">加速一维卷积计算</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">加速二维卷积计算</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Winograd 实现步骤</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">算法约束与缺点</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">本节视频</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <!--Copyright ©  适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+<section class="tex2jax_ignore mathjax_ignore" id="winograd">
+<h1>Winograd 算法<a class="headerlink" href="#winograd" title="Link to this heading">#</a></h1>
+<p>在上一节的介绍中，介绍了 Im2Col 技术，它通过将三维张量重新排列成矩阵形式，然后利用基于内存访问局部性的优化库如 GEMM（通用矩阵乘法库）加速计算。随后，还探讨了空间组合优化，这一种利用局部性原理来提升效率的技术。</p>
+<p>在本节将重点介绍 Winograd 优化算法，它是矩阵乘优化方法中 Coppersmith–Winograd 算法的一种应用，按照 Winograd 算法的原理将卷积的运算进行转换，从而减少卷积运算中乘法的计算总量。其主要是通过将卷积中的乘法使用加法来替换，并把一部分替换出来的加法放到卷积权重的提前处理阶段中，从而实现卷积计算的加速。Winograd 算法的优化局限于一些特定的常用卷积参数，这限制了其在更广泛场景下的应用。尽管存在这些局限性，Winograd 算法仍然是深度学习领域中的重要优化手段之一，对于提高卷积神经网络运行效率具有显著作用。</p>
+<section id="id1">
+<h2>Winograd 算法原理<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<p>Winograd 算法最早是 1980 年由 Shmuel Winograd 提出的《Arithmetic complexity of computations》，当时并没有引起太大的轰动。在 CVPR 2016 会议上，Lavin 等人在《Fast algorithms for convolutional neural networks》中提出了利用 Winograd 加速卷积运算，于是 Winograd 加速卷积在算法圈里火了起来，并从此 Winograd 算法在包括 Mindspore Lite，MMN 等推理引擎中被广泛应用。</p>
+<p>那 Winograd 为什么能加速卷积运算呢？简单来说就是用更多的加法计算来减少乘法计算，从而降低计算量，接下来就进一步了解如何使用 Winograd 加速卷积运算。</p>
+<section id="id2">
+<h3>加速一维卷积计算<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>以一维卷积 <span class="math notranslate nohighlight">\(F(2,3)\)</span> 为例，假设输入信号为 <span class="math notranslate nohighlight">\(d=[d_0,d_1,d_2,d_3]^T\)</span>，卷积核为 <span class="math notranslate nohighlight">\(g=[g_0,g_1,g_2]^T\)</span>，则整个卷积过程可以转换为如下的矩阵乘形式：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+F(2,3) = \begin{bmatrix}
+  d_0 &amp; d_1 &amp; d_2\\
+  d_1 &amp; d_2 &amp; d_3
+\end{bmatrix}
+\begin{bmatrix}
+ g_0 \\
+ g_1 \\
+g_2
+\end{bmatrix}
+= \begin{bmatrix}
+ r_0 \\
+ r_1
+\end{bmatrix}
+\end{align}
+\end{split}\]</div>
+<p>如果是使用一般的矩阵乘法进行计算，则如下式所示，会进行 6 次乘法操作与 4 次加法操作。</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+r_0 &amp; = d_0 \times g_0 +  d_1 \times g_1 + d_2 \times g_2\\
+r_1 &amp; = d_1 \times g_0 +  d_2 \times g_1 + d_3 \times g_2
+\end{align}
+\end{split}\]</div>
+<p>具体的过程可以由下图了解到，在卷积的计算过程中，由于在卷积层的设计中，往往卷积的步幅（Stride）的大小会小于卷积核的大小，所以最后转换的矩阵乘中往往有规律的分布着大量重复元素，比如这个一维卷积例子中矩阵乘输入矩阵第一行的 <span class="math notranslate nohighlight">\(d_1\)</span>、<span class="math notranslate nohighlight">\(d_2\)</span> 和第二行中的 <span class="math notranslate nohighlight">\(d_1\)</span>、<span class="math notranslate nohighlight">\(d_2\)</span>，卷积转换成的矩阵乘法比一般矩阵乘法的问题域更小，这就让优化存在了可能。</p>
+<p><img alt="Winograd01" src="../_images/04.winograd01.png" /></p>
+<p>在 Winograd 算法中则是通过增加加法操作来减少乘法操作从而实现计算加速，具体操作如下式所示：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+F(2,3) = \begin{bmatrix}
+  d_0 &amp; d_1 &amp; d_2\\
+  d_1 &amp; d_2 &amp; d_3
+\end{bmatrix}
+\begin{bmatrix}
+ g_0 \\
+ g_1 \\
+g_2
+\end{bmatrix}
+= \begin{bmatrix}
+ m_1 + m_2 + m_3 \\
+ m_2 - m_3 - m_4
+\end{bmatrix}
+\end{align}
+\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(m_1=(d_0-d_2)g_0\)</span>，<span class="math notranslate nohighlight">\(m_2=(d_1+d_2)\frac{g_0+g_1+g_2}{2}\)</span>，<span class="math notranslate nohighlight">\(m_3=(d_2-d_1)\frac{g_0-g_1+g_2}{2}\)</span>，<span class="math notranslate nohighlight">\(m_4=(d_1-d_3)g_2\)</span>。</p>
+<p>因为在推理阶段卷积核上的元素是固定的，所以上式 <span class="math notranslate nohighlight">\(m_1\)</span>，<span class="math notranslate nohighlight">\(m_2\)</span>，<span class="math notranslate nohighlight">\(m_3\)</span>，<span class="math notranslate nohighlight">\(m_4\)</span> 的式子中和 <span class="math notranslate nohighlight">\(g\)</span> 相关的式子可以提前计算好，在预测阶段只需要计算一次，因此计算次数可以忽略。而在计算 <span class="math notranslate nohighlight">\(m_1\)</span>，<span class="math notranslate nohighlight">\(m_2\)</span>，<span class="math notranslate nohighlight">\(m_3\)</span>，<span class="math notranslate nohighlight">\(m_4\)</span> 需要通过 4 次乘法操作与 4 次加法操作，然后基于计算好的 <span class="math notranslate nohighlight">\(m_1\)</span>，<span class="math notranslate nohighlight">\(m_2\)</span>，<span class="math notranslate nohighlight">\(m_3\)</span>，<span class="math notranslate nohighlight">\(m_4\)</span> 的值，需要通过使用 4 次加法操作得到结果，所以这里一共需要 4 次乘法操作和 8 次加法操作。由于乘法操作比加法操作消耗的时间多，因此 Winograd 的 4 次乘法和 8 次加法是要比一般的矩阵乘法的 6 次乘法和 4 次加法要快的。</p>
+<p>而 Winograd 加速卷积计算的具体推导过程如下，由上面的式子可以得知：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+ m_1 + m_2 + m_3 &amp;= d_0 \times g_0 +  d_1 \times g_1 + d_2 \times g_2\\
+ m_2 - m_3 - m_4 &amp;= d_1 \times g_0 +  d_2 \times g_1 + d_3 \times g_2
+\end{align}
+\end{split}\]</div>
+<p>其中，因为 <span class="math notranslate nohighlight">\(m_1\)</span> 与 <span class="math notranslate nohighlight">\(m_4\)</span> 没有重复出现，所以令 <span class="math notranslate nohighlight">\(m_1 = d_0 \times g_0\)</span>，<span class="math notranslate nohighlight">\(m_4 = -d_3 \times g_2\)</span>，这样就可以约掉 <span class="math notranslate nohighlight">\(m_1\)</span> 和 <span class="math notranslate nohighlight">\(m_4\)</span>，所以左边的式子只剩下两个变量，两个等式两个变量即可求出 <span class="math notranslate nohighlight">\(m_2\)</span> 与 <span class="math notranslate nohighlight">\(m_3\)</span>，在这个时候的 <span class="math notranslate nohighlight">\(m_1\)</span>、<span class="math notranslate nohighlight">\(m_2\)</span>、<span class="math notranslate nohighlight">\(m_3\)</span>、<span class="math notranslate nohighlight">\(m_4\)</span> 是这样的：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align*}
+ m_1  &amp;= d_0 \times g_0\\
+ m_2  &amp;=  \frac{g_1d_1 + g_2d_2 + g_0d_1 + g_1d_2}{2} \\
+ m_3  &amp;=  \frac{g_1d_1 + g_2d_2 - g_0d_1 - g_1d_2}{2} \\
+ m_4  &amp;=  -d_3 \times g_2\\
+\end{align*}
+\end{split}\]</div>
+<p><span class="math notranslate nohighlight">\(m_2\)</span> 中包含了 <span class="math notranslate nohighlight">\(d_1\)</span>、<span class="math notranslate nohighlight">\(d_2\)</span>、<span class="math notranslate nohighlight">\(g_0\)</span>、<span class="math notranslate nohighlight">\(g_1\)</span>、<span class="math notranslate nohighlight">\(g_2\)</span>，将这个式子转换为两个多项式乘积的形式，也即拆成 <span class="math notranslate nohighlight">\(d\)</span> 和 <span class="math notranslate nohighlight">\(g\)</span> 分开的形式，如下：</p>
+<div class="math notranslate nohighlight">
+\[
+\begin{align*}
+m_2 = \frac{(d_1 + d_2)(g_0 + g_1 + g_2)}{2} - \frac{d_2g_0}{2} - \frac{d_1g_2}{2}  
+\end{align*}
+\]</div>
+<p>同理，也对 <span class="math notranslate nohighlight">\(m_3\)</span> 进行转换得：</p>
+<div class="math notranslate nohighlight">
+\[
+\begin{align*}
+m_3 = \frac{(d_2 - d_1)(g_0 - g_1 + g_2)}{2} - \frac{d_2g_0}{2} + \frac{d_1g_2}{2}  
+\end{align*}
+\]</div>
+<p>由最初的(5)(6)式与上式可以得知，如果同时在 <span class="math notranslate nohighlight">\(m_2\)</span> 与 <span class="math notranslate nohighlight">\(m_3\)</span> 上同时加上一个值，对于式 (6) 来说整个式子是不变的，同时 <span class="math notranslate nohighlight">\(m_4\)</span> 的值没有改变，而对于式 (5) 来说需要减去两倍的这个值才能保持整个式子不变。因此，当这个值为 <span class="math notranslate nohighlight">\(\frac{d_2 g_0}{2}\)</span> 时可以简化表达式，通过这样的方式给上面的等式进行等价变换后得到的 <span class="math notranslate nohighlight">\(m_1\)</span>、<span class="math notranslate nohighlight">\(m_2\)</span>、<span class="math notranslate nohighlight">\(m_3\)</span>、<span class="math notranslate nohighlight">\(m_4\)</span> 如下：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align*}
+ m_1  &amp;= g_0(d_0 - d_2)\\
+ m_2  &amp;= \frac{(d_1 + d_2)(g_0 + g_1 + g_2)}{2}  - \frac{d_1g_2}{2} \\
+ m_3  &amp;= \frac{(d_2 - d_1)(g_0 - g_1 + g_2)}{2}  + \frac{d_1g_2}{2} \\
+ m_4  &amp;= -d_3 \times g_2\\
+\end{align*}
+\end{split}\]</div>
+<p>同理，如果给 <span class="math notranslate nohighlight">\(m_2\)</span> 加上一个值，同时给 <span class="math notranslate nohighlight">\(m_3\)</span> 减去这个值，那么对于式 (5) 来说整个式子是不变的，并且 <span class="math notranslate nohighlight">\(m_1\)</span> 的值没有改变，对于式 (6) 来说需要给 m4 需要减去两倍的这个值才能保持整个式子不变。因此，当这个值为 <span class="math notranslate nohighlight">\(\frac{d_1 g_2}{2}\)</span> 时可以简化表达式，通过这样的方式给上面的等式进行等价变换后得到的 <span class="math notranslate nohighlight">\(m_1\)</span>、<span class="math notranslate nohighlight">\(m_2\)</span>、<span class="math notranslate nohighlight">\(m_3\)</span>、<span class="math notranslate nohighlight">\(m_4\)</span> 如下：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align*}
+ m_1  &amp;= g_0(d_0 - d_2)\\
+ m_2  &amp;= \frac{(d_1 + d_2)(g_0 + g_1 + g_2)}{2}  \\
+ m_3  &amp;= \frac{(d_2 - d_1)(g_0 - g_1 + g_2)}{2}  \\
+ m_4  &amp;= g_2(d_1-d_3)\\
+\end{align*}
+\end{split}\]</div>
+<p>将上面的计算过程写成矩阵的形式如下：</p>
+<div class="math notranslate nohighlight">
+\[
+\begin{align}
+Y = A^T[(Gg)\odot (B^Td)]
+\end{align}
+\]</div>
+<p>其中，</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\odot\)</span> 表示 element-wise multiplication（Hadamard product），即对应位置相乘操作；</p></li>
+<li><p><span class="math notranslate nohighlight">\(g\)</span> 表示卷积核；<span class="math notranslate nohighlight">\(d\)</span> 表示输入特征图（输入信号）；</p></li>
+<li><p><span class="math notranslate nohighlight">\(G\)</span> 表示卷积核变换矩阵，尺寸为 <span class="math notranslate nohighlight">\((u+k-1) \times k\)</span>；</p></li>
+<li><p><span class="math notranslate nohighlight">\(B^T\)</span> 表示输入变换矩阵，尺寸为 <span class="math notranslate nohighlight">\((u+k-1)\times (u+k-1)\)</span>；</p></li>
+<li><p><span class="math notranslate nohighlight">\(A^T\)</span> 表示输出变换矩阵，尺寸为 <span class="math notranslate nohighlight">\((u+k-1) \times u\)</span>；</p></li>
+<li><p><span class="math notranslate nohighlight">\(u\)</span> 表示输出尺寸，<span class="math notranslate nohighlight">\(k\)</span> 表示卷积核尺寸，<span class="math notranslate nohighlight">\(u+k-1\)</span> 表示输入尺寸。</p></li>
+</ul>
+<p>式子中各个矩阵具体的值如下：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align*}
+&amp; B^T=\begin{bmatrix}
+   1 &amp; 0 &amp; -1 &amp; 0 \\
+   0 &amp; 1 &amp; 1 &amp; 0 \\
+   0 &amp; -1 &amp; 1 &amp; 0 \\
+   0 &amp; 1 &amp; 0 &amp; -1
+\end{bmatrix} \qquad
+G=\begin{bmatrix}
+1 &amp; 0 &amp; 0 \\
+\frac{1}{2} &amp; \frac{1}{2} &amp; \frac{1}{2} \\
+\frac{1}{2} &amp; -\frac{1}{2} &amp; \frac{1}{2} \\
+0 &amp; 0 &amp; 1 \\
+\end{bmatrix} \qquad
+A^T = \begin{bmatrix}
+   1 &amp; 1 &amp; 1 &amp; 0 \\
+   0 &amp; 1 &amp; -1 &amp; -1 \\
+\end{bmatrix} \\
+&amp; g = \begin{bmatrix}
+&amp; g_0 &amp; g_1 &amp; g_2
+\end{bmatrix}^T  \qquad \qquad
+d = \begin{bmatrix}
+d_0 &amp; d_1 &amp; d_2 &amp; d_3
+\end{bmatrix}^T
+\end{align*}
+\end{split}\]</div>
+</section>
+<section id="id3">
+<h3>加速二维卷积计算<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>将一维卷积 <span class="math notranslate nohighlight">\(F(2,3)\)</span> 的变换扩展到二维卷积 <span class="math notranslate nohighlight">\(F(2 \times 2, 3 \times 3)\)</span>，同样用矩阵形式表示为：</p>
+<div class="math notranslate nohighlight">
+\[
+\begin{align}
+Y = A^T[[GgG^T]\odot[B^TdB]]A
+\end{align}
+\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(g\)</span> 为 <span class="math notranslate nohighlight">\(r \times r\)</span> 的卷积核，<span class="math notranslate nohighlight">\(d\)</span> 为 <span class="math notranslate nohighlight">\((m + r -1) \times (m + r -1)\)</span> 的图像块.</p>
+<p>对于二维卷积，可以先将卷积过程使用 img2col 进行展开，将卷积核的元素拉成了一列，将输入信号每个滑动窗口中的元素拉成了一行，变成如下的矩阵乘的形式：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align*}
+\begin{bmatrix}
+  k_{0} &amp; k_{1} &amp; k_{2} &amp; k_{4} &amp; k_{5} &amp; k_{6} &amp; k_{8} &amp; k_{9} &amp; k_{10} \\
+  k_{1} &amp; k_{2} &amp; k_{3} &amp; k_{5} &amp; k_{6} &amp; k_{7} &amp; k_{9} &amp; k_{10} &amp; k_{11} \\
+  k_{4} &amp; k_{5} &amp; k_{6} &amp; k_{8} &amp; k_{9} &amp; k_{10} &amp; k_{12} &amp; k_{13} &amp; k_{14} \\
+  k_{5} &amp; k_{6} &amp; k_{7} &amp; k_{9} &amp; k_{10} &amp; k_{11} &amp; k_{13} &amp; k_{14} &amp; k_{15} \\
+\end{bmatrix}\begin{bmatrix}
+ w_0\\
+ w_1\\
+ w_2\\
+ w_3\\
+ w_4\\
+ w_5\\
+ w_6\\
+ w_7\\
+ w_8\\
+\end{bmatrix}=\begin{bmatrix}
+ r_0\\
+ r_1\\
+ r_2\\
+ r_3
+\end{bmatrix}
+\end{align*}
+\end{split}\]</div>
+<p>然后，将上述的矩阵乘的形式进行如下图的分块：</p>
+<p><img alt="Winograd02" src="../_images/04.winograd02.png" /></p>
+<p>即可以表示成如下类似于前文中 Winograd 加速一维卷积计算形式：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align*}
+F(2 \times 2, 3 \times 3)=\begin{bmatrix}
+  d_0 &amp; d_1 &amp; d_2\\
+  d_1 &amp; d_2 &amp; d_3
+\end{bmatrix}
+\begin{bmatrix}
+ g_0 \\
+ g_1 \\
+g_2
+\end{bmatrix}
+= \begin{bmatrix}
+ r_0 \\
+ r_1
+\end{bmatrix}
+\end{align*}
+\end{split}\]</div>
+<p>当然，变成了这样的形式就可以使用前文的推导方法，推导到出式(8)中的 Winograd 加速二维卷积计算的矩阵形式。</p>
+</section>
+</section>
+<section id="id4">
+<h2>Winograd 实现步骤<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<p>基于上文的介绍，Winograd 算法的实现可以细分为四个主要步骤：</p>
+<ol class="arabic simple">
+<li><p>对输入卷积核的变换：<span class="math notranslate nohighlight">\(𝑈=𝐺𝑔𝐺^𝑇\)</span>，其中 <span class="math notranslate nohighlight">\(G\)</span> 表示为卷积核变换矩阵，<span class="math notranslate nohighlight">\(g\)</span> 表示卷积核</p></li>
+<li><p>对输入数据的变换：<span class="math notranslate nohighlight">\(𝑉=𝐵^𝑇 d𝐵\)</span>，其中 <span class="math notranslate nohighlight">\(B\)</span> 表示为输入数据的变换矩阵，<span class="math notranslate nohighlight">\(d\)</span> 表示输入的特征图</p></li>
+<li><p>对中间矩阵 M 的计算：<span class="math notranslate nohighlight">\(M = \sum U \odot V\)</span></p></li>
+<li><p>卷积结果的计算：<span class="math notranslate nohighlight">\(𝑌=𝐴^𝑇𝑀𝐴\)</span>，其中 <span class="math notranslate nohighlight">\(A\)</span> 表示输出变换矩阵</p></li>
+</ol>
+<p>Winograd 算法的工作流程可以用以下图示来说明：</p>
+<p><img alt="Winograd03" src="../_images/04.winograd03.png" /></p>
+<p>以上文中 Winograd 加速二维卷积 <span class="math notranslate nohighlight">\(F(2 \times 2, 3 \times 3)\)</span> 的计算为例子，可以具体了解 Winograd 的实现过程。</p>
+<p>如下图所示，在输入卷积核的转换过程中，首先通过 Winograd 算法中的卷积核变换矩阵 <span class="math notranslate nohighlight">\(G\)</span> 和 <span class="math notranslate nohighlight">\(G^T\)</span> 分别将 <span class="math notranslate nohighlight">\(3 \times 3\)</span> 的卷积核权重转换为 <span class="math notranslate nohighlight">\(4 \times 4\)</span> 的矩阵。然后，将该矩阵中相同位置的点（如下图中蓝色为位置 1 的点）进行重新排布（Relayout），形成一个输入通道数 <span class="math notranslate nohighlight">\(IC \times\)</span> 输出通道数 <span class="math notranslate nohighlight">\( OC\)</span> 的矩阵，这一过程最终产生了 <span class="math notranslate nohighlight">\(4 \times 4 = 16\)</span> 个转换后的卷积核权重矩阵 <span class="math notranslate nohighlight">\(U\)</span>。</p>
+<p><img alt="Winograd04" src="../_images/04.winograd04.png" /></p>
+<p>如下图所示，在输入数据的转换过程中，首先将输入数据切分成 <span class="math notranslate nohighlight">\(4 \times 4\)</span> 的小块（tile）。接着，通过 Winograd 算法中输入数据的变换矩阵 <span class="math notranslate nohighlight">\(B\)</span> 和 <span class="math notranslate nohighlight">\(B^T\)</span> 将每个小块转换为 <span class="math notranslate nohighlight">\(4 \times 4\)</span> 的矩阵形式。完成矩阵转换后，每个小块的数据按照与卷积核转换过程中类似的重新排布方法，转换成 16 个维度是小块数 <span class="math notranslate nohighlight">\(nr\ tiles \times\)</span> 输入通道数 <span class="math notranslate nohighlight">\(IC\)</span> 的输入数据矩阵 <span class="math notranslate nohighlight">\(V\)</span>。</p>
+<p><img alt="Winograd05" src="../_images/04.winograd05.png" /></p>
+<p>如下图所示，将上述转换得到的卷积核权重矩阵 <span class="math notranslate nohighlight">\(U\)</span> 与输入数据矩阵 <span class="math notranslate nohighlight">\(V\)</span> 进行矩阵乘的操作，得到 16 个维度为小块数 <span class="math notranslate nohighlight">\(nr\ tiles \times\)</span> 输出通道数 <span class="math notranslate nohighlight">\(OC\)</span> 的中间矩阵 <span class="math notranslate nohighlight">\(M\)</span>。</p>
+<p>随后，将相同位置的 16 个点重新排布成 <span class="math notranslate nohighlight">\(nr\ tiles \times OC\)</span>  个维度为 <span class="math notranslate nohighlight">\(4 \times 4\)</span> 的矩阵。然后再使用 Winograd 算法中的输出变换矩阵 <span class="math notranslate nohighlight">\(A\)</span> 和 <span class="math notranslate nohighlight">\(A^T\)</span> 将这些 <span class="math notranslate nohighlight">\(4 \times 4\)</span> 的矩阵转换为 <span class="math notranslate nohighlight">\(2 \times 2\)</span> 的输出矩阵，最后将这些矩阵写回输出矩阵中就可以得到 Winograd 卷积的最终结果 <span class="math notranslate nohighlight">\(Y\)</span>。</p>
+<p><img alt="Winograd06" src="../_images/04.winograd06.png" /></p>
+</section>
+<section id="id5">
+<h2>算法约束与缺点<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<p>从上述方法的介绍中可以得知，Winograd 算法通过减少乘法操作的次数，有效降低了计算资源的消耗，从而提高了计算速度。尽管 Winograd 算法在加速卷积运算方面有明显优势，但同时也存在一些局限性和不足之处。</p>
+<p>首先，当应用 Winograd 算法处理单个小局部的二维卷积时，该算法不能直接应用于这样的计算当中，因为产生的辅助矩阵规模过大，可能会对实际效果产生负面影响。另外，不同规模的卷积需要不同规模的辅助矩阵，实时计算出这些辅助矩阵不现实，如果都存储起来会导致规模膨胀。</p>
+<p>Winograd 算法虽然通过减少乘法次数来提高计算速度，但加法运算的数量却相应增加，同时还需要额外的转换计算和存储转换矩阵。随着卷积核和分块尺寸的增大，加法运算、转换计算和存储的开销也随之增加。此外，分块尺寸越大，转换矩阵也越大，计算精度的损失也会进一步加剧。因此，Winograd 算法仅适用于较小的卷积核和分块尺寸。在实际工程应用中，Winograd 算法通常只用于处理一些特定的 <span class="math notranslate nohighlight">\(3 \times 3\)</span> 卷积，而 <span class="math notranslate nohighlight">\(1 \times 1\)</span> 和 <span class="math notranslate nohighlight">\(7 \times 7\)</span> 、 <span class="math notranslate nohighlight">\(5 \times 5\)</span> 的卷积则不会采用 Winograd 这个 kernel。因此，在 runtime 中需要根据具体情况进行决策，选择合适的 kernel。</p>
+<p>在实际应用中，通常会将所有可以固定的数据在网络运行前预先确定。在算法程序的设计中，希望尽可能提前计算出可以固定的数据，因此会有一个预编译阶段或离线模块转换阶段，以便提前计算出一些可预知的结果。在推理引擎中，主要处理的是一些常见或通用的算法问题，以及一些通用的网络模型结构。对于一些特定的网络模型结构，如果 <span class="math notranslate nohighlight">\(G\)</span> 是固定的，那么可以将特定网络的 <span class="math notranslate nohighlight">\(G\)</span> 提前计算出来，这样在下次运行时，就不需要重新计算。例如，在设计基于 Winograd 算法的特定网络结构时，如果 <span class="math notranslate nohighlight">\(G\)</span> 和 <span class="math notranslate nohighlight">\(g\)</span> 是固定的，那么 <span class="math notranslate nohighlight">\(U=GgG^T\)</span> 可以在网络运行前预先确定。</p>
+<p>另一个想法是将 Winograd 算法与空间组织算法结合起来，充分利用局部性和算法分析的优化，将卷积计算通过空间组合优化算法中的拆分方法，将输入拆分成若干个小规模卷积。例如，可以拆分成每个小卷积输出 <span class="math notranslate nohighlight">\(4 \times 4\)</span> 个数据的卷积。</p>
+</section>
+<section id="id6">
+<h2>小结与思考<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Winograd 算法优化原理：通过减少乘法操作的数量，增加加法操作，利用卷积核和输入数据的变换矩阵，将卷积运算转换为更少乘法次数的等价形式，从而加速卷积计算。</p></li>
+<li><p>Winograd 算法实现步骤包括输入卷积核的变换、输入数据的变换、中间矩阵的计算，以及最终卷积结果的计算，涉及特定的矩阵乘法和元素乘积（Hadamard product）。</p></li>
+<li><p>Winograd 算法适用于特定的卷积核和分块尺寸，对于大规模卷积核或大尺寸分块，转换矩阵的规模和计算精度损失可能会降低算法效率。</p></li>
+<li><p>在实际应用中，Winograd 算法可以与空间组织算法结合，通过分块处理和卷积核的预编译，优化计算过程，尤其适用于小型卷积核如 <span class="math notranslate nohighlight">\(3×3\)</span>。</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2>本节视频<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
+<html>
+<iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=567780450&bvid=BV1vv4y1Y7sc&cid=1034419206&p=1&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</html>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./04Inference06Kernel"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="03Im2col.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Im2Col 算法</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="05Qnnpack.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">QNNPack 算法</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Winograd 算法原理</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">加速一维卷积计算</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">加速二维卷积计算</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Winograd 实现步骤</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">算法约束与缺点</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">本节视频</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 01, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

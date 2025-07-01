@@ -24,7 +24,7 @@ AI 芯片，作为 AI 的硬件体系架构主要是指 AI 芯片，这里就很
 
 ## 课程脑图
 
-![脑图](images/Architecture02.png)
+![脑图](../images/02Hardware/Architecture02.png)
 
 ## 备注
 
