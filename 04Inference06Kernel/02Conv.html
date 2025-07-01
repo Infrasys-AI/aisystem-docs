@@ -1,0 +1,1262 @@
+
+<!DOCTYPE html>
+
+
+<html lang="cn" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="卷积操作原理" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="04Inference06Kernel/02Conv.html" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
+<meta property="og:description" content="卷积是神经网络里面的核心计算之一，它是一种特殊的线性运算。而卷积神经网络（CNN）是针对图像领域任务提出的神经网络，其受猫的视觉系统启发，堆叠使用卷积层和池化层提取特征。它在 CV 领域方面的突破性进展引领了深度学习的热潮。 回到卷积本身，其变种丰富、计算复杂，神经网络运行时大部分时间都耗费在计算卷积，神经网络模型的发展在不断增加网络的深度，因此优化卷积计算就显得尤为重要。 本节将首先介绍卷..." />
+<meta name="description" content="卷积是神经网络里面的核心计算之一，它是一种特殊的线性运算。而卷积神经网络（CNN）是针对图像领域任务提出的神经网络，其受猫的视觉系统启发，堆叠使用卷积层和池化层提取特征。它在 CV 领域方面的突破性进展引领了深度学习的热潮。 回到卷积本身，其变种丰富、计算复杂，神经网络运行时大部分时间都耗费在计算卷积，神经网络模型的发展在不断增加网络的深度，因此优化卷积计算就显得尤为重要。 本节将首先介绍卷..." />
+
+    <title>卷积操作原理 &#8212; AI System</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=aabdd393"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/rtd-data.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '04Inference06Kernel/02Conv';</script>
+    <script src="https://assets.readthedocs.org/static/javascript/readthedocs-doc-embed.js"></script>
+    <link rel="icon" href="../_static/logo-square.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Im2Col 算法" href="03Im2col.html" />
+    <link rel="prev" title="Kernel 层架构" href="01Introduction.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="cn"/>
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../reference/blog/atom.xml"
+  title="Blog"
+/>
+  
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-wide.svg" class="logo__image only-light" alt="AI System - Home"/>
+    <script>document.write(`<img src="../_static/logo-wide.svg" class="logo__image only-dark" alt="AI System - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Youtube</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Blibili</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/01Introduction.html">课程内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/02ArchSlim.html">AI 计算模式（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/03MobileParallel.html">AI 计算模式（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/04Metrics.html">关键设计指标</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/05Matrix.html">核心计算之矩阵乘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/06BitWidth.html">计算之比特位宽</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware02ChipBase/README.html">AI 芯片基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/01CPUBase.html">CPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/02CPUISA.html">CPU 指令集架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/03CPUData.html">CPU 计算本质</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/04CPULatency.html">CPU 计算时延</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/05GPUBase.html">GPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/06NPUBase.html">NPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/07Future.html">超异构计算</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware03GPUBase/README.html">图形处理器 GPU</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/01Works.html">GPU 工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/02Principle.html">为什么 GPU 适用于 AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/03Concept.html">GPU 架构与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/04History.html">GPU 架构回顾</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware04NVIDIA/README.html">英伟达 GPU 详解</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/01BasicTC.html">Tensor Core 基本原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/02HistoryTC.html">Tensor Core 架构演进</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/03DeepTC.html">Tensor Core 深度剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/04BasicNvlink.html">分布式通信与 NVLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/05DeepNvlink.html">NVLink 原理剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/06DeepNvswitch.html">NV Switch 深度解析</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware05Abroad/README.html">国外 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/04TPUIntrol.html">谷歌 TPU 历史发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/05TPU1.html">谷歌 TPU v1-脉动阵列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/06TPU2.html">谷歌 TPUv2 训练芯片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/07TPU3.html">谷歌 TPUv3 POD 形态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/08TPU4.html">谷歌 TPU v4 与光路交换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware06Domestic/README.html">国内 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/04Cambricon.html">寒武纪介绍</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/08AscendBase.html">昇腾 AI 架构介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/09AscendSOC.html">昇腾 AI 处理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/10AscendCube.html">昇腾 AI 核心单元</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/11AscendLayout.html">昇腾数据布局转换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware07Thought/README.html">AI 芯片黄金十年</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/01Introduction.html">芯片的编程体系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/02SIMTSIMD.html">SIMD &amp; SIMT 与芯片架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/03SPMT.html">SIMD &amp; SIMT 与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/04NVSIMT.html">CUDA 编程模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/05DSA.html">从 CUDA 对 AI 芯片思考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/06AIChip.html">AI 芯片的思考</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/01Introduction.html">编译器基础介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/02History.html">传统编译器发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/03GCC.html">GCC 主要特征</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/04LLVM.html">LLVM 架构设计和原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/05LLVMIR.html">LLVM IR 基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/06LLVMDetail.html">LLVM IR 详解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/07LLVMFrontend.html">LLVM 前端和优化层</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/08LLVMBackend.html">LLVM 后端代码生成</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler02AICompiler/README.html">AI 编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/01Appear.html">为什么需要 AI 编译器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/02Stage.html">AI 编译器历史阶段</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/03Architecture.html">AI 编译器基本架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/04Future.html">AI 编译器挑战与思考</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler03Frontend/README.html">前端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/01Introduction.html">AI 编译器前端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/02GraphIR.html">图算 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/03OPFusion.html">算子融合</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/04LayoutPrinc.html">布局转换原理与算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/06Memory.html">内存分配算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/07ConstantFold.html">常量折叠原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/08CSE.html">公共表达式消除原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/09DCE.html">死代码消除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/10algebraic.html">代数简化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler04Backend/README.html">后端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/01Introduction.html">AI 编译器后端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/02OPSCompute.html">计算与调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/03Optimization.html">算子手工优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/04LoopOpt.html">算子循环优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 四. 推理系统&amp;引擎 ===</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../04Inference/README.html">推理系统&amp;引擎概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference01Inference/README.html">推理系统</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/01Introduction.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/02Constraints.html">推理系统介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/03Workflow.html">推理流程全景</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/04System.html">推理系统架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/05Inference.html">推理引擎架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/07MindIEIntro.html">昇腾推理引擎 MindIE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/08AscendCL.html">推理引擎示例：AscendCL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference02Mobilenet/README.html">模型轻量化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/01Introduction.html">推理参数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/021Squeezenet.html">SqueezeNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/022Shufflenet.html">ShuffleNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/023Mobilenet.html">MobileNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/024ESPNet.html">ESPNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/025FBNet.html">FBNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/026EfficientNet.html">EfficientNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/027GhostNet.html">GhostNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/02Cnn.html">CNN 模型小型化（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/031MobileVit.html">MobileVit 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/032MobileFormer.html">MobileFormer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/033EfficientFormer.html">EfficientFormer 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Cnn.html">CNN 模型小型化（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Transformer.html">Transformer 小型化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/04Transformer.html">Transformer 模型小型化</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference03Slim/README.html">模型压缩</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/02Quant.html">低比特量化原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/03QAT.html">感知量化训练 QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/04PTQ.html">训练后量化与部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/05Pruning.html">模型剪枝</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/06Distillation.html">知识蒸馏原理</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference04Converter/README.html">模型转换</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/02Principle.html">推理文件格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/03IR.html">自定义计算图 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/04Detail.html">模型转换流程</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference05Optimize/README.html">模型优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/01Optimizer.html">计算图优化架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/02Basic.html">离线图优化技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/03Extend.html">其他计算图优化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">Kernel 优化</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01Introduction.html">Kernel 层架构</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">卷积操作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Im2col.html">Im2Col 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04Winograd.html">Winograd 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05Qnnpack.html">QNNPack 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06Memory.html">推理内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08Others.html">汇编与循环优化</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 五. AI 框架核心模块 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../05Framework/README.html">AI 框架核心概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework01Foundation/README.html">AI 框架基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/01Introduction.html">内容介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/02Fundamentals.html">AI 框架作用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/03History.html">AI 框架之争</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/04Programing.html">框架编程范式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/05MindSpore.html">昇思 MindSore 关键特性</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework02AutoDiff/README.html">自动微分</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/01Introduction.html">自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/02BaseConcept.html">什么是微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/03GradMode.html">微分计算模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/04Implement.html">微分实现方式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/05ForwardMode.html">动手实现自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/06ReversedMode.html">动手实现 PyTorch 微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/07Challenge.html">自动微分的挑战&amp;未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework03DataFlow/README.html">计算图</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/02Computegraph.html">计算图原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/03Atuodiff.html">计算图与自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/04Dispatch.html">计算图的调度与执行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/05ControlFlow.html">计算图的控制流实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/06StaticGraph.html">动态图与静态图转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/07Future.html">计算图挑战与未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework04Parallel/README.html">分布式并行</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/02DataParallel.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/03ZeRODP.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/04TensorParallel.html">张量并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/05PipelineParallel.html">流水并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/06HybridParallel.html">混合并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/07MSParallel.html">昇思MindSpore并行</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/blob/master/04Inference06Kernel/02Conv.md?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/edit/master/04Inference06Kernel/02Conv.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/issues/new?title=Issue%20on%20page%20%2F04Inference06Kernel/02Conv.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/04Inference06Kernel/02Conv.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>卷积操作原理</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">卷积的数学原理</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">通俗定义</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">具体例子</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">卷积的性质</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">卷积物理意义</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">离散卷积</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cnn">CNN 卷积计算</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">名词解释</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">朴素卷积过程</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">计算复杂度分析</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pytorch">pytorch 卷积实现</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">卷积优化手段</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tensor">Tensor 运算</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">Tensor 内存布局</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">Tensor 卷积运算</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id15">本节视频</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <!--Copyright ©  适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+<section class="tex2jax_ignore mathjax_ignore" id="id1">
+<h1>卷积操作原理<a class="headerlink" href="#id1" title="Link to this heading">#</a></h1>
+<p>卷积是神经网络里面的核心计算之一，它是一种特殊的线性运算。而卷积神经网络（CNN）是针对图像领域任务提出的神经网络，其受猫的视觉系统启发，堆叠使用卷积层和池化层提取特征。它在 CV 领域方面的突破性进展引领了深度学习的热潮。</p>
+<p>回到卷积本身，其变种丰富、计算复杂，神经网络运行时大部分时间都耗费在计算卷积，神经网络模型的发展在不断增加网络的深度，因此优化卷积计算就显得尤为重要。</p>
+<p>本节将首先介绍卷积在数学范畴中的定义，通过信号处理领域的一个例子对卷积的过程进行阐释。之后为大家介绍 CNN 中卷积计算的相关知识。在了解卷积计算的基础之上，本节会继续为大家介绍卷积在内存中的数据格式以及张量中的卷积计算过程。</p>
+<section id="id2">
+<h2>卷积的数学原理<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<p>在通常形式中，卷积是对两个实变函数的一种数学运算。在泛函分析中，卷积、旋积或褶积 (Convolution) 是通过两个函数 <span class="math notranslate nohighlight">\(f\)</span> 和 <span class="math notranslate nohighlight">\(g\)</span> 生成第三个函数的一种数学运算，其本质是一种特殊的积分变换，表征函数 <span class="math notranslate nohighlight">\(f\)</span> 与 <span class="math notranslate nohighlight">\(g\)</span> 经过翻转和平移的重叠部分函数值乘积对重叠长度的积分。</p>
+<p>卷积神经网络（Convolution Neural Networks, CNN）的概念拓展自信号处理领域的卷积。信号处理的卷积定义为：</p>
+<div class="math notranslate nohighlight">
+\[
+(f*g)(t)\triangleq\int_{\mathbb{R}^{n}}f(\tau)g(t-\tau)d\tau
+\]</div>
+<p>可以证明，关于几乎所有的实数 x，随着 x 的不同取值，积分定义了一个新函数 <span class="math notranslate nohighlight">\(h(x)\)</span>，称为函数 <span class="math notranslate nohighlight">\(f\)</span> 与 <span class="math notranslate nohighlight">\(g\)</span> 的卷积，记为：</p>
+<div class="math notranslate nohighlight">
+\[
+h(x)=(f*g)(x)
+\]</div>
+<p>对于信号处理的卷积定义为连续的表示，真正计算的过程中会把连续用离散形式进行计算：</p>
+<div class="math notranslate nohighlight">
+\[
+(f*g)(n)\triangleq\sum_{\mathbb{Z}^{n}}f(m)g(n-m)
+\]</div>
+<section id="id3">
+<h3>通俗定义<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>卷积计算在直觉上不易理解，其可视化后如下图所示。图中红色滑块在移动过程中与蓝色方块的积绘制成的三角图案即为卷积结果在各点上的取值：</p>
+<p><img alt="卷积可视化动图" src="../_images/02Conv01.gif" /></p>
+<p>更具体来说，解释卷积需要清楚“卷”和”积“两个步骤。</p>
+<ol class="arabic simple">
+<li><p>“卷”的过程</p></li>
+</ol>
+<p>根据上述介绍中卷积的定义：</p>
+<div class="math notranslate nohighlight">
+\[
+(f*g)(t)\triangleq\int_{\mathbb{R}^{n}}f(\tau)g(t-\tau)d\tau
+\]</div>
+<p>令</p>
+<div class="math notranslate nohighlight">
+\[
+x=\tau,y=t-\tau
+\]</div>
+<p>则有 <span class="math notranslate nohighlight">\(x+y=t\)</span> 成立。</p>
+<p>换言之，在卷积的过程中，函数 <span class="math notranslate nohighlight">\(f(x)\)</span> 与 <span class="math notranslate nohighlight">\(g(y)\)</span> 中 <span class="math notranslate nohighlight">\(x,y\)</span> 取值受线性函数 <span class="math notranslate nohighlight">\(x+y=t\)</span> 的约束。若令 <span class="math notranslate nohighlight">\(t=10\)</span>，则 <span class="math notranslate nohighlight">\(x,y\)</span> 的取值序列有如下图所示的对应关系。直观上 <span class="math notranslate nohighlight">\(x,y\)</span> 的取值有一种翻转对应的感觉。</p>
+<p><img alt="卷积取值的示例" src="../_images/02Conv02.png" /></p>
+<ol class="arabic simple" start="2">
+<li><p>”积“的过程</p></li>
+</ol>
+<p>当 <span class="math notranslate nohighlight">\(t\)</span> 的取值变化时，<span class="math notranslate nohighlight">\(x,y\)</span> 的取值约束在下图所示的斜率为 -1 的直线簇中。</p>
+<p>定义：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+g(y)=f(x)=\begin{cases}0,x&lt;0.5\\1,-0.5\leqslant x \leqslant0.5\\0,x&gt;0.5\end{cases}
+\end{split}\]</div>
+<p>下图（左）中 <span class="math notranslate nohighlight">\(t\)</span> 的取值从上到下分别为-1，-0.5，0，0.5，1，令 <span class="math notranslate nohighlight">\(y=t-\tau,x=\tau\)</span>，左图中的红线为 <span class="math notranslate nohighlight">\(g(t-\tau)\)</span> 的函数图像，蓝线为 <span class="math notranslate nohighlight">\(f(\tau)\)</span> 的函数图像。黄色区域为不同 t 的取值条件下参与卷积的有效区间，黑色直线最右端的点的取值为卷积结果。</p>
+<p><img alt="t 不同取值情况下卷积的示例" src="../_images/02Conv03.png" /></p>
+<p>总结来说，积分的本质为可理解为求和的极限，卷积中“积”的过程即为相应的函数相乘和求积分的过程。</p>
+</section>
+<section id="id4">
+<h3>具体例子<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<p>以信号处理的系统响应函数为例：</p>
+<p>定义输入信号是 <span class="math notranslate nohighlight">\(f(t)\)</span> ，随时间变化其数值保持不变。系统响应函数是 <span class="math notranslate nohighlight">\(g(t)\)</span>，图中的响应函数是随时间指数下降的，它的物理意义是说：如果在 <span class="math notranslate nohighlight">\(t=t_{1}\)</span> 的时刻有一个输入，那么随着时间的流逝，这个输入将不断衰减。</p>
+<p><img alt="系统随时间 t 的响应函数" src="../_images/02Conv04.png" /></p>
+<p>由于信号 <span class="math notranslate nohighlight">\(f(t)\)</span> 是连续输入的，也就是说，每个时刻都有新的信号进来。同时，该时刻前面的输入对后面仍有影响，该影响以 <span class="math notranslate nohighlight">\(g(t)\)</span> 的形式衰减。如下图所示，在 <span class="math notranslate nohighlight">\(t_{2}\)</span> 时刻，系统的输入既包括 <span class="math notranslate nohighlight">\(t_{2}\)</span> 时刻的新信号，也包括 <span class="math notranslate nohighlight">\(t_{1}\)</span> 时刻衰减后的响应（黄色框中的红色虚线点）。所以可以推知，系统最终输出的是所有之前输入信号的累积效果。</p>
+<p><img alt="任意时刻下系统的输入信号示意图" src="../_images/02Conv05.png" /></p>
+<p>如下图(左)所示，由于信号的响应随时间衰减，我们假定每个时刻的新信号产生的响应的影响范围为 5 个等距时间段 <span class="math notranslate nohighlight">\(T\)</span>，即在 <span class="math notranslate nohighlight">\(t_{0}\)</span> 产生的新信号的响应影响至 <span class="math notranslate nohighlight">\(t_{5}\)</span> 时刻。那么在 <span class="math notranslate nohighlight">\(T=t_{5}\)</span> 时刻，输出结果跟图中绿色框的区域整体有关。</p>
+<p><img alt="输出结果示意图" src="../_images/02Conv06.png" /></p>
+<p>其中，<span class="math notranslate nohighlight">\(f(t_{5})\)</span> 因为是刚输入的，所以其输出结果应该是 <span class="math notranslate nohighlight">\(f(t_{5})g(t_{0})\)</span>，而时刻 <span class="math notranslate nohighlight">\(t_{4}\)</span> 的输入 <span class="math notranslate nohighlight">\(f(t_{4})\)</span>，只经过了 1 个时间单位的衰减，所以产生的输出应该是 <span class="math notranslate nohighlight">\(f(t_{4})g(t_{1})\)</span>，如此类推，即图中虚线所描述的关系。这些对应点相乘然后累加，就是 <span class="math notranslate nohighlight">\(T=t_{5}\)</span> 时刻的输出信号值，这个结果也是 <span class="math notranslate nohighlight">\(f\)</span>  和 <span class="math notranslate nohighlight">\(g\)</span> 两个函数在 <span class="math notranslate nohighlight">\(T=t_{5}\)</span> 时刻的卷积值。</p>
+<p>从上图来看 <span class="math notranslate nohighlight">\(f\)</span> 和 <span class="math notranslate nohighlight">\(g\)</span> 这种对应关系并不直观，因此对 <span class="math notranslate nohighlight">\(g\)</span> 关于 <span class="math notranslate nohighlight">\(y\)</span> 轴对称变换一下，变为 <span class="math notranslate nohighlight">\(g(-t_{i})\)</span>，变换后 <span class="math notranslate nohighlight">\(f\)</span> 和 <span class="math notranslate nohighlight">\(g\)</span> 的对应关系如下图所示。</p>
+<p><img alt="对称变换后输出结果示意图" src="../_images/02Conv07.png" /></p>
+<p>进一步，将 <span class="math notranslate nohighlight">\(g(-t_{i})\)</span> 图像右移 <span class="math notranslate nohighlight">\(T\)</span> 个时间单位，得到 <span class="math notranslate nohighlight">\(g(T-t_{i})\)</span>：</p>
+<p><img alt="平移后输出结果示意图" src="../_images/02Conv08.png" /></p>
+<p>这样我们就得到了 <span class="math notranslate nohighlight">\(f*g(T)=\int f(t)g(T-t)dt\)</span> 的直观的图示表达。</p>
+<p>一般来讲，当我们用计算机处理数据时，时间会被离散化，传感器会定期地反馈数据。所以在上述例子中，假设传感器每秒反馈一次测量结果是比较现实的。这样，时刻 <span class="math notranslate nohighlight">\(t_{i}\)</span> 只能取整数值，如果假设 <span class="math notranslate nohighlight">\(g\)</span> 和 <span class="math notranslate nohighlight">\(f\)</span> 都定义在整数时刻 <span class="math notranslate nohighlight">\(t_{i}\)</span> 上，就可以定义上述条件下离散形式的卷积：</p>
+<div class="math notranslate nohighlight">
+\[
+h(T)=(f*g)(T)=\sum_{i=0}^{i=T} f(t_{i})g(T-t_{i})
+\]</div>
+</section>
+<section id="id5">
+<h3>卷积的性质<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>卷积满足以下的数学定律和具体的性质：</p>
+<ol class="arabic simple">
+<li><p>交换律：<span class="math notranslate nohighlight">\(f * g = g * f\)</span>；</p></li>
+<li><p>结合律：<span class="math notranslate nohighlight">\((f * g) * h = f * (g * h)\)</span>；</p></li>
+<li><p>分配律：<span class="math notranslate nohighlight">\(f * (g + h) = f * g + f * h\)</span>；</p></li>
+<li><p>单位响应：存在一个函数 <span class="math notranslate nohighlight">\(\delta\)</span>，使得 <span class="math notranslate nohighlight">\(f * \delta = f\)</span>。</p></li>
+</ol>
+<blockquote>
+<div><p>其中 <span class="math notranslate nohighlight">\(\delta\)</span> 是狄拉克 <span class="math notranslate nohighlight">\(\delta\)</span> 函数（连续）或单位脉冲函数（离散）。</p>
+</div></blockquote>
+</section>
+<section id="id6">
+<h3>卷积物理意义<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
+<p>卷积的物理意义取决于它所应用的具体领域。在不同的领域中，卷积可以代表不同的物理过程。</p>
+<ol class="arabic simple">
+<li><p>信号处理</p></li>
+</ol>
+<p>在信号处理领域，卷积的物理意义通常与系统的响应有关。假设我们有一个输入信号 <span class="math notranslate nohighlight">\(f(t)\)</span>（例如，一个音频信号）和一个系统对该信号的响应 <span class="math notranslate nohighlight">\(g(t)\)</span>（系统的输出）。系统的响应 <span class="math notranslate nohighlight">\(g(t)\)</span> 可以是理想的，也可以是实际测量得到的。</p>
+<p>当输入信号 <span class="math notranslate nohighlight">\(f(t)\)</span> 通过系统时，系统的输出 <span class="math notranslate nohighlight">\(h(t)\)</span> 可以通过卷积 <span class="math notranslate nohighlight">\(f∗g\)</span> 来计算。这里的卷积表示系统对输入信号的累积响应。具体来说，<span class="math notranslate nohighlight">\(h(t)\)</span> 在任意时刻 <span class="math notranslate nohighlight">\(t\)</span> 的值是输入信号 <span class="math notranslate nohighlight">\(f(t)\)</span> 与系统响应 <span class="math notranslate nohighlight">\(g(t)\)</span> 在过去所有时刻的加权叠加。权重由系统响应 <span class="math notranslate nohighlight">\(g\)</span> 决定，反映了系统对不同时刻输入信号的“记忆”。</p>
+<p>例如，如果一个系统对输入信号的响应是滞后的，那么输出信号 <span class="math notranslate nohighlight">\(h(t)\)</span> 将是输入信号 <span class="math notranslate nohighlight">\(f(t)\)</span> 的平滑版本，其中 <span class="math notranslate nohighlight">\(g(t)\)</span> 决定了平滑的程度。</p>
+<ol class="arabic simple" start="2">
+<li><p>图像处理</p></li>
+</ol>
+<p>在图像处理中，卷积通常用于滤波和特征提取。在这种情况下，图像可以被视为二维信号 <span class="math notranslate nohighlight">\(f(x,y)\)</span>，其中 <span class="math notranslate nohighlight">\(x\)</span> 和 <span class="math notranslate nohighlight">\(y\)</span> 分别是图像的水平和垂直坐标。卷积核 <span class="math notranslate nohighlight">\(g(x,y)\)</span> 是一个小的权重矩阵，它在图像上滑动，计算每个像素点的加权平均值。</p>
+<p>这个过程的物理意义是将图像的每个像素点与其周围的像素点进行比较，通过加权平均来确定这个像素点的新值。卷积核 <span class="math notranslate nohighlight">\(g\)</span> 的设计决定了这种比较的方式，例如，边缘检测卷积核会突出显示图像中强度变化明显的区域，从而检测出边缘。</p>
+<ol class="arabic simple" start="3">
+<li><p>概率论</p></li>
+</ol>
+<p>在概率论中，两个独立随机变量的联合概率密度函数的卷积给出了它们的和的概率密度函数。这背后的物理意义是，如果你有两个随机过程，它们分别产生随时间变化的概率密度函数，那么这两个过程叠加后的新过程的概率密度函数可以通过卷积原来的两个概率密度函数来得到。</p>
+<ol class="arabic simple" start="4">
+<li><p>其他物理系统</p></li>
+</ol>
+<p>在其他物理系统中，卷积可以表示扩散过程、波的传播、材料的混合等。在这些情况下，卷积描述了一个物理量（如温度、压力、浓度等）随时间和空间的分布变化，它是通过系统中各个部分之间的相互作用和传播效应累积而成的。</p>
+<p>总的来说，卷积的物理意义是将两个函数（或信号）通过一种特定的方式结合起来，产生一个新的函数，这个新函数在某种意义上代表了这两个函数的相互作用或混合。具体意义取决于应用领域和函数（信号）的物理含义。</p>
+</section>
+<section id="id7">
+<h3>离散卷积<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
+<p>从上文信号分析的部分中，我们得到离散形式的卷积公式：</p>
+<div class="math notranslate nohighlight">
+\[
+(f*g)(n)\triangleq\sum_{\mathbb{Z}^{n}}f(m)g(n-m)
+\]</div>
+<p>离散卷积是指将两个离散序列中的数，按照规则，两两相乘再相加的操作。</p>
+<p>离散卷积可以看作矩阵的乘法，然而，这个矩阵的一些元素被限制为必须和另外一些元素相等。比如对于单变量的离散卷积，矩阵每一行中的元素都与上一行对应位置平移一个单位的元素相同。这种矩阵叫做 Toeplitz 矩阵。</p>
+<p>将上述离散卷积公式拓展到二维空间即可得到神经网络中的卷积，可简写为：</p>
+<div class="math notranslate nohighlight">
+\[
+S(i,j)=(I^{*}K)(i,j)=\sum_{m}\sum_{n}I(m,n)K(i-m,j-n)
+\]</div>
+<p>其中：S 为卷积的输出，I 为卷积输入，K 为卷积核的尺寸。因为卷积是可交换的，我们可等价地写作：</p>
+<div class="math notranslate nohighlight">
+\[
+S(i,j)=(K^{*}I)(i,j)=\sum_{m}\sum_{n}I(i-m,j-n)K(m,n)
+\]</div>
+<p>对于二维的情况，卷积对应着一个双重分块循环矩阵。除了元素相等方面的限制之外，卷积通常对应着一个非常稀疏的矩阵。这是因为核的大小通常远小于输入图像的大小。任何一个使用矩阵乘法但是并不依赖于矩阵结构的特殊性质的神经网络算法，都适用于卷积计算，并且不需要对神经网络做出大的修改。</p>
+<p>在卷积网络的术语中，卷积的第一个参数 <span class="math notranslate nohighlight">\(f\)</span> 通常叫做输入(input)，第二个参数 <span class="math notranslate nohighlight">\(g\)</span> 叫做核函数（kernel function）。输出有时被称为特征映射(feature map)。在机器学习的应用中，输入通常是多维数组的数据，而核通常是由学习算法优化得到的多维数组的参数。我们把这些多维数组叫做张量。因为在输入与核中的每一个元素都必须明确地分开存储，我们通常假设在存储了数值的有限点集以外，这些函数的值都为 0。这意味着在实际操作中，我们可以通过对有限个数组元素的求和来实现无限求和。</p>
+</section>
+</section>
+<section id="cnn">
+<h2>CNN 卷积计算<a class="headerlink" href="#cnn" title="Link to this heading">#</a></h2>
+<p>当我们在神经网络的上下文中讨论卷积时，通常不是特指数学文献中所使用的那种标准的离散卷积运算。当提到神经网络中的卷积时，通常是指由多个并行卷积组成的计算。这是因为，虽然具有单个核的卷积可以作用在多个空间位置上，但它只能提取一种类型的特征。通常，我们希望网络的每一层能够在多个位置提取多种类型的特征。当处理图像时，我们通常把卷积的输入输出看作 3 维的张量 <span class="math notranslate nohighlight">\([C,W,H]=[[·]_{W×H},[·]_{W×H},[·]_{W×H}]\)</span>，其中一个索引 <span class="math notranslate nohighlight">\(C\)</span> 用于表明不同的通道（比如 RGB 三通道 <span class="math notranslate nohighlight">\([R_{m×n},G_{m×n},B_{m×n}]\)</span>），另外两个索引 <span class="math notranslate nohighlight">\(W,H\)</span> 标明在每个通道的空间坐标。软件实现通常使用批处理模式，所以实际上会使用 4 维的张量 <span class="math notranslate nohighlight">\([N,C,W,H]\)</span>，第 4 维索引 <span class="math notranslate nohighlight">\(N\)</span> 用于标明批处理中的不同实例。</p>
+<p>卷积神经网络主要由卷积层、池化层和全连接层三个部分构成。其中，卷积层是卷积神经网络的核心部分，它通过对输入图像进行卷积操作来提取图像的特征。卷积层的输入通常是一个多通道的（例如多通道图像），每个通道代表一个特征，卷积层的输出也是多通道的，其中每个通道表示一个不同的特征。池化层用于降低特征图的空间分辨率，并增强模型对输入图像的平移不变性和鲁棒性。全连接层通常用于将卷积层和池化层提取的特征进行分类或回归。它的输入是一维向量，其输出的维度与任务的分类数或回归值的维度相同。</p>
+<p>如下图所示, 神经网络中的卷积计算过程可描述为：<span class="math notranslate nohighlight">\(3 * 3\)</span> 的卷积核在 <span class="math notranslate nohighlight">\(8 * 8\)</span> 的图像上进行滑动，每次滑动时，都把卷积核和对应位置的元素进行相乘再求和。青色区域为其感受野。</p>
+<p><img alt="神经网络中卷积计算过程" src="../_images/02Conv09.png" /></p>
+<section id="id8">
+<h3>名词解释<a class="headerlink" href="#id8" title="Link to this heading">#</a></h3>
+<p>卷积的操作过程中涉及到多个专业名词和不同的计算方式，如 Padding、Stride、Channel、Kernel 等，下面将深入介绍不同名词之间的关系和表达含义。</p>
+<ol class="arabic simple">
+<li><p><strong>填充（Padding）</strong>：防止图像边缘信息丢失，在输入图像的周围添加额外的行/列，通常用“0”来进行填充。其作用为使卷积后图像分辨率不变，方便计算特征图尺寸的变化，弥补边界。</p></li>
+</ol>
+<p>填充背后的数学原理是这样的，如果我们有一个 <span class="math notranslate nohighlight">\(n×n\)</span> 的图像，用 <span class="math notranslate nohighlight">\(k×k\)</span> 的卷积核做卷积，那么输出的大小就是 <span class="math notranslate nohighlight">\((n-k+1)×(n-k+1)\)</span>。这样的话会有两个缺点：</p>
+<ul class="simple">
+<li><p>第一个缺点是每次做卷积操作，图像就会缩小，在经过多层卷积后，得到的图像就会非常小；</p></li>
+<li><p>第二个缺点是在角落或者边缘区域的像素点在输出中采用较少，卷积核遍历时只经过一次，而其他区域的像素点可能会计算多次。</p></li>
+</ul>
+<p>针对以上两个问题，我们采用的方法就是填充。假设填充的行/列数为 <span class="math notranslate nohighlight">\(p\)</span>，因为我们在周围都填充了一个像素点，输出也就变成了 <span class="math notranslate nohighlight">\((n+2p-k+1)×(n+2p-k+1)\)</span>。</p>
+<p>Padding 通常有 3 种方法：Valid 方式、Same 方式和自定义 Padding。</p>
+<p><strong>Valid 方式</strong></p>
+<p>Valid 意为不填充，这样的话，输入为 <span class="math notranslate nohighlight">\(n×n\)</span> 的图像，用 <span class="math notranslate nohighlight">\(k×k\)</span> 的卷积核卷积，最终得到 <span class="math notranslate nohighlight">\((n-k+1)×(n-k+1)\)</span> 的输出。</p>
+<p><strong>Same 方式</strong></p>
+<p>Same 意为填充后输出大小和输入大小一致。根据原始输入计算得到的输出尺寸 <span class="math notranslate nohighlight">\(n-k+1\)</span>，填充 <span class="math notranslate nohighlight">\(p\)</span> 行/列后，公式变为 <span class="math notranslate nohighlight">\(n+2p-k+1\)</span>。令 <span class="math notranslate nohighlight">\(n+2p-k+1=n\)</span>，使得输出和输入大小相等，解得 <span class="math notranslate nohighlight">\(p=(k-1)/2\)</span>。这就产生了两种情况。若 <span class="math notranslate nohighlight">\(k\)</span> 为奇数，可以直接根据公式计算得到 <span class="math notranslate nohighlight">\(p\)</span>；若 <span class="math notranslate nohighlight">\(k\)</span> 为偶数，则只能进行不对称填充（比如左边填充多一点，右边填充少一点）以保证输出尺寸不变。</p>
+<p><strong>自定义方式</strong></p>
+<p>自定义意为填充自定义的行/列数。定义 <span class="math notranslate nohighlight">\(w\)</span> 为图的宽，<span class="math notranslate nohighlight">\(h\)</span> 为图的高，其生成的特征图大小的计算公式为：</p>
+<div class="math notranslate nohighlight">
+\[
+F_{out}^{h}=\left[\frac{F_{in_h}-k_{h}+2 p_{h} }s\right]+1
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+F_{out}^{w}=\left[\frac{F_{in_w}-k_{w}+2 p_{w} }s\right]+1
+\]</div>
+<ol class="arabic simple" start="2">
+<li><p><strong>步长（Stride）</strong>：步长是指卷积核在每一次卷积操作中滑动的距离。步长的大小可以影响输出数据的大小，也可以影响特征提取能力和计算复杂度。当步长增大时，输出数据的尺寸会减小，特征提取能力会变弱，但计算速度会加快。</p></li>
+</ol>
+<p>我们可以把 Stride 的过程看作对全卷积函数输出的下采样，如果想在输出的每个方向上每隔 <span class="math notranslate nohighlight">\(s\)</span> 个像素进行采样，或者说在图像中卷积核的滑动距离为 <span class="math notranslate nohighlight">\(s\)</span>，那么这个过程可用公式描述为：</p>
+<div class="math notranslate nohighlight">
+\[
+S(i,j)=(K^{*}I)(i,j)=\sum_{m}\sum_{n}I((i-1)×s+m,(j-1)×s+n)K(m,n)
+\]</div>
+<ol class="arabic simple" start="3">
+<li><p><strong>通道数（Channel）</strong>：通道数也称为深度或特征图数量，是指卷积神经网络中每一层输出的特征图数量。通道数的大小直接影响了卷积神经网络的特征提取能力和计算复杂度。通过增加通道数，可以增强卷积神经网络的特征提取能力，但也会增加计算复杂度。</p></li>
+<li><p><strong>卷积核（Kernel）</strong>：是具有可学习参数的算子，用于对输出图像进行特征提取，输出通常为特征图。每一个卷积核代表一种模式/特征，有几个卷积核就有几张特征图，一个卷积核都对应一个特征图。在机器学习中，卷积核的参数是由反向传播/梯度下降算法计算更新，非人工设置。其特点为：1）卷积核每次仅连接 K×K 区域，K×K 是卷积核的尺寸；2）卷积核参数重复使用（参数共享），在图像上滑动。</p></li>
+<li><p><strong>特征图（Feature Map）</strong>：输出特征图的尺寸的计算公式为如下所示：</p></li>
+</ol>
+<p>其中：S 为卷积的输出，I 为卷积输入，K 为卷积核的尺寸。</p>
+</section>
+<section id="id9">
+<h3>朴素卷积过程<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
+<p>为了更好地理解后续的示例，现将卷积神经网络 CNN 的每层的相关参数定义为：</p>
+<blockquote>
+<div><p>H：图片高度 hight；</p>
+<p>W：图片宽度 width；</p>
+<p>C：原始图片通道数 channel；</p>
+<p>N：卷积核个数 Number of Kernel；</p>
+<p>K：卷积核高宽大小 Kernel Size；</p>
+<p>P：图像边扩充大小 Padding；</p>
+<p>S：卷积核窗口滑动的步长 Stride。</p>
+</div></blockquote>
+<p>定义 <span class="math notranslate nohighlight">\(P=0,S=1\)</span>，以 <span class="math notranslate nohighlight">\(N=6\)</span> 个卷积核对一张 <span class="math notranslate nohighlight">\(W=5,H=5,C=1\)</span> 的图片进行卷积的过程为例，其经过的步骤为：</p>
+<ol class="arabic simple">
+<li><p>一个卷积核覆盖的 <span class="math notranslate nohighlight">\(K×K=3×3\)</span> 的区域，对应位置的数据相乘后相加。</p></li>
+<li><p>每个卷积核均对 1 所述区域做乘加操作，并在不同通道(Channel)对应位置相加（本例中每个卷积核的通道数 <span class="math notranslate nohighlight">\(C=1\)</span>），得到的结果为特征图上相应位置的数值。</p></li>
+</ol>
+<div class="math notranslate nohighlight">
+\[
+f_{out}(i,j)=\sum_{C=0}^{1}\sum_{m=0}^{3}\sum_{n=0}^{3}I(i+m,j+n)K(m,n,C)
+\]</div>
+<p>1,2 步骤的过程如下图所示。</p>
+<p><img alt="卷积乘加过程" src="../_images/02Conv11.png" /></p>
+<ol class="arabic simple" start="3">
+<li><p>每个卷积核在图像上从左到右，从上到下滑动，依次计算特征图中的每一个像素点。根据特征图大小的计算公式，可知 <span class="math notranslate nohighlight">\(W_{f_{out}}=H_{f_{out}}=3\)</span>；本例中有 <span class="math notranslate nohighlight">\(N=6\)</span> 个卷积核，输出 6 张特征图。</p></li>
+</ol>
+<div class="math notranslate nohighlight">
+\[
+f_{out}^{l}(i,j)
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+i=0,1,……,W_{f_{out}}-1;J=0,1,……,H_{f_{out}}-1;l=1,2,……,6;
+\]</div>
+<p><img alt="卷积滑动求和过程" src="../_images/02Conv12.png" /></p>
+<p>每滑动一次，计算得到第 <span class="math notranslate nohighlight">\(l\)</span> 个特征图上的一个像素点，如上图所示。其滑动的总次数即为特征图的像素点数量。</p>
+<p>若有多个通道(假设 <span class="math notranslate nohighlight">\(C=3\)</span>)，则每个通道的 <span class="math notranslate nohighlight">\((i.j)\)</span> 位置的值对应相加得到最终结果：</p>
+<div class="math notranslate nohighlight">
+\[
+f_{out}^{l}(i,j)=f_{out}^{l}(i,j)_{C1}+f_{out}^{l}(i,j)_{C2}+f_{out}^{l}(i,j)_{C3}
+\]</div>
+<p>在卷积神经网络的层与层之间进行计算的时候，在 1,2 步骤之后，往往需要加偏置量 <span class="math notranslate nohighlight">\(b\)</span> ，以打破卷积神经网络的平移不变性，增强神经网络的拟合能力：</p>
+<div class="math notranslate nohighlight">
+\[
+f_{out}^{l}(i,j)=f_{out}^{l}(i,j)_{C1}+f_{out}^{l}(i,j)_{C2}+f_{out}^{l}(i,j)_{C3}+b
+\]</div>
+<p><img alt="卷积加偏置过程" src="../_images/02Conv13.png" /></p>
+<p>在卷积操作中卷积核是可学习的参数，其参数的更新由梯度下降算法确定。经过上面的介绍，可知每层卷积的参数量为 <span class="math notranslate nohighlight">\(C×K×K×N\)</span>。卷积层的参数较少，这也是由卷积层的<strong>局部连接</strong>和<strong>共享权重</strong>特性所决定。</p>
+<p><strong>局部连接</strong>：每个神经元仅与输入神经元的一块区域连接，这块局部区域称作感受野（receptive field）。在图像卷积操作中，即神经元在空间维度（spatial dimension，即在图像平面滑动区域）是局部连接，但在深度（通道方面的计算）上是全部连接。这种局部连接保证了学习后的卷积核能够对于局部的输入特征有最强的响应。</p>
+<p><strong>权重共享</strong>：计算同一个输出特征图时采用的卷积核是共享的，即一个卷积核在输入图像上滑动，产生一张特征图。该特征图的每个像素点都是由上述卷积核在输入图像上滑动卷积计算产生。这样可以很大程度上减少参数。在卷积层，通常采用多个卷积核提取不同特征，单个卷积核的不同通道之间权重不共享（比如 RGB 有三通道，每个通道的权重参数相互独立）。另外，偏置参数对同一个卷积核的各个参数共享。</p>
+</section>
+<section id="id10">
+<h3>计算复杂度分析<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>时间复杂度</p></li>
+</ol>
+<p>CNN 的时间复杂度主要取决于卷积层的计算量。对于单个卷积层，其时间复杂度可以表示为</p>
+<div class="math notranslate nohighlight">
+\[
+O(f_{in}^{2}× C_{in}× C_{out} × K^{2})
+\]</div>
+<p>其中 <span class="math notranslate nohighlight">\(f_{in}\)</span> 是输入特征图的尺寸，<span class="math notranslate nohighlight">\(C_{in}\)</span> 和 <span class="math notranslate nohighlight">\(C_{out}\)</span> 分别是输入和输出通道数，<span class="math notranslate nohighlight">\(K\)</span> 是卷积核的边长。这个公式表明，时间复杂度由与输入特征图的大小、输入通道数、输出通道数以及卷积核的大小完全确定。</p>
+<p>对于整个 CNN，时间复杂度是所有卷积层时间复杂度的累加。因此，减少卷积层的数量或降低每个卷积层的计算量都可以有效降低 CNN 的时间复杂度。例如，可以通过使用更小的卷积核、减少卷积层的通道数或采用更高效的卷积算法来优化 CNN 的性能。</p>
+<blockquote>
+<div><p>在本节的后续小节会为大家介绍卷积的优化算法。</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>空间复杂度</p></li>
+</ol>
+<p>空间复杂度（访存量），严格来讲包括两部分：总参数量 + 各层输出特征图。</p>
+<ul class="simple">
+<li><p>参数量：模型所有带参数的层的权重参数总量（即模型体积，下式第一个求和表达式，其中 <span class="math notranslate nohighlight">\(C_{l}\)</span> 为本层的输出通道数，对于第 <span class="math notranslate nohighlight">\(l\)</span> 个卷积层来说，本层的 <span class="math notranslate nohighlight">\(C_{in}\)</span> 就是上一层的输出通道数 <span class="math notranslate nohighlight">\(C_{l-1}\)</span>，<span class="math notranslate nohighlight">\(D\)</span> 为总的卷积层数）</p></li>
+<li><p>特征图：模型在实时运行过程中每层所计算出的输出特征图大小（下式第二个求和表达式）</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[
+O(\sum_{l=1}^DK_l^2\cdot C_{l-1}\cdot C_l+\sum_{l=1}^Df_l^2\cdot C_l)
+\]</div>
+<p>因此，空间复杂度与总层数、每层输入和输出通道数以及卷积核的大小有关。</p>
+<p>优化 CNN 的空间复杂度通常通过减少模型的参数数量来实现。例如，可以采用卷积核分解的方法，将一个较大的卷积核分解为多个较小的卷积核，从而减少模型的参数数量。此外，还可以通过剪枝、量化等方法来进一步降低模型的复杂度。</p>
+</section>
+<section id="pytorch">
+<h3>pytorch 卷积实现<a class="headerlink" href="#pytorch" title="Link to this heading">#</a></h3>
+<p>首先定义 padding 模式。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_padding</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;SAME&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return padding list in different modes.</span>
+<span class="sd">    params: inputs (input array)</span>
+<span class="sd">    params: ks (kernel size) [p, q]</span>
+<span class="sd">    return: padding list [n,m,j,k]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pad</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;FULL&quot;</span><span class="p">:</span>
+        <span class="n">pad</span> <span class="o">=</span> <span class="p">[</span><span class="n">ks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;VALID&quot;</span><span class="p">:</span>
+        <span class="n">pad</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;SAME&quot;</span><span class="p">:</span>
+        <span class="n">pad</span> <span class="o">=</span> <span class="p">[(</span><span class="n">ks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">ks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span>
+               <span class="p">(</span><span class="n">ks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">ks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">pad</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">ks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">pad</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Invalid mode&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pad</span>
+</pre></div>
+</div>
+<p>确定了输入尺寸、卷积核尺寸、Padding 以及 Stride，输出的尺寸就被确定下来。之后利用这些参数计算特征图的大小，并定义卷积。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">conv</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;SAME&quot;</span><span class="p">):</span>
+    <span class="c1"># 确定卷积核的尺寸</span>
+    <span class="n">ks</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    
+    <span class="c1"># get_padding 确定 padding 的模式和数值</span>
+    <span class="n">pad</span> <span class="o">=</span> <span class="n">get_padding</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;SAME&quot;</span><span class="p">)</span>
+    <span class="n">padded_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="n">pad</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pad</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="p">(</span><span class="n">pad</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pad</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span>
+	  
+    <span class="c1"># 得到输入图像的尺寸和通道数</span>
+    <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">channels</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">shape</span>
+    
+    <span class="c1"># 确定输出特征图的尺寸</span>
+    <span class="n">out_width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">width</span> <span class="o">+</span> <span class="n">pad</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">pad</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">ks</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">stride</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">out_height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">height</span> <span class="o">+</span> <span class="n">pad</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">pad</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">ks</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">stride</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">out_height</span><span class="p">,</span> <span class="n">out_width</span><span class="p">))</span>
+    
+    <span class="c1"># 进行卷积计算</span>
+    <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">padded_inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">ks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">padded_inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">ks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="p">)):</span>
+            <span class="n">outputs</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">padded_inputs</span><span class="p">[</span><span class="n">y</span><span class="p">:</span><span class="n">y</span><span class="o">+</span><span class="n">ks</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="n">ks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outputs</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id11">
+<h2>卷积优化手段<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<section id="tensor">
+<h3>Tensor 运算<a class="headerlink" href="#tensor" title="Link to this heading">#</a></h3>
+<p>张量（Tensor）是标量、矢量、矩阵等概念的总称与拓展，是机器学习领域的基础数据结构。程序中的张量是一个多维数组的数据结构。</p>
+<div class="highlight-C++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#define MAX_DIM 6</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">Tensor</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 维度信息</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">dim</span><span class="p">[</span><span class="n">MAX_DIM</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">num_dim</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// 数据信息</span>
+<span class="w">    </span><span class="kt">float</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">num_data</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>0 维张量，就是一个数。1 维张量等同于一个向量。2 维张量对应一个矩阵。3 维张量则是一个立方体。</p>
+<p><img alt="张量" src="../_images/02Conv14.png" /></p>
+<p>张量集到张量集的映射称为张量计算。用编程语言来说，输入是若干张量，输出也是若干个张量，并且无副作用（参考函数式编程）的函数称之为张量计算。</p>
+<p>张量有 “维度” 和 “数据” 两个组成要素，张量计算，也就包含维度与数据这两个组成要素的处理。比如矩阵乘法 C = MatMul(A, B)，首先是根据输入的两个张量 A, B 确定 C 的维度，然后根据 A 和 B 的数据再去计算 C 的数据。具体一些可参考下面的代码：</p>
+<div class="highlight-C++ notranslate"><div class="highlight"><pre><span></span><span class="n">Tensor</span><span class="o">*</span><span class="w"> </span><span class="nf">MatMul</span><span class="p">(</span><span class="n">Tensor</span><span class="o">*</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">Tensor</span><span class="o">*</span><span class="w"> </span><span class="n">B</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Tensor</span><span class="o">*</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Tensor</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// 计算维度</span>
+<span class="w">    </span><span class="n">C</span><span class="o">-&gt;</span><span class="n">num_dim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="n">C</span><span class="o">-&gt;</span><span class="n">dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A</span><span class="o">-&gt;</span><span class="n">dim</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">    </span><span class="n">C</span><span class="o">-&gt;</span><span class="n">dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">B</span><span class="o">-&gt;</span><span class="n">dim</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+
+<span class="w">    </span><span class="c1">// 分配内存</span>
+<span class="w">    </span><span class="n">C</span><span class="o">-&gt;</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// 计算数据</span>
+<span class="w">    </span><span class="n">Matrix</span><span class="o">::</span><span class="n">multi</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">C</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="id12">
+<h3>Tensor 内存布局<a class="headerlink" href="#id12" title="Link to this heading">#</a></h3>
+<p>NHWC 和 NCHW 是卷积神经网络(cnn)中广泛使用的数据格式。它们决定了多维数据，如图像、点云或特征图如何存储在内存中。</p>
+<blockquote>
+<div><p>NHWC(样本数，高度，宽度，通道)：这种格式存储数据通道在最后，是 TensorFlow 框架或者大部分推理引擎的默认格式；</p>
+<p>NCHW(样本数，通道，高度，宽度)：通道位于高度和宽度尺寸之前，经常与 PyTorch 一起使用。</p>
+</div></blockquote>
+</section>
+<section id="id13">
+<h3>Tensor 卷积运算<a class="headerlink" href="#id13" title="Link to this heading">#</a></h3>
+<p><img alt="张量卷积计算示意图" src="../_images/02Conv15.png" /></p>
+<p>当中张量的内存布局为 NHWC 时，卷积计算相应的伪代码如下。其中外三层循环遍历输出 C 的每个数据点，对于每个输出数据都需要经由内三层循环累加求和得到（点积）。</p>
+<div class="highlight-C++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">oh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">oh</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">OH</span><span class="p">;</span><span class="w"> </span><span class="n">oh</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">ow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">ow</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">OW</span><span class="p">;</span><span class="w"> </span><span class="n">ow</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">oc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">oc</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">OC</span><span class="p">;</span><span class="w"> </span><span class="n">oc</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">//OH,OW,OC 为输出图像的尺寸和通道数，ow,oh,oc 为输入图像当前像素点的坐标和通道序号</span>
+<span class="w">      </span><span class="n">C</span><span class="p">[</span><span class="n">oh</span><span class="p">][</span><span class="n">ow</span><span class="p">][</span><span class="n">oc</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">kh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">kh</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">KH</span><span class="p">,</span><span class="w"> </span><span class="n">kh</span><span class="o">++</span><span class="p">){</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">kw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">kw</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">KW</span><span class="p">,</span><span class="w"> </span><span class="n">kw</span><span class="o">++</span><span class="p">){</span>
+<span class="w">          </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">ic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">ic</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">IC</span><span class="p">,</span><span class="w"> </span><span class="n">ic</span><span class="o">++</span><span class="p">){</span>
+<span class="w">          </span><span class="c1">//KW,KH,IC 分别为第 i 个卷积核的尺寸和通道数，卷积核的通道数 IC 应与输入图像的通道数相匹配</span>
+<span class="w">            </span><span class="n">C</span><span class="p">[</span><span class="n">oh</span><span class="p">][</span><span class="n">ow</span><span class="p">][</span><span class="n">oc</span><span class="p">]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">oh</span><span class="o">+</span><span class="n">kh</span><span class="p">][</span><span class="n">ow</span><span class="o">+</span><span class="n">kw</span><span class="p">][</span><span class="n">ic</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">kh</span><span class="p">][</span><span class="n">kw</span><span class="p">][</span><span class="n">ic</span><span class="p">];</span>
+<span class="w">            </span><span class="c1">//表示在输入图像的 ic 通道下 ow,oh 位置开始进行卷积计算，ow+kh 表示在 ow 处右移 kh 个位置</span>
+<span class="w">            </span><span class="c1">//+=操作表示不同通道下的乘加结果求和，应“简单卷积过程”小节下步骤 3 的第二个公式</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>和矩阵乘的优化方法类似，我们也可针对该计算进行向量化、并行化、循环展开的基本的优化操作。</p>
+</section>
+</section>
+<section id="id14">
+<h2>小结与思考<a class="headerlink" href="#id14" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>卷积操作是深度学习中用于提取特征的关键数学运算，涉及两个函数的元素乘积与累加。</p></li>
+<li><p>卷积在不同领域具有不同的物理意义，如信号处理中的系统响应和图像处理中的特征提取。</p></li>
+<li><p>优化卷积计算对于提高神经网络模型效率至关重要，包括算法、内存访问、汇编和调度优化。</p></li>
+<li><p>张量运算和内存布局（如 NHWC 与 NCHW）对卷积性能有显著影响，是实现高效卷积计算的关键策略。</p></li>
+</ul>
+</section>
+<section id="id15">
+<h2>本节视频<a class="headerlink" href="#id15" title="Link to this heading">#</a></h2>
+<html>
+<iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=395040992&bvid=BV1No4y1e7KX&cid=1027996262&p=1&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</html>
+<html>
+<iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=651712557&bvid=BV1Ze4y1c7Bb&cid=1003817481&p=1&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</html>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./04Inference06Kernel"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="01Introduction.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Kernel 层架构</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="03Im2col.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Im2Col 算法</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">卷积的数学原理</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">通俗定义</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">具体例子</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">卷积的性质</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">卷积物理意义</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">离散卷积</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cnn">CNN 卷积计算</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">名词解释</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">朴素卷积过程</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">计算复杂度分析</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pytorch">pytorch 卷积实现</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">卷积优化手段</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tensor">Tensor 运算</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">Tensor 内存布局</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">Tensor 卷积运算</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id15">本节视频</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 01, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

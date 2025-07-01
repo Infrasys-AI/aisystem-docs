@@ -1,0 +1,1260 @@
+
+<!DOCTYPE html>
+
+
+<html lang="cn" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="推理系统架构" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="04Inference01Inference/04System.html" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
+<meta property="og:description" content="推理系统架构是 AI 领域中的一个关键组成部分，它负责将训练好的模型应用于实际问题，从而实现智能决策和自动化。在构建一个高效的推理系统时，我们不仅需要考虑其性能和准确性，还需要确保系统的可扩展性、灵活性以及对不同业务需求的适应性。在本节中，我们将主要以 NVIDIA Triton Inference Server 为基础深入探讨推理系统架构的各个方面。 推理、部署、服务化: 推理、部署和服务..." />
+<meta name="description" content="推理系统架构是 AI 领域中的一个关键组成部分，它负责将训练好的模型应用于实际问题，从而实现智能决策和自动化。在构建一个高效的推理系统时，我们不仅需要考虑其性能和准确性，还需要确保系统的可扩展性、灵活性以及对不同业务需求的适应性。在本节中，我们将主要以 NVIDIA Triton Inference Server 为基础深入探讨推理系统架构的各个方面。 推理、部署、服务化: 推理、部署和服务..." />
+
+    <title>推理系统架构 &#8212; AI System</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=aabdd393"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/rtd-data.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '04Inference01Inference/04System';</script>
+    <script src="https://assets.readthedocs.org/static/javascript/readthedocs-doc-embed.js"></script>
+    <link rel="icon" href="../_static/logo-square.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="推理引擎架构" href="05Inference.html" />
+    <link rel="prev" title="推理流程全景" href="03Workflow.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="cn"/>
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../reference/blog/atom.xml"
+  title="Blog"
+/>
+  
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-wide.svg" class="logo__image only-light" alt="AI System - Home"/>
+    <script>document.write(`<img src="../_static/logo-wide.svg" class="logo__image only-dark" alt="AI System - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Youtube</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Blibili</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/01Introduction.html">课程内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/02ArchSlim.html">AI 计算模式（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/03MobileParallel.html">AI 计算模式（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/04Metrics.html">关键设计指标</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/05Matrix.html">核心计算之矩阵乘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/06BitWidth.html">计算之比特位宽</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware02ChipBase/README.html">AI 芯片基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/01CPUBase.html">CPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/02CPUISA.html">CPU 指令集架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/03CPUData.html">CPU 计算本质</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/04CPULatency.html">CPU 计算时延</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/05GPUBase.html">GPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/06NPUBase.html">NPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/07Future.html">超异构计算</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware03GPUBase/README.html">图形处理器 GPU</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/01Works.html">GPU 工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/02Principle.html">为什么 GPU 适用于 AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/03Concept.html">GPU 架构与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/04History.html">GPU 架构回顾</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware04NVIDIA/README.html">英伟达 GPU 详解</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/01BasicTC.html">Tensor Core 基本原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/02HistoryTC.html">Tensor Core 架构演进</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/03DeepTC.html">Tensor Core 深度剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/04BasicNvlink.html">分布式通信与 NVLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/05DeepNvlink.html">NVLink 原理剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/06DeepNvswitch.html">NV Switch 深度解析</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware05Abroad/README.html">国外 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/04TPUIntrol.html">谷歌 TPU 历史发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/05TPU1.html">谷歌 TPU v1-脉动阵列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/06TPU2.html">谷歌 TPUv2 训练芯片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/07TPU3.html">谷歌 TPUv3 POD 形态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/08TPU4.html">谷歌 TPU v4 与光路交换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware06Domestic/README.html">国内 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/04Cambricon.html">寒武纪介绍</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/08AscendBase.html">昇腾 AI 架构介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/09AscendSOC.html">昇腾 AI 处理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/10AscendCube.html">昇腾 AI 核心单元</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/11AscendLayout.html">昇腾数据布局转换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware07Thought/README.html">AI 芯片黄金十年</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/01Introduction.html">芯片的编程体系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/02SIMTSIMD.html">SIMD &amp; SIMT 与芯片架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/03SPMT.html">SIMD &amp; SIMT 与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/04NVSIMT.html">CUDA 编程模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/05DSA.html">从 CUDA 对 AI 芯片思考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/06AIChip.html">AI 芯片的思考</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/01Introduction.html">编译器基础介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/02History.html">传统编译器发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/03GCC.html">GCC 主要特征</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/04LLVM.html">LLVM 架构设计和原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/05LLVMIR.html">LLVM IR 基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/06LLVMDetail.html">LLVM IR 详解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/07LLVMFrontend.html">LLVM 前端和优化层</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/08LLVMBackend.html">LLVM 后端代码生成</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler02AICompiler/README.html">AI 编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/01Appear.html">为什么需要 AI 编译器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/02Stage.html">AI 编译器历史阶段</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/03Architecture.html">AI 编译器基本架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/04Future.html">AI 编译器挑战与思考</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler03Frontend/README.html">前端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/01Introduction.html">AI 编译器前端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/02GraphIR.html">图算 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/03OPFusion.html">算子融合</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/04LayoutPrinc.html">布局转换原理与算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/06Memory.html">内存分配算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/07ConstantFold.html">常量折叠原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/08CSE.html">公共表达式消除原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/09DCE.html">死代码消除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/10algebraic.html">代数简化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler04Backend/README.html">后端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/01Introduction.html">AI 编译器后端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/02OPSCompute.html">计算与调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/03Optimization.html">算子手工优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/04LoopOpt.html">算子循环优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 四. 推理系统&amp;引擎 ===</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../04Inference/README.html">推理系统&amp;引擎概述</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">推理系统</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01Introduction.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02Constraints.html">推理系统介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Workflow.html">推理流程全景</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">推理系统架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05Inference.html">推理引擎架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07MindIEIntro.html">昇腾推理引擎 MindIE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08AscendCL.html">推理引擎示例：AscendCL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference02Mobilenet/README.html">模型轻量化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/01Introduction.html">推理参数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/021Squeezenet.html">SqueezeNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/022Shufflenet.html">ShuffleNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/023Mobilenet.html">MobileNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/024ESPNet.html">ESPNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/025FBNet.html">FBNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/026EfficientNet.html">EfficientNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/027GhostNet.html">GhostNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/02Cnn.html">CNN 模型小型化（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/031MobileVit.html">MobileVit 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/032MobileFormer.html">MobileFormer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/033EfficientFormer.html">EfficientFormer 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Cnn.html">CNN 模型小型化（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/03Transformer.html">Transformer 小型化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference02Mobilenet/04Transformer.html">Transformer 模型小型化</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference03Slim/README.html">模型压缩</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/02Quant.html">低比特量化原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/03QAT.html">感知量化训练 QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/04PTQ.html">训练后量化与部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/05Pruning.html">模型剪枝</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/06Distillation.html">知识蒸馏原理</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference04Converter/README.html">模型转换</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/02Principle.html">推理文件格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/03IR.html">自定义计算图 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/04Detail.html">模型转换流程</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference05Optimize/README.html">模型优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/01Optimizer.html">计算图优化架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/02Basic.html">离线图优化技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/03Extend.html">其他计算图优化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference06Kernel/README.html">Kernel 优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/01Introduction.html">Kernel 层架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/02Conv.html">卷积操作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/03Im2col.html">Im2Col 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/04Winograd.html">Winograd 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/05Qnnpack.html">QNNPack 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/06Memory.html">推理内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/08Others.html">汇编与循环优化</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 五. AI 框架核心模块 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../05Framework/README.html">AI 框架核心概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework01Foundation/README.html">AI 框架基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/01Introduction.html">内容介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/02Fundamentals.html">AI 框架作用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/03History.html">AI 框架之争</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/04Programing.html">框架编程范式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/05MindSpore.html">昇思 MindSore 关键特性</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework02AutoDiff/README.html">自动微分</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/01Introduction.html">自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/02BaseConcept.html">什么是微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/03GradMode.html">微分计算模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/04Implement.html">微分实现方式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/05ForwardMode.html">动手实现自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/06ReversedMode.html">动手实现 PyTorch 微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/07Challenge.html">自动微分的挑战&amp;未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework03DataFlow/README.html">计算图</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/02Computegraph.html">计算图原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/03Atuodiff.html">计算图与自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/04Dispatch.html">计算图的调度与执行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/05ControlFlow.html">计算图的控制流实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/06StaticGraph.html">动态图与静态图转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/07Future.html">计算图挑战与未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework04Parallel/README.html">分布式并行</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/02DataParallel.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/03ZeRODP.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/04TensorParallel.html">张量并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/05PipelineParallel.html">流水并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/06HybridParallel.html">混合并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/07MSParallel.html">昇思MindSpore并行</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/blob/master/04Inference01Inference/04System.md?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/edit/master/04Inference01Inference/04System.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/issues/new?title=Issue%20on%20page%20%2F04Inference01Inference/04System.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/04Inference01Inference/04System.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>推理系统架构</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">推理、部署、服务化</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference">推理（Inference）</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment">部署（Deployment）</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#serving">服务化（Serving）</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nvidia-triton">NVIDIA Triton 推理服务</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#triton">Triton 接入层</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Triton 模型仓库</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Triton 模型预编排</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Triton 推理引擎</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Triton 返回与监控</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">集成推理引擎</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">模型生命周期管理</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">金丝雀策略</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">回滚策略</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">本节视频</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <!--Copyright © 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+<section class="tex2jax_ignore mathjax_ignore" id="id1">
+<h1>推理系统架构<a class="headerlink" href="#id1" title="Link to this heading">#</a></h1>
+<p>推理系统架构是 AI 领域中的一个关键组成部分，它负责将训练好的模型应用于实际问题，从而实现智能决策和自动化。在构建一个高效的推理系统时，我们不仅需要考虑其性能和准确性，还需要确保系统的可扩展性、灵活性以及对不同业务需求的适应性。在本节中，我们将主要以 NVIDIA Triton Inference Server 为基础深入探讨推理系统架构的各个方面。</p>
+<section id="id2">
+<h2>推理、部署、服务化<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<p>推理、部署和服务化是构建高效、可靠的机器学习系统不可或缺的三个环节。它们共同构成了从模型训练到实际应用的桥梁，确保了模型能够在真实世界中发挥其预测和决策的能力。推理阶段关注于利用训练好的模型进行高效计算和生成输出；部署阶段涉及将模型迁移到生产环境并优化其性能；服务化阶段则将模型转化为可以被实际应用调用的服务。接下来，我们将探讨推理、部署和服务化这三个阶段，以及它们如何协同工作，共同支撑起一个高效、稳定的推理系统。通过对这些环节的深入理解和实践，我们可以确保机器学习模型在各种应用场景中实现最佳性能，并为用户提供可靠的解决方案。</p>
+<section id="inference">
+<h3>推理（Inference）<a class="headerlink" href="#inference" title="Link to this heading">#</a></h3>
+<p>推理是指在机器学习和深度学习中使用训练好的模型对新数据进行处理并生成输出结果的过程。这个过程可以看作是模型前向计算的一部分。模型接受输入数据，通过其内部的参数和架构进行计算，最终输出预测结果。推理阶段的高效性和准确性是衡量一个模型实用价值的重要标准。</p>
+<p>推理与预测虽然有时被混用，但在技术细节和应用场景上有所不同。推理侧重于模型内部的计算过程，而预测则更多涉及统计学和数据分析领域。在实际应用中，推理通常是模型运行的一部分，而预测可能包括更多的统计处理和数据解读。</p>
+<p>推理过程的优化是一个重要研究方向。为了加快推理速度、减少计算资源的消耗，工程师们常常会使用模型压缩技术，如量化、剪枝和蒸馏。此外，硬件加速（如 GPU、TPU）和专用芯片（如 AI 加速器）也是提高推理效率的重要手段。</p>
+</section>
+<section id="deployment">
+<h3>部署（Deployment）<a class="headerlink" href="#deployment" title="Link to this heading">#</a></h3>
+<p>训练得到的模型并不仅仅是为了学术研究，最终目的是应用于实际问题的解决。因此，模型的部署是一个至关重要的阶段。模型部署涉及将训练好的模型从开发环境迁移到生产环境，使其能够处理真实世界的数据并生成有用的结果。</p>
+<p>模型部署的过程包括多个步骤和挑战：</p>
+<ul class="simple">
+<li><p><strong>移植</strong>：将模型从开发环境迁移到生产环境，这可能涉及不同的操作系统、硬件平台和软件框架。</p></li>
+<li><p><strong>压缩</strong>：为了在有限的计算资源下运行，模型需要进行压缩。常见的方法包括模型剪枝、量化和蒸馏，这些技术可以减少模型的参数数量和计算复杂度。</p></li>
+<li><p><strong>加速</strong>：使用专用的硬件（如 GPU、TPU）和优化的算法（如图计算库、并行计算）来加速模型的推理过程。</p></li>
+<li><p><strong>监控和维护</strong>：部署后的模型需要持续监控其性能，并进行必要的维护和更新，以确保其在实际应用中始终保持高效和准确。</p></li>
+</ul>
+</section>
+<section id="serving">
+<h3>服务化（Serving）<a class="headerlink" href="#serving" title="Link to this heading">#</a></h3>
+<p>在模型部署的过程中，服务化是实现模型高效应用的关键步骤。服务化指的是将模型封装成一个可以供其他系统或用户调用的服务。这种服务化可以通过多种方式实现，包括 SDK 封装、应用集成和 Web 服务。</p>
+<ul class="simple">
+<li><p>SDK 封装：将模型的推理功能封装成一个软件开发工具包（SDK），开发者可以将其集成到自己的应用程序中。这种方式适用于需要在本地设备上进行推理的应用，如移动应用和嵌入式系统。</p></li>
+<li><p>应用集成：直接将模型集成到现有的应用程序中，使其成为应用的一部分。这种方式适用于那些需要紧密结合模型功能和业务逻辑的场景。</p></li>
+<li><p>Web 服务：将模型部署为一个 Web 服务，对外暴露 API 接口（如 HTTP(S)、RPC 等）。这种方式使得模型可以被远程调用，适用于需要跨平台、跨设备访问模型的场景。</p></li>
+</ul>
+<p>服务化的优势在于可以灵活地将模型功能暴露给不同的用户和系统，支持多种访问方式，并且可以方便地进行版本管理和更新。此外，通过 Web 服务，可以实现模型的分布式部署和负载均衡，从而提高系统的可用性和响应速度。</p>
+<p><img alt="TF Serving 架构图" src="../_images/04System01.png" /></p>
+<p>一个早期的服务化框架是谷歌在 2016 年针对 TensorFlow 推出的 TensorFlow Serving，它能够把 TensorFlow 模型以 web 服务的方式对外暴露接口，通过网络请求方式接受来自客户端（Client）的请求数据，计算得到前向推理结果并返回。这成为了模型服务化的重要里程碑。除此之外，业界还涌现了许多其他优秀的服务化框架，如 TorchServe、Triton、BentoML、Kubeflow 和 Seldon Core 等。</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>服务框架</p></th>
+<th class="head"><p>支持的模型</p></th>
+<th class="head"><p>开源仓库地址</p></th>
+<th class="head"><p>开源时间</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>TensorFlow Serving</p></td>
+<td><p>TensorFlow</p></td>
+<td><p><a class="github reference external" href="https://github.com/TensorFlow/serving">TensorFlow/serving</a></p></td>
+<td><p>2016</p></td>
+</tr>
+<tr class="row-odd"><td><p>TorchServe</p></td>
+<td><p>PyTorch</p></td>
+<td><p><a class="github reference external" href="https://github.com/pytorch/serve">pytorch/serve</a></p></td>
+<td><p>2020</p></td>
+</tr>
+<tr class="row-even"><td><p>Triton</p></td>
+<td><p>TensorFlow/PyTorch 等</p></td>
+<td><p><a class="github reference external" href="https://github.com/triton-inference-server/server">triton-inference-server/server</a></p></td>
+<td><p>2018</p></td>
+</tr>
+<tr class="row-odd"><td><p>BentoML</p></td>
+<td><p>TensorFlow/PyTorch 等</p></td>
+<td><p><a class="github reference external" href="https://github.com/bentoml/BentoML">bentoml/BentoML</a></p></td>
+<td><p>2019</p></td>
+</tr>
+<tr class="row-even"><td><p>Kubeflow</p></td>
+<td><p>TensorFlow/PyTorch 等</p></td>
+<td><p><a class="github reference external" href="https://github.com/kubeflow/kfserving">kubeflow/kfserving</a></p></td>
+<td><p>2019</p></td>
+</tr>
+<tr class="row-odd"><td><p>Seldon Core</p></td>
+<td><p>TensorFlow/PyTorch 等</p></td>
+<td><p><a class="github reference external" href="https://github.com/SeldonIO/seldon-Core">SeldonIO/seldon-Core</a></p></td>
+<td><p>2018</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="nvidia-triton">
+<h2>NVIDIA Triton 推理服务<a class="headerlink" href="#nvidia-triton" title="Link to this heading">#</a></h2>
+<p>NVIDIA Triton Inference Server（简称 Triton）是一个高性能、可扩展的开源推理框架，由英伟达等公司推出。Triton 旨在为用户提供云和边缘推理的部署解决方案，支持多种神经网络模型和框架。</p>
+<p><img alt="Triton 服务流程图" src="../_images/04System02.png" /></p>
+<p>Triton 的主要特点包括：</p>
+<ul class="simple">
+<li><p><strong>高性能</strong>：通过优化模型加载、执行和卸载的流程，Triton 显著提高了推理性能。</p></li>
+<li><p><strong>可扩展性</strong>：支持水平扩展和垂直扩展，能够适应不同的计算资源和负载需求。</p></li>
+<li><p><strong>多框架支持</strong>：兼容 TensorFlow、PyTorch、ONNX 等主流 AI 框架。</p></li>
+<li><p><strong>模型优化</strong>：集成 TensorRT 等优化工具，进一步提升模型推理性能。</p></li>
+<li><p><strong>灵活性</strong>：提供灵活的部署选项，支持公有云、私有云和边缘设备。</p></li>
+<li><p><strong>安全性</strong>：支持安全传输和访问控制，保障推理服务的安全性。</p></li>
+</ul>
+<p>作为一个强大的推理框架，Triton 能够满足多样化的 AI 应用需求，帮助企业和开发者构建高效、可靠的推理服务。Triton 还拥有活跃的开源社区，提供了丰富的文档、示例和工具，帮助开发者快速上手和部署推理服务。本小节将以 Triton 为例，介绍推理系统的架构和实现原理。</p>
+<section id="triton">
+<h3>Triton 接入层<a class="headerlink" href="#triton" title="Link to this heading">#</a></h3>
+<p>Triton 通过提供多种接入方式，支持不同场景下的模型推理需求。</p>
+<p><img alt="Triton 接入层" src="../_images/04System03.png" /></p>
+<ol class="arabic simple">
+<li><p>HTTP/REST 协议支持</p></li>
+</ol>
+<p>HTTP/REST 是一种广泛使用的网络通信协议，它基于 HTTP 协议，使用 RESTful 架构风格。Triton 通过支持 HTTP/REST 协议，允许用户通过标准的 HTTP 请求来调用模型推理服务。</p>
+<ul class="simple">
+<li><p><strong>优点</strong>：</p>
+<ul>
+<li><p>易于理解和实现。</p></li>
+<li><p>广泛的客户端支持。</p></li>
+<li><p>可以利用现有的 HTTP 基础设施和工具。</p></li>
+</ul>
+</li>
+<li><p><strong>缺点</strong>：</p>
+<ul>
+<li><p>相比于 GRPC，HTTP/REST 通常在性能上稍逊一筹。</p></li>
+<li><p>不如 GRPC 灵活，特别是在处理复杂数据结构时。</p></li>
+</ul>
+</li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p>GRPC 协议支持</p></li>
+</ol>
+<p>GRPC 是一个高性能、开源和通用的 RPC 框架，由谷歌主导开发。它使用 Protocol Buffers 为接口定义语言，支持多种编程语言。Triton 通过支持 GRPC 协议，提供了一种高效的通信机制，特别适用于需要高性能和低延迟的场景。</p>
+<ul class="simple">
+<li><p><strong>优点</strong>：</p>
+<ul>
+<li><p>高性能和低延迟。</p></li>
+<li><p>支持流式调用，可以处理大量数据。</p></li>
+<li><p>支持多种编程语言，易于集成。</p></li>
+</ul>
+</li>
+<li><p><strong>缺点</strong>：</p>
+<ul>
+<li><p>相比于 HTTP/REST，GRPC 的学习曲线可能更陡峭。</p></li>
+<li><p>需要特定的客户端库支持。</p></li>
+</ul>
+</li>
+</ul>
+<ol class="arabic simple" start="3">
+<li><p>共享内存 IPC 通信机制</p></li>
+</ol>
+<p>共享内存是一种进程间通信（IPC）方式，允许多个进程共享同一块内存区域。Triton 通过支持共享内存 IPC，可以显著提高数据传输效率，特别是在高负载和大数据量的场景中。</p>
+<p><strong>基本工作原理</strong>：</p>
+<ol class="arabic simple">
+<li><p><strong>创建共享内存区域</strong>：操作系统首先创建一个共享内存区域。这个区域可以被多个进程访问，并且可以包含任意类型的数据。</p></li>
+<li><p><strong>映射共享内存</strong>：各个进程将共享内存区域映射到自己的地址空间中。映射操作使得进程能够像访问自己的内存一样访问共享内存区域。</p></li>
+<li><p><strong>数据交换</strong>：进程通过读写共享内存区域来交换数据。由于数据直接在内存中交换，这减少了数据复制的开销，提高了通信效率。</p></li>
+<li><p><strong>同步机制</strong>：由于多个进程可以同时访问共享内存，因此需要同步机制来避免数据竞争和一致性问题。这通常通过信号量、互斥锁等同步原语来实现。</p></li>
+<li><p><strong>内存管理</strong>：操作系统负责管理共享内存的生命周期，包括创建、销毁和权限控制。当共享内存不再需要时，操作系统会负责回收资源。</p></li>
+</ol>
+<p><img alt="共享内存原理图" src="../_images/04System04.png" /></p>
+<ul class="simple">
+<li><p><strong>优点</strong>：</p>
+<ul>
+<li><p>极高的数据传输效率，因为避免了数据的复制。</p></li>
+<li><p>适用于高负载和大数据量的场景。</p></li>
+<li><p>可以减少 CPU 的使用，因为减少了数据传输的开销。</p></li>
+</ul>
+</li>
+<li><p><strong>缺点</strong>：</p>
+<ul>
+<li><p>实现复杂度较高，需要处理好同步和内存管理。</p></li>
+<li><p>不同操作系统和平台上的支持可能有所不同。</p></li>
+</ul>
+</li>
+</ul>
+<p>在实际应用中，开发者可以根据具体需求选择合适的接入方式。例如，对于需要快速开发和部署的 Web 应用，可以选择 HTTP/REST 协议；对于追求极致性能的分布式系统，可以选择 GRPC 协议；而对于需要处理大量数据的高性能计算场景，共享内存 IPC 则是最佳选择。</p>
+</section>
+<section id="id3">
+<h3>Triton 模型仓库<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>Triton 的模型仓库是一个用于存储和管理机器学习模型的地方，它支持本地存储和云存储解决方案，并且可以处理多个模型以及模型编排。</p>
+<p><img alt="Triton 模型仓库" src="../_images/04System05.png" /></p>
+<ol class="arabic simple">
+<li><p>本地模型仓库</p></li>
+</ol>
+<p>本地模型仓库指的是将模型文件存储在物理服务器或虚拟机的磁盘上。这种方式的优点是简单、直接，并且可以提供快速的模型访问速度。</p>
+<ul class="simple">
+<li><p><strong>优点</strong>：</p>
+<ul>
+<li><p>本地存储通常能够提供较低的延迟和较快的数据访问速度。</p></li>
+<li><p>用户对存储介质有完全的控制权，可以灵活管理存储资源。</p></li>
+</ul>
+</li>
+<li><p><strong>缺点</strong>：</p>
+<ul>
+<li><p>相比于云存储，本地存储的扩展性较差。</p></li>
+<li><p>如果物理硬件发生故障，可能会影响模型的可用性。</p></li>
+</ul>
+</li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p>云模型仓库</p></li>
+</ol>
+<p>云模型仓库指的是将模型文件存储在云服务提供商的存储服务上，如谷歌 Cloud Platform (GCP)的 Cloud Storage 或 Amazon Web Services (AWS) 的 S3。</p>
+<ul class="simple">
+<li><p><strong>优点</strong>：</p>
+<ul>
+<li><p>云存储服务通常提供良好的扩展性，可以根据需要轻松调整存储容量。</p></li>
+<li><p>云服务提供商通常会提供数据备份和恢复服务，增强数据的可靠性。</p></li>
+<li><p>可以从全球任何地方通过网络访问云存储中的模型。</p></li>
+</ul>
+</li>
+<li><p><strong>缺点</strong>：</p>
+<ul>
+<li><p>长期使用云存储服务可能会产生较高的费用。</p></li>
+<li><p>网络延迟可能会影响模型的加载和访问速度。</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h3>Triton 模型预编排<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<p>Triton 模型预编排允许用户在模型部署之前，通过定义模型的执行方式，来优化模型的运行效率和资源分配，从而实现更好的性能和成本效益。</p>
+<p>模型预编排的核心在于根据请求的具体内容智能地调度和组织模型的加载、运行与资源分配。这涉及到对模型执行流程的细粒度控制，确保每个请求都能以最优路径得到处理。在 Triton 中，这一过程始于对请求 URL 的解析，通过分析请求中携带的信息，如模型名称、版本号及特定的输入参数等，预编排系统能够确定下一步的执行逻辑。</p>
+<p><img alt="Triton 模型预编排" src="../_images/04System06.png" /></p>
+<p>Pre-Model Scheduler Queues 是模型编排的核心工作区，负责解析请求的 URL，并根据解析结果从模型仓库中查询到编排信息，然后执行模型编排。</p>
+<p><strong>Pre-Model Scheduler Queues 的工作流程</strong></p>
+<ul class="simple">
+<li><p><strong>请求解析</strong>：当一个推理请求到达 Triton Server 时，首先通过调度器进行初步处理。调度器会解析请求的 URL，提取出请求所指定的模型及其版本信息，这是预编排流程的起点。</p></li>
+<li><p><strong>模型编排信息查询</strong>：利用从请求中获取的信息，Triton 会在模型仓库中查找对应的模型配置。这些配置文件不仅定义了模型的结构和参数，还可能包含了预编排指令，比如模型间依赖关系、优先级设置或特定的资源分配需求。</p></li>
+<li><p><strong>执行模型编排</strong>：基于查询到的编排信息，Triton 会动态地安排模型的加载、卸载及执行顺序。例如，如果某个模型依赖于前一个模型的输出作为输入，预编排系统会确保这两个模型按正确的顺序执行。此外，它还会考虑资源利用率，尽可能并行化处理，减少等待时间。</p></li>
+<li><p><strong>资源管理和优化</strong>：预编排机制还包括了对 GPU、CPU 等硬件资源的智能分配与回收，确保高负载情况下也能维持服务的稳定性和低延迟。它能根据当前系统负载动态调整模型实例的数量，避免资源浪费或过度竞争。</p></li>
+</ul>
+</section>
+<section id="id5">
+<h3>Triton 推理引擎<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>Triton 的一大亮点在于其高度灵活且强大的推理引擎支持体系，将 TensorFlow、TensorRT、PyTorch、ONNX Runtime 等主流框架统一整合为“Backends”。这一设计极大地促进了神经网络模型部署的标准化和效率，使得开发者能够在一个统一的平台上轻松管理多样化的模型，而无需关注底层实现细节，获得具有多后端架构的优势。</p>
+<p><img alt="Triton 推理引擎" src="../_images/04System07.png" /></p>
+<ul class="simple">
+<li><p><strong>无缝迁移与混合部署</strong>：通过将不同框架的模型推理能力抽象为统一的 Backend 接口，Triton 允许用户在不修改模型代码的情况下，自由选择或切换推理引擎。这意味着，开发者可以在 TensorFlow 模型和 PyTorch 模型之间轻松迁移，甚至在同一服务中混合部署多种框架的模型，极大提升了开发效率和灵活性。</p></li>
+<li><p><strong>性能优化与硬件加速</strong>：Triton 集成的每个 Backend 都针对特定框架进行了优化，尤其是 TensorRT，作为英伟达开发的高性能推理加速库，能显著提高 GPU 上的推理速度。此外，Triton 还能自动利用硬件加速特性，如 FP16、INT8 量化，进一步提升吞吐量和降低延迟。</p></li>
+<li><p><strong>资源高效利用</strong>：多后端架构使得 Triton 能够根据模型特性和硬件资源情况智能选择最合适的推理引擎。例如，对于某些模型，使用 TensorRT 可能比原生 TensorFlow 提供更好的性能；而对于复杂的 PyTorch 模型，直接利用 PyTorch Backend 可能更为合适。这种动态适配策略有助于最大化资源利用率。</p></li>
+</ul>
+<ol class="arabic simple">
+<li><p>启动时的模型加载与管理</p></li>
+</ol>
+<p>Triton 在其初始化序列中采用了一套精细且高效的模型管理机制，远超简单的模型加载范畴。这一过程深入到了模型生命周期管理的核心，确保了从模型仓库到生产环境的无缝过渡。</p>
+<p>在模型加载之前，Triton 执行详尽的验证步骤，这不仅仅局限于文件的存在性和格式正确性，还包括对模型结构的深入分析，验证模型输入输出的合规性、数据类型一致性以及模型间依赖关系的完整性。这一层次的验证是确保模型能够在生产环境中稳定运行的基础。</p>
+<p>根据模型的具体需求及系统当前的资源分配状况，Triton 采用先进的资源调度算法来决定模型的最优存放位置（内存或 GPU 显存）。此过程综合考虑了模型尺寸、预期的推理延迟要求、以及 GPU 的内存使用情况等多维度因素，力求达到资源使用的最优化。对于 GPU 密集型模型，Triton 会尝试最大化 GPU 并行度，同时考虑内存带宽限制，避免资源争抢。</p>
+<p>针对每个模型，Triton 会基于选定的 Backend 定制化创建推理引擎。这一步骤包含了模型的优化，比如图优化、算子融合、内核选择等，以及针对特定硬件的编译。特别是对于 TensorRT Backend，Triton 会利用其神经网络优化器自动执行量化、层融合、内存优化等高级策略，以减少计算和内存开销。</p>
+<p>为了加速首次推理请求的响应时间，Triton 会在模型加载后执行一系列预推理操作，即所谓的“热身”。这个过程会生成并缓存执行计划，包括计算图的优化布局、内存分配方案等，确保后续请求能够直接利用这些预计算结果，从而显著减少冷启动延迟。</p>
+<ol class="arabic simple" start="2">
+<li><p>动态服务与资源管理</p></li>
+</ol>
+<p>Triton 的动态服务能力进一步扩展了其灵活性和响应速度，使模型部署和调整成为持续优化的过程，而非一次性配置。</p>
+<ul class="simple">
+<li><p><strong>即时模型更新与加载</strong>：Triton 支持在线模型更新，无需中断服务即可加载新版本模型或添加全新模型。这一功能基于其动态模型发现与加载机制，使得 AI 应用能够迅速适应市场需求变化，如模型精度提升、新功能上线等。配合版本控制和滚动更新策略，可确保服务连续性不受影响。</p></li>
+<li><p><strong>资源按需调配与负载均衡</strong>：在运行时，Triton 能够根据推理请求的实时流量和复杂度动态调整资源分配。当检测到某个模型负载过重时，可以自动增加其处理能力，或将请求分流至其他可用资源，保持整体服务的高效和稳定。同时，它还能根据长期趋势预测未来资源需求，提前进行资源预留或释放，实现资源的高效循环利用。</p></li>
+</ul>
+</section>
+<section id="id6">
+<h3>Triton 返回与监控<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
+<p>Triton 的返回与监控功能为用户提供了强大的支持，确保了模型推理服务的高效运行和稳定监控。通过 Inference Response 机制，用户可以及时准确地获取推理结果；而通过 Status/Health Metrics Export 接口与 Prometheus 的集成，用户可以方便地实现服务的监控和管理。</p>
+<p><img alt="Triton 返回与监控" src="../_images/04System08.png" /></p>
+<ol class="arabic simple">
+<li><p>Inference Response 机制</p></li>
+</ol>
+<p>Triton 推理响应（Inference Response）机制是连接模型推理结果与最终用户的关键环节，其设计旨在保障数据的高效、准确传递。这一过程不仅涉及结果数据的组织与封装，还融入了对性能优化和错误处理的考量。</p>
+<p>正如之前所提到的，Triton 支持多种协议，如 gRPC 和 HTTP/REST，以适应不同客户端的需求。推理完成后，模型输出会被转换成符合相应协议规定的格式，如 Protobuf 或 JSON，确保数据能够无损地跨网络传输。此外，Triton 还支持批量处理响应，允许一次请求中包含多个样本的推理结果，提高了通信效率。</p>
+<p>为了提高系统的健壮性，Triton 对推理过程中可能遇到的各种错误进行了细致的处理和分类。无论是模型内部的异常、资源不足还是数据不合规，Triton 都会生成详细的错误码和描述信息，封装进响应中返回给客户端。这种透明化的错误反馈机制有助于快速定位问题，加速故障排查。</p>
+<p>考虑到延迟敏感的应用场景，Triton 在设计推理响应流程时，特别注重减少不必要的处理延迟。通过异步 IO、批处理技术和高效的序列化/反序列化算法，即使是高并发请求也能获得快速响应。此外，对于连续的推理任务，Triton 支持会话（Session）管理，进一步减少了客户端与服务端之间的握手和认证开销。</p>
+<ol class="arabic simple" start="2">
+<li><p>Status/Health Metrics Export</p></li>
+</ol>
+<p>Triton 提供了与 Prometheus 监控系统集成的能力，通过标准化的指标导出接口，使得模型服务的健康状态、性能指标和资源使用情况变得一目了然。这一特性对于维护大规模部署尤其重要。</p>
+<p>Triton 导出的指标既包括了通用的系统级健康状态（如服务是否运行、CPU/GPU 使用率），也涵盖了模型和服务层面的详细指标，如推理请求的吞吐量、延迟、错误率等。此外，用户还可以自定义指标，以满足特定应用的监控需求。</p>
+<p>在推理过程中，通过 Prometheus 的拉取（Pull）机制，Triton 定期向 Prometheus Server 报告指标数据，使得这些数据能够被 Prometheus 的各种仪表板工具（如 Grafana）所可视化。这使得运维团队可以实时监控服务状态，快速识别性能瓶颈或故障点，并作出响应。</p>
+<p>集成 Prometheus 后，运维人员可以设置阈值告警，一旦关键指标超出预设范围，立即触发通知或自动化的修复动作。例如，当 GPU 内存使用率达到高危水平时，系统可以自动调度任务，平衡负载，或甚至动态扩展资源，保障服务稳定性。</p>
+</section>
+<section id="id7">
+<h3>集成推理引擎<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
+<p>本小节将介绍如何基于 Triton 开发自己的 Backend 推理引擎。</p>
+<p>Triton 推理服务器通过其精心设计的架构，将推理服务的复杂性进行了有效的分层处理，其中&quot;Backend&quot;作为核心组件，专注于模型的加载、前向推理计算及卸载等关键操作，而网络请求处理、模型编排等周边功能则由 Triton 服务框架统一管理。这一设计极大地简化了推理引擎的开发与集成过程，同时也保证了服务的高效与灵活性。</p>
+<p><img alt="Triton 主分支代码的加载逻辑" src="../_images/04System09.png" /></p>
+<p>上图展示了 Backend 在 Triton 主分支代码的加载逻辑，Triton 推理引擎加载用户自定义后端的逻辑是统一的。首先，初始化 InferenceServer 类，它是整个 Triton 推理服务的入口。在 InferenceServer 类的 Init() 方法中，核心步骤是创建 ModelRepositoryManager 类，该类负责管理模型仓库。它会访问指定的模型仓库地址，获取所有可用的模型。对于每一个模型，ModelRepositoryManager 通过调用 BackendLifeCycle::CreateInferenceBackend() 来创建后端，最终 TritonBackend::LoadBackendLibrary() 通过 dlfcn 库加载用户定义的推理引擎库。</p>
+<p>用户自定义的后端推理引擎库通过这种方式被加载到 Triton 中。</p>
+<p>接下来，我们分析 LoadBackendLibrary() 方法的实现：</p>
+<div class="highlight-C++ notranslate"><div class="highlight"><pre><span></span><span class="n">Status</span><span class="w"> </span><span class="nf">TritonBackend::LoadBackendLibrary</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">RETURN_IF_ERROR</span><span class="p">(</span><span class="n">OpenLibraryHandle</span><span class="p">(</span><span class="n">libpath_</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">dlhandle_</span><span class="p">));</span>
+
+<span class="w">    </span><span class="n">TritonBackendInitFn_t</span><span class="w"> </span><span class="n">bifn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TritonBackendFiniFn_t</span><span class="w"> </span><span class="n">bffn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TritonModelInitFn_t</span><span class="w"> </span><span class="n">mifn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TritonModelFiniFn_t</span><span class="w"> </span><span class="n">mffn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TritonModelInstanceInitFn_t</span><span class="w"> </span><span class="n">iifn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TritonModelInstanceFiniFn_t</span><span class="w"> </span><span class="n">iffn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TritonModelInstanceExecFn_t</span><span class="w"> </span><span class="n">iefn</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Backend initialize and finalize functions, optional</span>
+<span class="w">    </span><span class="n">RETURN_IF_ERROR</span><span class="p">(</span><span class="n">GetEntrypoint</span><span class="p">(</span>
+<span class="w">        </span><span class="n">dlhandle_</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TRITONBACKEND_Initialize&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="cm">/* optional */</span><span class="p">,</span>
+<span class="w">        </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">**&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bifn</span><span class="p">)));</span>
+<span class="w">    </span><span class="n">RETURN_IF_ERROR</span><span class="p">(</span><span class="n">GetEntrypoint</span><span class="p">(</span>
+<span class="w">        </span><span class="n">dlhandle_</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TRITONBACKEND_Finalize&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="cm">/* optional */</span><span class="p">,</span>
+<span class="w">        </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">**&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bffn</span><span class="p">)));</span>
+
+<span class="w">    </span><span class="c1">// Model initialize and finalize functions, optional</span>
+<span class="w">    </span><span class="n">RETURN_IF_ERROR</span><span class="p">(</span><span class="n">GetEntrypoint</span><span class="p">(</span>
+<span class="w">        </span><span class="n">dlhandle_</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TRITONBACKEND_ModelInitialize&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="cm">/* optional */</span><span class="p">,</span>
+<span class="w">        </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">**&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mifn</span><span class="p">)));</span>
+<span class="w">    </span><span class="n">RETURN_IF_ERROR</span><span class="p">(</span><span class="n">GetEntrypoint</span><span class="p">(</span>
+<span class="w">        </span><span class="n">dlhandle_</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TRITONBACKEND_ModelFinalize&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="cm">/* optional */</span><span class="p">,</span>
+<span class="w">        </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">**&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mffn</span><span class="p">)));</span>
+
+<span class="w">    </span><span class="c1">// Model instance initialize and finalize functions, optional</span>
+<span class="w">    </span><span class="n">RETURN_IF_ERROR</span><span class="p">(</span><span class="n">GetEntrypoint</span><span class="p">(</span>
+<span class="w">        </span><span class="n">dlhandle_</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TRITONBACKEND_ModelInstanceInitialize&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="cm">/* optional */</span><span class="p">,</span>
+<span class="w">        </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">**&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">iifn</span><span class="p">)));</span>
+<span class="w">    </span><span class="n">RETURN_IF_ERROR</span><span class="p">(</span><span class="n">GetEntrypoint</span><span class="p">(</span>
+<span class="w">        </span><span class="n">dlhandle_</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TRITONBACKEND_ModelInstanceFinalize&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="cm">/* optional */</span><span class="p">,</span>
+<span class="w">        </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">**&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">iffn</span><span class="p">)));</span>
+
+<span class="w">    </span><span class="c1">// Model instance execute function, required</span>
+<span class="w">    </span><span class="n">RETURN_IF_ERROR</span><span class="p">(</span><span class="n">GetEntrypoint</span><span class="p">(</span>
+<span class="w">        </span><span class="n">dlhandle_</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;TRITONBACKEND_ModelInstanceExecute&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="w"> </span><span class="cm">/* optional */</span><span class="p">,</span>
+<span class="w">        </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">**&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">iefn</span><span class="p">)));</span>
+
+<span class="w">    </span><span class="n">backend_init_fn_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bifn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">backend_fini_fn_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bffn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">model_init_fn_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mifn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">model_fini_fn_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mffn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">inst_init_fn_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iifn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">inst_fini_fn_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iffn</span><span class="p">;</span>
+<span class="w">    </span><span class="n">inst_exec_fn_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iefn</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Status</span><span class="o">::</span><span class="n">Success</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>在 LoadBackendLibrary() 方法中，首先通过 OpenLibraryHandle() 函数获取用户自定义的后端推理引擎库的句柄。然后，从动态库中获取以下函数的入口点：</p>
+<ul class="simple">
+<li><p>TRITONBACKEND_Initialize 和 TRITONBACKEND_Finalize：后端初始化和清理函数，是可选的。</p></li>
+<li><p>TRITONBACKEND_ModelInitialize 和 TRITONBACKEND_ModelFinalize：模型初始化和清理函数，是可选的。</p></li>
+<li><p>TRITONBACKEND_ModelInstanceInitialize 和 TRITONBACKEND_ModelInstanceFinalize：模型实例初始化和清理函数，是可选的。</p></li>
+<li><p>TRITONBACKEND_ModelInstanceExecute：模型实例执行函数，是必需的。</p></li>
+</ul>
+<p>因此，自定义的后端推理引擎必须实现上述 7 个 API。接下来，我们将详细讲解如何开发自定义的后端推理引擎。</p>
+<ol class="arabic simple">
+<li><p>自定义 Backend 推理引擎编码</p></li>
+</ol>
+<p>要开始开发自定义的 Triton 后端推理引擎，首先需要获取官方提供的后端代码模板库。这可以通过访问 Triton Inference Server GitHub 仓库（<a class="github reference external" href="https://github.com/triton-inference-server/backend">triton-inference-server/backend</a>）来完成。下载后，需要清理 src/ 和 include/ 目录，删除其中的所有文件，但要保留 src/backend_common.cc 文件，因为它是必需的。</p>
+<p>根据之前的讨论，自定义后端必须实现七个核心 API 方法：</p>
+<ul class="simple">
+<li><p>TRITONBACKEND_Initialize：用于初始化自定义后端推理引擎。这是全局的初始化，通常只执行一次，用于准备环境和设置全局变量。</p></li>
+<li><p>TRITONBACKEND_Finalize：用于释放自定义后端推理引擎的资源。通常仅在退出 Triton 时调用。</p></li>
+<li><p>TRITONBACKEND_ModelInitialize：用于初始化每个模型仓库中的模型。这通常只执行一次，主要任务是检查模型配置并设置默认值。</p></li>
+<li><p>TRITONBACKEND_ModelFinalize：用于释放模型资源。通常仅在模型从模型仓库中移除时调用。</p></li>
+<li><p>TRITONBACKEND_ModelInstanceInitialize：用于实例化模型的初始化。如果启动 N 个服务实例，对于每个模型，该方法将被调用 N 次，主要用于根据模型配置加载模型到内存或显存。</p></li>
+<li><p>TRITONBACKEND_ModelInstanceFinalize：用于实例化模型的释放。通常仅在模型服务实例被移除时调用。</p></li>
+<li><p>TRITONBACKEND_ModelInstanceExecute：执行模型的前向推理计算。当模型服务接收到用户的推理请求时，将调用此方法进行计算。</p></li>
+</ul>
+<p>对于后端开发者来说，以下三个 API 的实现尤为关键：</p>
+<ul class="simple">
+<li><p>TRITONBACKEND_ModelInstanceInitialize：加载模型到内存或显存。</p></li>
+<li><p>TRITONBACKEND_ModelInstanceFinalize：卸载模型资源。</p></li>
+<li><p>TRITONBACKEND_ModelInstanceExecute：执行模型的前向推理。</p></li>
+</ul>
+<p>为了帮助开发者编写自己的后端，Triton 官方在仓库的 src/backends/backend/examples 目录下提供了多个后端示例代码。这些示例对于理解如何开发自定义后端非常有帮助。</p>
+<ol class="arabic simple" start="2">
+<li><p>编译和部署</p></li>
+</ol>
+<p>编译和部署自定义 Triton 后端时，官方提供的后端代码模板库中包含了一个结构精良的 CMake 文件，它为编译过程提供了便利。大多数情况下，开发者仅需要替换 add_library() 函数中的参数，将其指向自己编写的 C 或 C++ 源文件。如果项目结构较为复杂，或者需要对安装过程进行定制，那么需要自行对 CMake 文件进行相应的修改来满足特定的构建和部署需求。</p>
+</section>
+</section>
+<section id="id8">
+<h2>模型生命周期管理<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<p>模型版本管理是机器学习和深度学习项目中不可或缺的一部分。它允许开发者跟踪、比较和部署不同版本的模型。版本管理可能会产生于不同需求，比如随着数据的积累和算法的改进，模型需要不断迭代以提高性能；或是在模型开发过程中，需要记录不同实验的结果，以便比较和选择最佳模型；如果新部署的模型表现不佳，需要能够快速回滚到之前的稳定版本；而在团队中，往往需支持并行开发，即允许多个团队或个人同时在不同版本上进行开发，而不互相干扰。</p>
+<p><img alt="模型生命周期管理工作流实例" src="../_images/04System10.png" /></p>
+<p>金丝雀策略和回滚策略是模型生命周期管理中的典型实践，它们帮助确保模型的持续迭代和稳定性。金丝雀策略通过逐步部署新版本来降低风险，而回滚策略则提供了一种快速恢复到稳定状态的方法。</p>
+<section id="id9">
+<h3>金丝雀策略<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
+<p>金丝雀发布（Canary Deployment）是一种逐步部署和验证新版本软件的策略，得名于过去矿工用金丝雀检测矿井中是否存在有毒气体的做法。在机器学习模型或软件服务的上下文中，该策略旨在最小化新版本可能引入的风险，通过逐步将一小部分流量导向新版本，同时保持大部分流量在已知稳定的旧版本上。</p>
+<p>首先，需要一个灵活的路由系统，能够根据预定义的规则（如用户 ID 的哈希值、地理位置或随机分配）将请求分发到新旧两个模型版本。这样可以确保每个版本都处理一部分真实用户请求，为性能和准确性提供实际测试环境。</p>
+<p>在推理服务过程中需要进行监控与评估，关键在于实时监控两个版本的表现，这包括但不限于精度、响应时间、资源消耗等指标。利用 A/B 测试框架，对比新旧模型在相同条件下的表现差异，确保新模型不仅在理论上改进，而且在实践中也确实提升了用户体验或业务指标。</p>
+<p>基于监控数据，系统可以自动判断新模型是否达到预期标准，或者提供给运维人员决策依据。如果新模型表现不佳，应能快速回滚到之前的稳定版本；如果表现良好，则可逐步增加流向新模型的流量比例，直至完全替换旧版本。</p>
+<ul class="simple">
+<li><p><strong>优势</strong>：</p>
+<ul>
+<li><p><strong>风险降低</strong>：通过逐步部署新模型，降低了全面部署可能带来的风险。</p></li>
+<li><p><strong>性能比较</strong>：允许直接比较新旧模型的性能，为决策提供数据支持。</p></li>
+<li><p><strong>灵活性</strong>：提供了灵活的切换机制，根据性能评估结果调整部署策略。</p></li>
+</ul>
+</li>
+</ul>
+<p>实施金丝雀策略需要额外的计算资源来并行运行两个模型版本，尤其是在大规模服务中。因此，合理规划资源分配，确保在高峰期也能维持服务稳定性，是成功实施的关键因素之一，以避免用户暴露于可能存在缺陷的模型。</p>
+</section>
+<section id="id10">
+<h3>回滚策略<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
+<p>回滚策略是故障恢复机制的重要组成部分，旨在快速应对生产环境中发现的严重问题，通过恢复到一个已知稳定的状态来最小化影响。</p>
+<p>回滚具有快速响应机制，一旦检测到新部署的模型存在严重缺陷或性能下降，系统应立即触发回滚流程。这要求监控系统具备高度敏感性和准确性，能够迅速识别问题并触发报警。</p>
+<p>为了实现高效的回滚，必须维护一个清晰的模型版本历史记录，并能够快速定位和部署指定的旧版本。这通常涉及到版本控制系统和模型仓库的使用，确保每个模型版本的可追溯性和可部署性。</p>
+<p>回滚过程应该尽可能平滑，减少对用户的影响。这意味着卸载有问题的新版本和装载选定的旧版本的操作顺序要经过精心设计，确保服务中断时间最短，甚至实现无中断切换。</p>
+<p>完成回滚后，重要的是分析问题原因，修复缺陷，并通过再次实施金丝雀发布等策略安全地重新部署修复后的版本。此外，建立从回滚中学到的经验教训反馈机制，有助于优化未来的部署流程和提高系统的韧性。</p>
+<ul class="simple">
+<li><p><strong>优势</strong>：</p>
+<ul>
+<li><p><strong>快速响应</strong>：允许快速从问题版本回滚到稳定版本，减少服务中断时间。</p></li>
+<li><p><strong>灵活性</strong>：提供了灵活的配置选项，适应不同的回滚需求。</p></li>
+<li><p><strong>稳定性保障</strong>：确保服务的稳定性和可靠性，保护用户免受缺陷影响。</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="id11">
+<h2>小结与思考<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>推理系统架构是实现机器学习模型从训练到实际应用的关键桥梁，涉及推理、部署和服务化三个重要环节。</p></li>
+<li><p>NVIDIA Triton Inference Server 是一个高性能、可扩展的开源推理框架，支持多种神经网络模型和框架，提供丰富的模型管理和优化功能。</p></li>
+<li><p>模型生命周期管理包括金丝雀策略和回滚策略，确保模型的持续迭代和稳定性，降低新版本部署风险，快速应对可能的问题。</p></li>
+</ul>
+</section>
+<section id="id12">
+<h2>本节视频<a class="headerlink" href="#id12" title="Link to this heading">#</a></h2>
+<html>
+<iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=565182107&bvid=BV1Gv4y1i7Tw&cid=960779011&p=1&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</html>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./04Inference01Inference"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="03Workflow.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">推理流程全景</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="05Inference.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">推理引擎架构</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">推理、部署、服务化</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#inference">推理（Inference）</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment">部署（Deployment）</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#serving">服务化（Serving）</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nvidia-triton">NVIDIA Triton 推理服务</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#triton">Triton 接入层</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Triton 模型仓库</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Triton 模型预编排</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Triton 推理引擎</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Triton 返回与监控</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">集成推理引擎</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">模型生命周期管理</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">金丝雀策略</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">回滚策略</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">本节视频</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 01, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

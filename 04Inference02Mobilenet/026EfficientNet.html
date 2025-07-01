@@ -1,0 +1,1207 @@
+
+<!DOCTYPE html>
+
+
+<html lang="cn" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="EfficientNet 系列" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="04Inference02Mobilenet/026EfficientNet.html" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
+<meta property="og:description" content="本节主要介绍 EffiicientNet 系列，在之前的文章中，一般都是单独增加图像分辨率或增加网络深度或单独增加网络的宽度，来提高网络的准确率。而在 EfficientNet 系列论文中，会介绍使用网络搜索技术(NAS)去同时探索网络的宽度(width)，深度(depth)，分辨率(resolution)对模型准确率的影响。以及如何加速训练推理速度。 EfficientNet V1 模型:..." />
+<meta name="description" content="本节主要介绍 EffiicientNet 系列，在之前的文章中，一般都是单独增加图像分辨率或增加网络深度或单独增加网络的宽度，来提高网络的准确率。而在 EfficientNet 系列论文中，会介绍使用网络搜索技术(NAS)去同时探索网络的宽度(width)，深度(depth)，分辨率(resolution)对模型准确率的影响。以及如何加速训练推理速度。 EfficientNet V1 模型:..." />
+
+    <title>EfficientNet 系列 &#8212; AI System</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
+    <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=aabdd393"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/rtd-data.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '04Inference02Mobilenet/026EfficientNet';</script>
+    <script src="https://assets.readthedocs.org/static/javascript/readthedocs-doc-embed.js"></script>
+    <link rel="icon" href="../_static/logo-square.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GhostNet 系列" href="027GhostNet.html" />
+    <link rel="prev" title="FBNet 系列" href="025FBNet.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="cn"/>
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../reference/blog/atom.xml"
+  title="Blog"
+/>
+  
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-wide.svg" class="logo__image only-light" alt="AI System - Home"/>
+    <script>document.write(`<img src="../_static/logo-wide.svg" class="logo__image only-dark" alt="AI System - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Youtube</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Blibili</span></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/01Introduction.html">课程内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/02ArchSlim.html">AI 计算模式（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/03MobileParallel.html">AI 计算模式（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/04Metrics.html">关键设计指标</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/05Matrix.html">核心计算之矩阵乘</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware01Foundation/06BitWidth.html">计算之比特位宽</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware02ChipBase/README.html">AI 芯片基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/01CPUBase.html">CPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/02CPUISA.html">CPU 指令集架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/03CPUData.html">CPU 计算本质</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/04CPULatency.html">CPU 计算时延</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/05GPUBase.html">GPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/06NPUBase.html">NPU 基础</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware02ChipBase/07Future.html">超异构计算</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware03GPUBase/README.html">图形处理器 GPU</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/01Works.html">GPU 工作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/02Principle.html">为什么 GPU 适用于 AI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/03Concept.html">GPU 架构与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware03GPUBase/04History.html">GPU 架构回顾</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware04NVIDIA/README.html">英伟达 GPU 详解</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/01BasicTC.html">Tensor Core 基本原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/02HistoryTC.html">Tensor Core 架构演进</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/03DeepTC.html">Tensor Core 深度剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/04BasicNvlink.html">分布式通信与 NVLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/05DeepNvlink.html">NVLink 原理剖析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware04NVIDIA/06DeepNvswitch.html">NV Switch 深度解析</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware05Abroad/README.html">国外 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/04TPUIntrol.html">谷歌 TPU 历史发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/05TPU1.html">谷歌 TPU v1-脉动阵列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/06TPU2.html">谷歌 TPUv2 训练芯片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/07TPU3.html">谷歌 TPUv3 POD 形态</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware05Abroad/08TPU4.html">谷歌 TPU v4 与光路交换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware06Domestic/README.html">国内 AI 芯片</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/04Cambricon.html">寒武纪介绍</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/08AscendBase.html">昇腾 AI 架构介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/09AscendSOC.html">昇腾 AI 处理器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/10AscendCube.html">昇腾 AI 核心单元</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware06Domestic/11AscendLayout.html">昇腾数据布局转换</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware07Thought/README.html">AI 芯片黄金十年</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/01Introduction.html">芯片的编程体系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/02SIMTSIMD.html">SIMD &amp; SIMT 与芯片架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/03SPMT.html">SIMD &amp; SIMT 与 CUDA 关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/04NVSIMT.html">CUDA 编程模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/05DSA.html">从 CUDA 对 AI 芯片思考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02Hardware07Thought/06AIChip.html">AI 芯片的思考</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/01Introduction.html">编译器基础介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/02History.html">传统编译器发展</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/03GCC.html">GCC 主要特征</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/04LLVM.html">LLVM 架构设计和原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/05LLVMIR.html">LLVM IR 基本概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/06LLVMDetail.html">LLVM IR 详解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/07LLVMFrontend.html">LLVM 前端和优化层</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler01Tradition/08LLVMBackend.html">LLVM 后端代码生成</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler02AICompiler/README.html">AI 编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/01Appear.html">为什么需要 AI 编译器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/02Stage.html">AI 编译器历史阶段</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/03Architecture.html">AI 编译器基本架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler02AICompiler/04Future.html">AI 编译器挑战与思考</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler03Frontend/README.html">前端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/01Introduction.html">AI 编译器前端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/02GraphIR.html">图算 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/03OPFusion.html">算子融合</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/04LayoutPrinc.html">布局转换原理与算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/06Memory.html">内存分配算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/07ConstantFold.html">常量折叠原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/08CSE.html">公共表达式消除原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/09DCE.html">死代码消除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler03Frontend/10algebraic.html">代数简化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler04Backend/README.html">后端优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/01Introduction.html">AI 编译器后端优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/02OPSCompute.html">计算与调度</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/03Optimization.html">算子手工优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/04LoopOpt.html">算子循环优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 四. 推理系统&amp;引擎 ===</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../04Inference/README.html">推理系统&amp;引擎概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference01Inference/README.html">推理系统</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/01Introduction.html">引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/02Constraints.html">推理系统介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/03Workflow.html">推理流程全景</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/04System.html">推理系统架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/05Inference.html">推理引擎架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/07MindIEIntro.html">昇腾推理引擎 MindIE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference01Inference/08AscendCL.html">推理引擎示例：AscendCL</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="README.html">模型轻量化</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01Introduction.html">推理参数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="021Squeezenet.html">SqueezeNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="022Shufflenet.html">ShuffleNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="023Mobilenet.html">MobileNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="024ESPNet.html">ESPNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="025FBNet.html">FBNet 系列</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">EfficientNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="027GhostNet.html">GhostNet 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02Cnn.html">CNN 模型小型化（上）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="031MobileVit.html">MobileVit 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="032MobileFormer.html">MobileFormer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="033EfficientFormer.html">EfficientFormer 系列</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Cnn.html">CNN 模型小型化（下）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03Transformer.html">Transformer 小型化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04Transformer.html">Transformer 模型小型化</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference03Slim/README.html">模型压缩</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/02Quant.html">低比特量化原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/03QAT.html">感知量化训练 QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/04PTQ.html">训练后量化与部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/05Pruning.html">模型剪枝</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference03Slim/06Distillation.html">知识蒸馏原理</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference04Converter/README.html">模型转换</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/02Principle.html">推理文件格式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/03IR.html">自定义计算图 IR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference04Converter/04Detail.html">模型转换流程</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference05Optimize/README.html">模型优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/01Optimizer.html">计算图优化架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/02Basic.html">离线图优化技术</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference05Optimize/03Extend.html">其他计算图优化</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04Inference06Kernel/README.html">Kernel 优化</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/01Introduction.html">Kernel 层架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/02Conv.html">卷积操作原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/03Im2col.html">Im2Col 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/04Winograd.html">Winograd 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/05Qnnpack.html">QNNPack 算法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/06Memory.html">推理内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04Inference06Kernel/08Others.html">汇编与循环优化</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 五. AI 框架核心模块 ===</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../05Framework/README.html">AI 框架核心概述</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework01Foundation/README.html">AI 框架基础</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/01Introduction.html">内容介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/02Fundamentals.html">AI 框架作用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/03History.html">AI 框架之争</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/04Programing.html">框架编程范式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework01Foundation/05MindSpore.html">昇思 MindSore 关键特性</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework02AutoDiff/README.html">自动微分</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/01Introduction.html">自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/02BaseConcept.html">什么是微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/03GradMode.html">微分计算模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/04Implement.html">微分实现方式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/05ForwardMode.html">动手实现自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/06ReversedMode.html">动手实现 PyTorch 微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework02AutoDiff/07Challenge.html">自动微分的挑战&amp;未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework03DataFlow/README.html">计算图</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/02Computegraph.html">计算图原理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/03Atuodiff.html">计算图与自动微分</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/04Dispatch.html">计算图的调度与执行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/05ControlFlow.html">计算图的控制流实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/06StaticGraph.html">动态图与静态图转换</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework03DataFlow/07Future.html">计算图挑战与未来</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05Framework04Parallel/README.html">分布式并行</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/01Introduction.html">基本介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/02DataParallel.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/03ZeRODP.html">数据并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/04TensorParallel.html">张量并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/05PipelineParallel.html">流水并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/06HybridParallel.html">混合并行</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05Framework04Parallel/07MSParallel.html">昇思MindSpore并行</a></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/blob/master/04Inference02Mobilenet/026EfficientNet.md?plain=1" target="_blank"
+   class="btn btn-sm btn-source-file-button dropdown-item"
+   title="Show source"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-code"></i>
+  </span>
+<span class="btn__text-container">Show source</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/edit/master/04Inference02Mobilenet/026EfficientNet.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/chenzomi12/chenzomi12.github.io/issues/new?title=Issue%20on%20page%20%2F04Inference02Mobilenet/026EfficientNet.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/04Inference02Mobilenet/026EfficientNet.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>EfficientNet 系列</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#efficientnet-v1">EfficientNet V1 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">复合模型缩放</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#se">SE 模块</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">网络结构实现</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#efficientnet-v2">EfficientNet V2 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nas">训练感知 NAS 和缩放</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">渐进式学习</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">自适应正则化</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">网络结构实现</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">本节视频</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <!--Copyright © XcodeHw 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+<section class="tex2jax_ignore mathjax_ignore" id="efficientnet">
+<h1>EfficientNet 系列<a class="headerlink" href="#efficientnet" title="Link to this heading">#</a></h1>
+<p>本节主要介绍 EffiicientNet 系列，在之前的文章中，一般都是单独增加图像分辨率或增加网络深度或单独增加网络的宽度，来提高网络的准确率。而在 EfficientNet 系列论文中，会介绍使用网络搜索技术(NAS)去同时探索网络的宽度(width)，深度(depth)，分辨率(resolution)对模型准确率的影响。以及如何加速训练推理速度。</p>
+<section id="efficientnet-v1">
+<h2>EfficientNet V1 模型<a class="headerlink" href="#efficientnet-v1" title="Link to this heading">#</a></h2>
+<p><strong>EfficientNetV1</strong>:重点分析了卷积网络的深度，宽度和输入图像大小对卷积网络性能表现的影响，提出了一种混合模型尺度的方法，通过设置一定的参数值平衡调节卷积网络的深度，宽度和输入图像大小，使卷积网络的表现达到最好。</p>
+<section id="id1">
+<h3>复合模型缩放<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<p>单独适当增大深度、宽度或分辨率都可以提高网络的精确性，但随着模型的增大，其精度增益却会降低。此外，这三个维度并不是独立的（如：高分辨率图像需要更深的网络来获取更细粒度特征等），需要我们协调和平衡不同尺度的缩放，而不是传统的一维缩放。EfficientNet 的设想就是能否设计一个标准化的卷积网络扩展方法，既可以实现较高的准确率，又可以充分的节省算力资源。其通过 NAS（Neural Architecture Search）技术来搜索网络的图像输入分辨率 r，网络的深度 depth 以及 channel 的宽度 width 三个参数的合理化配置。如下图所示，(b)，(c)，(d)分别从不同的维度对 baseline 做 model scaling，而这篇论文要做的是将这 3 者结合起来一起优化即(e)。</p>
+<p><img alt="EfficientNet" src="../_images/07Efficientnet01.png" /></p>
+<p>通过实验得出以下结论:</p>
+<ol class="arabic simple">
+<li><p><strong>增加网络的 depth</strong> 能够得到更加丰富、复杂的高级语义特征，并且能很好的应用到其他任务中去。但是网络的深度过深会面临梯度消失，训练困难等问题。</p></li>
+<li><p><strong>增加网络的 width</strong> 能够获得更高细粒度的特征，并且也更容易训练。但是对于宽度很大，深度较浅的网络往往很难学习到更深层次的特征。例如我就只有一个 3×3 的卷积，但是输出通道为 10000，也没办法得到更为抽象的高级语义。</p></li>
+<li><p><strong>增加输入网络的图像分辨率</strong>能够潜在获得更高细粒度的特征模版，图像分辨率越高能看到的细节就越多，能提升分辨能力。但是对于非常高的输入分辨率，准确率的增益也会减少。且大分辨率图像会增加网络的计算量（注意不是参数量）。</p></li>
+</ol>
+<p>一个卷积网络的某一层 <span class="math notranslate nohighlight">\(i\)</span> 可以被定义为；</p>
+<div class="math notranslate nohighlight">
+\[
+Y_{i}=F_{i}(X_{i})
+\]</div>
+<p>其中：<span class="math notranslate nohighlight">\(X_{i}\)</span> 表示输入的 tensor，其形状为 <span class="math notranslate nohighlight">\(&lt;H_{i},W_{i},C_{i}&gt;\)</span>，<span class="math notranslate nohighlight">\(Y_{i}\)</span> 是输出的 tensor。于是，一个卷积网络 <span class="math notranslate nohighlight">\(N\)</span> 可以被表示成如下形式：</p>
+<div class="math notranslate nohighlight">
+\[
+N=F_{k}\odot ...\odot F_{2}\odot F_{1}(X_{11})=\odot_{j=1....k}F_{j}(X_{1})
+\]</div>
+<p>但是在实际中，ConvNets 的各个层通常被划分为多个 stage，并且每个 stage 中的所有层都具有相同的体系结构（例如 ResNet，共有五个 stage，除了第一层之外的每个 stage 的所有层都分别具有相同的卷积类型）。</p>
+<p>因此，我们可以将 ConvNet 重新表示成如下形式：
+$<span class="math notranslate nohighlight">\(
+N = \bigoplus_{i=1...s}F_{i}^{L_i}(X_{&lt;H_{i},W_{i},C_{i}&gt;})
+\)</span><span class="math notranslate nohighlight">\(
+其中 \)</span>F_{i}^{L_{i}}<span class="math notranslate nohighlight">\( 表示第 \)</span>i<span class="math notranslate nohighlight">\( 个 stage，并且这个 stage 由 \)</span>L_{i}<span class="math notranslate nohighlight">\( 次的 \)</span>F_{i}$（相当于一层 layer）操作构成。</p>
+<p>通常 ConvNet 的设计焦点在 <span class="math notranslate nohighlight">\(F_{i}\)</span>，但是这篇文章的焦点，或者说 Model Scaling 的焦点则是在模型的深度（<span class="math notranslate nohighlight">\(L_{i}\)</span>）、宽度（<span class="math notranslate nohighlight">\(C_{i}\)</span>）和输入图片的大小（<span class="math notranslate nohighlight">\(H_{i}\)</span>,<span class="math notranslate nohighlight">\(W_{i}\)</span>），而不改变在 baseline 中预先定义好的 <span class="math notranslate nohighlight">\(F_{i}\)</span>。</p>
+<p>通过固定 <span class="math notranslate nohighlight">\(F_{i}\)</span>，简化了对于新资源约束的 Model Scaling 设计问题，但仍然有很大的设计空间来探索每一层的不同 <span class="math notranslate nohighlight">\(L_{i}\)</span>，<span class="math notranslate nohighlight">\(C_{i}\)</span>，<span class="math notranslate nohighlight">\(H_{i}\)</span>，<span class="math notranslate nohighlight">\(W_{i}\)</span>。为了进一步减小设计空间，作者又限制所有层必须以恒定比率均匀地做 Scaling。目标是在任何给定的资源约束下最大化模型精度，这可以表述为优化问题：
+$<span class="math notranslate nohighlight">\(
+max_{d,w,r}Accurracy(N(d,w,r))
+\)</span>$</p>
+<div class="math notranslate nohighlight">
+\[
+s.t.  N(d,w,r) = \bigoplus_{i=1...s}\hat{F}_{i}^{d \cdot \hat{L}_{i}}(X_{&lt;r\cdot \hat{H}_{i},r\cdot\hat{W}_{i},w\cdot\hat{C}_{i}&gt;})
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+Memory(N)\leq target memory
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+FLOPS(N)\leq target flops
+\]</div>
+<p>其中:w,d,r 分别为 Model Scaling 的宽度，深度和分辨率的系数，<span class="math notranslate nohighlight">\(\hat {F}_{i}\)</span>，<span class="math notranslate nohighlight">\(\hat{L}_{i}\)</span>，<span class="math notranslate nohighlight">\(\hat{H}_{i}\)</span>，<span class="math notranslate nohighlight">\(\hat{W}_{i}\)</span>，<span class="math notranslate nohighlight">\(\hat{C}_{i}\)</span> 是预先设定好的参数。</p>
+<p><strong>Scaling Dimensions</strong></p>
+<p>上述优化问题主要困难在于：最佳的 d，w，r 是相互依赖的，并且在不同的资源约束下会发生变化。由于这一困难，常规方法通常会在网络深度（layers），宽度（channel）和输入图像的分辨率这三个维度之一来扩展 ConvNets。</p>
+<p><strong>Depth</strong>:缩放网络深度是一种常用的提高卷积网络精度的方法，但是由于梯度消失问题，更深层次的网络也更难训练。</p>
+<p>下图左边显示了具有不同深度系数 d 的基线模型进行缩放的实证研究，表明了增加网络层数到一定深度时精度并不能随之增加。</p>
+<p><strong>Width</strong>:小型模型通常使用缩放网络宽度来提取更多的特征，然而，非常宽但较浅的网络往往难以捕获更高层次的特征。下图中结果显示，当网络越大，w 变得越宽时，精度迅速饱和。</p>
+<p><strong>Resolution</strong>:早期的图像大小以 224×224 开始，现在常使用 299×299 或者 311×311。最近的创新：480×480 的分辨率和 600×600 的分辨率。下图右是缩放网络分辨率的结果，更高的分辨率的确提高了网络的精度，但对于非常高的分辨率来说，准确率的提高会减弱。</p>
+<p><img alt="EfficientNet" src="../_images/07Efficientnet02.png" /></p>
+<p><strong>Compound Scaling</strong></p>
+<p>为了追求更好的精度和效率，在连续网络缩放过程中平衡网络宽度、深度和分辨率的所有维度是至关重要的。如下图所示。</p>
+<p><img alt="EfficientNet" src="../_images/07Efficientnet03.png" /></p>
+<p>不同维度的 Scaling 并不相互独立，需要协调和平衡不同维度的 Scaling，而不是常规的单维度 Scaling。EfficientNet 提出了 compound scaling method（复合缩放方法），这种方法是通过一个复合系数φ去统一缩放网络的宽度，深度和分辨率，公式表示如下：</p>
+<div class="math notranslate nohighlight">
+\[
+depth:d=α^{φ}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+width:w=β^{φ}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+resolution:r=γ^{φ}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+s.t. α\cdotβ^{2}\cotγ^{2}\approx 2
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+α\geq1,β\geq1,γ\geq1
+\]</div>
+<p>其中，α、β以及γ是常数，可以通过在 baseline 上做 small grid search 来得到。ϕ 是用户指定的系数，用于控制有多少其他计算资源可用于模型缩放，而 α，β，γ 指定如何分别将这些额外资源分配给网络宽度，深度和分辨率。</p>
+<p>需要注意的是：常规卷积运算的 FLOPS 与 d，<span class="math notranslate nohighlight">\(w^{2}\)</span>，<span class="math notranslate nohighlight">\(r^{2}\)</span> 成正比，即网络深度增加 1 倍会使 FLOPS 增加 1 倍，网络宽度或分辨率增加 1 倍会使 FLOPS 增加 4 倍。</p>
+<p>由于卷积运算通常在 ConvNets 中占主导地位，因此根据上述的等式，缩放 ConvNets 将使总 FLOPS 大约增加 <span class="math notranslate nohighlight">\((α⋅β^{2}⋅γ^{2})ϕ\)</span>。在本文中，作者做了 <span class="math notranslate nohighlight">\(α⋅β^{2}⋅γ^{2}≈2\)</span> 的约束，这样对于任何新的 ϕ ，总 FLOPS 大约会增加 <span class="math notranslate nohighlight">\(2^{ϕ}\)</span>。</p>
+</section>
+<section id="se">
+<h3>SE 模块<a class="headerlink" href="#se" title="Link to this heading">#</a></h3>
+<p>如下图所示，SE 模块由一个全局平均池化(AvgPooling)，两个 FC 层组成。第一个全连接层的节点个数是 MBConv 模块的输入特征图 channels 的 <span class="math notranslate nohighlight">\( \frac{1}{4}\)</span> ，且使用 Swish 激活函数。第二个全连接层的节点个数等于 MBConv 模块中 DWConv 层输出特征图的 channels，且使用 Sigmoid 激活函数。简单理解，SE 模块的总体思想是：给每个特征图不同的权重，关注更有用的特征。</p>
+<p><img alt="EfficientNet" src="../_images/07Efficientnet05.png" /></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 注意力机制模块</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SqueezeExcitation</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">input_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>   <span class="c1"># block input channel   # 其对应的是 MBConv 模块输入的 channel</span>
+                 <span class="n">expand_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>  <span class="c1"># block expand channel  # 因为之前的 DW 卷积不改变 channe，所以其对应着 1x1 卷积输出的 channel</span>
+                 <span class="n">squeeze_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>    <span class="c1"># squeeze_c：其等于 input_c 的 channel 数的 1/4</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SqueezeExcitation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="n">squeeze_c</span> <span class="o">=</span> <span class="n">input_c</span> <span class="o">//</span> <span class="n">squeeze_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">expand_c</span><span class="p">,</span> <span class="n">squeeze_c</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># 此处使用卷积来达到全连接层的目的，所以 kernel_size 为 1  此处与 ModileNet 中的注意力机制的输入 channel 的选择存在差异</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ac1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">SiLU</span><span class="p">()</span>  <span class="c1"># alias Swish</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">squeeze_c</span><span class="p">,</span> <span class="n">expand_c</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ac2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">adaptive_avg_pool2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">output_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ac1</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ac2</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">x</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h3>网络结构实现<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>以 EfficientNet-B0 baseline 网络结构为例，在 B0 中一共分为 9 个 stage，表中的卷积层后默认都跟有 BN 以及 Swish 激活函数。stage 1 就是一个 3×3 的卷积层。对于 stage 2 到 stage 8 就是在重复堆叠 MBConv。</p>
+<p><img alt="EfficientNet" src="../_images/07Efficientnet04.png" /></p>
+<p>Conv 1x1, s1 层，一个 1x1 的标准卷积，用于降维，然后通过一个 BN，没有 swish 激活函数。
+Droupout 层，其 dropout_rate 对应的是 drop_connect_rate；shortcut 连接，执行 add 操作。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># MBConvm 模块的配置类</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InvertedResidualConfig</span><span class="p">:</span>
+    <span class="c1"># kernel_size, in_channel, out_channel, exp_ratio, strides, use_SE, drop_connect_rate</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">kernel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>          <span class="c1"># 3 or 5  DW 卷积的 kernel_size,可能为 3x3 或者 5x5</span>
+                 <span class="n">input_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>    <span class="c1"># 表示输入 MBConvm 模块的 channel</span>
+                 <span class="n">out_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>      <span class="c1"># 表示 MBConvm 模块的输出 channel</span>
+                 <span class="n">expanded_ratio</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>  <span class="c1"># 1 or 6   表示 MBConvm 模块内第一个 1x1 卷积层维度扩展输出的 channel 的扩展因子</span>
+                 <span class="n">stride</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>          <span class="c1"># 1 or 2   DW 卷积的步距</span>
+                 <span class="n">use_se</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>         <span class="c1"># True</span>
+                 <span class="n">drop_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>    <span class="c1"># # 表示 MBConvm 模块中的丢弃层，随机失活比例</span>
+                 <span class="n">index</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>           <span class="c1"># 1a, 2a, 2b, ...</span>
+                 <span class="n">width_coefficient</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>   <span class="c1"># 网络宽度的倍率因子，即 channel 数 xn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_channels</span><span class="p">(</span><span class="n">input_c</span><span class="p">,</span> <span class="n">width_coefficient</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expanded_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_c</span> <span class="o">*</span> <span class="n">expanded_ratio</span>  <span class="c1"># expanded_ratio：1 or 6   表示 MBConvm 模块内第一个 1x1 卷积层维度扩展输出的 channel 的扩展因子</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_channels</span><span class="p">(</span><span class="n">out_c</span><span class="p">,</span> <span class="n">width_coefficient</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_se</span> <span class="o">=</span> <span class="n">use_se</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">=</span> <span class="n">stride</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop_rate</span> <span class="o">=</span> <span class="n">drop_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adjust_channels</span><span class="p">(</span><span class="n">channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">width_coefficient</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>   <span class="c1"># width_coefficient: float):   # 网络宽度的倍率因子，即 channel 数 xn</span>
+        <span class="k">return</span> <span class="n">_make_divisible</span><span class="p">(</span><span class="n">channels</span> <span class="o">*</span> <span class="n">width_coefficient</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+
+
+<span class="c1"># MBConvm 模块类</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InvertedResidual</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">cnf</span><span class="p">:</span> <span class="n">InvertedResidualConfig</span><span class="p">,</span>
+                 <span class="n">norm_layer</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">InvertedResidual</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">cnf</span><span class="o">.</span><span class="n">stride</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;illegal stride value.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_res_connect</span> <span class="o">=</span> <span class="p">(</span><span class="n">cnf</span><span class="o">.</span><span class="n">stride</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">cnf</span><span class="o">.</span><span class="n">input_c</span> <span class="o">==</span> <span class="n">cnf</span><span class="o">.</span><span class="n">out_c</span><span class="p">)</span>   <span class="c1"># 判断是否进行 shortCut 连接   cnf.stride == 1：表示输出矩阵的高与宽是不会发生变化的</span>
+
+        <span class="n">layers</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>    <span class="c1"># 定义一个有序的字典</span>
+        <span class="n">activation_layer</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">SiLU</span>  <span class="c1"># alias Swish</span>
+
+        <span class="c1"># expand</span>
+        <span class="k">if</span> <span class="n">cnf</span><span class="o">.</span><span class="n">expanded_c</span> <span class="o">!=</span> <span class="n">cnf</span><span class="o">.</span><span class="n">input_c</span><span class="p">:</span>   <span class="c1"># 即当 n（expanded_ratio）=1 时，其不需要升高维度</span>
+            <span class="c1"># MBConv 模块中的第一个 1x1 卷积层</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;expand_conv&quot;</span><span class="p">:</span> <span class="n">ConvBNActivation</span><span class="p">(</span><span class="n">cnf</span><span class="o">.</span><span class="n">input_c</span><span class="p">,</span>
+                                                           <span class="n">cnf</span><span class="o">.</span><span class="n">expanded_c</span><span class="p">,</span>   <span class="c1"># 进行升高维度</span>
+                                                           <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                                           <span class="n">norm_layer</span><span class="o">=</span><span class="n">norm_layer</span><span class="p">,</span>
+                                                   <span class="n">activation_layer</span><span class="o">=</span><span class="n">activation_layer</span><span class="p">)})</span>
+
+        <span class="c1"># depthwise</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;dwconv&quot;</span><span class="p">:</span> <span class="n">ConvBNActivation</span><span class="p">(</span><span class="n">cnf</span><span class="o">.</span><span class="n">expanded_c</span><span class="p">,</span>
+                                                  <span class="n">cnf</span><span class="o">.</span><span class="n">expanded_c</span><span class="p">,</span>
+                                                  <span class="n">kernel_size</span><span class="o">=</span><span class="n">cnf</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span>
+                                                  <span class="n">stride</span><span class="o">=</span><span class="n">cnf</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span>
+                                                  <span class="n">groups</span><span class="o">=</span><span class="n">cnf</span><span class="o">.</span><span class="n">expanded_c</span><span class="p">,</span>
+                                                  <span class="n">norm_layer</span><span class="o">=</span><span class="n">norm_layer</span><span class="p">,</span>
+                                                  <span class="n">activation_layer</span><span class="o">=</span><span class="n">activation_layer</span><span class="p">)})</span>
+
+        <span class="k">if</span> <span class="n">cnf</span><span class="o">.</span><span class="n">use_se</span><span class="p">:</span>
+            <span class="c1"># 添加注意力机制</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;se&quot;</span><span class="p">:</span> <span class="n">SqueezeExcitation</span><span class="p">(</span><span class="n">cnf</span><span class="o">.</span><span class="n">input_c</span><span class="p">,</span>
+                                                   <span class="n">cnf</span><span class="o">.</span><span class="n">expanded_c</span><span class="p">)})</span>
+
+        <span class="c1"># project</span>
+        <span class="c1"># 注意力机制后，再加一个 1x1 的卷积</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;project_conv&quot;</span><span class="p">:</span> <span class="n">ConvBNActivation</span><span class="p">(</span><span class="n">cnf</span><span class="o">.</span><span class="n">expanded_c</span><span class="p">,</span>
+                                                        <span class="n">cnf</span><span class="o">.</span><span class="n">out_c</span><span class="p">,</span>
+                                                        <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                                        <span class="n">norm_layer</span><span class="o">=</span><span class="n">norm_layer</span><span class="p">,</span>
+                                                        <span class="n">activation_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">)})</span>  <span class="c1"># 该层之后未使用激活函数，所以使用 nn.Identity，表示不做任何处理，</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_channels</span> <span class="o">=</span> <span class="n">cnf</span><span class="o">.</span><span class="n">out_c</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_strided</span> <span class="o">=</span> <span class="n">cnf</span><span class="o">.</span><span class="n">stride</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+        <span class="c1"># 只有在使用 shortcut 连接时才使用 dropout 层</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_res_connect</span> <span class="ow">and</span> <span class="n">cnf</span><span class="o">.</span><span class="n">drop_rate</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">DropPath</span><span class="p">(</span><span class="n">cnf</span><span class="o">.</span><span class="n">drop_rate</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_res_connect</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">x</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="efficientnet-v2">
+<h2>EfficientNet V2 模型<a class="headerlink" href="#efficientnet-v2" title="Link to this heading">#</a></h2>
+<p><strong>EfficientNet V2</strong>：该网络主要使用训练感知神经结构搜索和缩放的组合；在 EfficientNetV1 的基础上，引入了 Fused-MBConv 到搜索空间中；引入渐进式学习策略、自适应正则强度调整机制使得训练更快；进一步关注模型的推理速度与训练速度。</p>
+<section id="nas">
+<h3>训练感知 NAS 和缩放<a class="headerlink" href="#nas" title="Link to this heading">#</a></h3>
+<p><strong>NAS 搜索</strong></p>
+<p>这里采用的是 trainning-aware NAS framework，搜索工作主要还是基于之前的 Mnasnet 以及 EfficientNet. 但是这次的优化目标联合了 accuracy、parameter efficiency 以及 trainning efficiency 三个维度。这里是以 EfficientNet 作为 backbone，设计空间包含:</p>
+<ul class="simple">
+<li><p>convolutional operation type : MBConv, Fused-MBConv</p></li>
+<li><p>number of layer</p></li>
+<li><p>kernel size : 3x3, 5x5</p></li>
+<li><p>expansion ratio : 1, 4, 6</p></li>
+</ul>
+<p>另外，作者通过以下方法来减小搜索空间的范围：</p>
+<p>移除不需要的搜索选项，重用 EfficientNet 中搜索的 channel sizes，接着在搜索空间中随机采样了 1000 个模型，并针对每个模型训练 10 个 epochs（使用较小的图像尺度）。搜索奖励结合了模型准确率 A，标准训练一个 step 所需时间 S 以及模型参数大小 P，奖励函数可写成：
+$<span class="math notranslate nohighlight">\(
+A \cdot S^{w}\cdot P^{v}
+\)</span>$</p>
+<p>其中，A 是模型精度、S 是归一化训练时长，P 是参数量，w=-0.07 和 v=-005。</p>
+<p>与 V1 的不同：</p>
+<p>1.除了使用 MBConv 之外还使用了 Fused-MBConv 模块，加快训练速度与提升性能。</p>
+<p>2.使用较小的 expansion ratio (之前是 6)，从而减少内存的访问量。</p>
+<p>3.趋向于选择 kernel 大小为 3 的卷积核，但是会增加多个卷积用以提升感受野。</p>
+<p>4.移除了最后一个 stride 为 1 的 stage，从而减少部分参数和内存访问。</p>
+<p><strong>EfficientNetV2 缩放</strong></p>
+<p>作者在 EfficientNetV2-S 的基础上采用类似 EfficientNet 的复合缩放，并添加几个额外的优化，得到 EfficientNetV2-M/L。</p>
+<p>额外的优化描述如下：</p>
+<p>1.限制最大推理图像尺寸为 480。</p>
+<p>2.在网络的后期添加更多的层提升模型容量且不引入过多耗时。</p>
+<p><strong>训练速度比较</strong></p>
+<p>如下图所示，EfficientNetV2 模型在 ImageNet 上 top-1 acc 和 train step time，这里的训练采用固定的图像大小，不过比推理时图像大小降低 30%，而图中的 EffNet(reprod)也是采用这样的训练策略，可以看到比 baseline 训练速度和效果均有明显提升，而 EfficientNetV2 在训练速度和效果上有进一步地提升。</p>
+<p><img alt="EfficientNet" src="../_images/07Efficientnet06.png" /></p>
+</section>
+<section id="id3">
+<h3>渐进式学习<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>除了模型设计优化，论文还提出了一种 progressive learning 策略来进一步提升 EfficientNet v2 的训练速度，简单来说就训练过程渐进地增大图像大小，但在增大图像同时也采用更强的正则化策略，训练的正则化策略包括数据增强和 dropout 等。</p>
+<p>不同的图像输入采用不同的正则化策略，这不难理解，在早期的训练阶段，我们用更小的图像和较弱的正则化来训练网络，这样网络就可以轻松、快速地学习简单的表示。然后，我们逐渐增加图像的大小，但也通过增加更强的正则化，使学习更加困难。从下表中可以看到，大的图像输入要采用更强的数据增强，而小的图像输入要采用较轻的数据增强才能训出最优模型效果。</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>Size=128</p></th>
+<th class="head"><p>Size=192</p></th>
+<th class="head"><p>Size=300</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>RandAug magnitude=5</p></td>
+<td><p><strong>78.3</strong><span class="math notranslate nohighlight">\(\pm\)</span> 0.16</p></td>
+<td><p>81.2<span class="math notranslate nohighlight">\(\pm\)</span> 0.06</p></td>
+<td><p>82.5<span class="math notranslate nohighlight">\(\pm\)</span> 0.05</p></td>
+</tr>
+<tr class="row-odd"><td><p>RandAug magnitude=10</p></td>
+<td><p>78.0<span class="math notranslate nohighlight">\(\pm\)</span> 0.08</p></td>
+<td><p><strong>81.6</strong><span class="math notranslate nohighlight">\(\pm\)</span>0.08</p></td>
+<td><p>82.7<span class="math notranslate nohighlight">\(\pm\)</span> 0.08</p></td>
+</tr>
+<tr class="row-even"><td><p>RandAug magnitude=15</p></td>
+<td><p>77.7<span class="math notranslate nohighlight">\(\pm\)</span> 0.15</p></td>
+<td><p>81.5<span class="math notranslate nohighlight">\(\pm\)</span>0.05</p></td>
+<td><p><strong>83.2</strong><span class="math notranslate nohighlight">\(\pm\)</span> 0.09</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>结论：</strong></p>
+<p>（1）即使是相同的网络，较小的图像尺寸会导致较小的网络容量，因此需要较弱的正则化。</p>
+<p>（2）反之，较大的图像尺寸会导致更多的计算，而容量较大，因此更容易出现过拟合。</p>
+<p>（3）当图像大小较小时，弱增强的精度最好；但对于较大的图像，更强的增强效果更好。</p>
+</section>
+<section id="id4">
+<h3>自适应正则化<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<p>在早期训练阶段，使用较小的图像大小和较弱的正则化训练网络，这样网络可以轻松快速地学习简单表示。然后，逐渐增加图像大小，但也通过添加更强的正则化使学习更加困难。在逐步改进图像大小的基础上，自适应地调整正则化。假设整个训练有 N 个步骤，目标图像大小为 <span class="math notranslate nohighlight">\(S_{e}\)</span> ，正则化大小 <span class="math notranslate nohighlight">\(Φ_{e}={ϕ_{e}^{}}\)</span> ，这里 k 表示一种正则化类型，例如 dropout rate or mixup rate value。将训练分为 M 个阶段，对于每个阶段 <span class="math notranslate nohighlight">\(1≤i≤M\)</span> ，利用图像大小 Si 和正则化幅度对模型进行训练 <span class="math notranslate nohighlight">\(Φ_{i}={ϕ_{i}^{k}}\)</span> ，最后阶段 <span class="math notranslate nohighlight">\(M\)</span> 将图像大小 <span class="math notranslate nohighlight">\(S_{e}\)</span> 和正则化 <span class="math notranslate nohighlight">\(Φ_{e}\)</span> ，为了简单起见，启发式地选择初始图像大小 <span class="math notranslate nohighlight">\(S_{0}\)</span>,<span class="math notranslate nohighlight">\(Φ_{0}\)</span> ，然后使用线性插值来确定每个阶段的值，算法 1 总结了该过程。在每个阶段开始，网络将集成前一阶段的所有权重，与 trasnformer 不同，trasnformer 的权重（例如位置嵌入）可能取决于输入长度，ConvNet 的权重与图像大小无关，可以轻松继承。本文中主要研究了以下三种正则：Dropout、RandAugment 以及 Mixup。</p>
+<ul class="simple">
+<li><p>dropout：一种网络级的正规化，通过随机丢弃通道来减少共同适应(co-adaptation)。我们将调整 dropout 率。</p></li>
+<li><p>RandAugment：对每幅图像分别做幅度可调的数据增强。</p></li>
+<li><p>Mixup：图像与图像相互作用的数据增强。给定带有标签的两幅图像 <span class="math notranslate nohighlight">\((x_{i},y_{i})\)</span> 和 <span class="math notranslate nohighlight">\((x_{j},y_{j})\)</span>，Mixup 根据混合比将两者混合：<span class="math notranslate nohighlight">\(\widetilde{x_{i}}=λx_{j}+(1-λ)x_{i}\)</span>  <span class="math notranslate nohighlight">\(\widetilde{y_{i}}=λy_{j}+(1-λ)y_{j}\)</span>，。我们将在训练期间调整混合比λ。</p></li>
+</ul>
+</section>
+<section id="id5">
+<h3>网络结构实现<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>EfficientNet V2 在除了使用 MBConv 之外，在网络浅层使用了 Fused-MBConv 模块，加快训练速度与提升性能；使用较小的 expansion ratio(从 V1 版本的 6 减小到 4)，从而减少内存的访问量；
+偏向使用更小的 3×3 卷积核(V1 版本存在很多 5×5)，并堆叠更多的层结构以增加感受野；移除步长为 1 的最后一个阶段(V1 版本中 stage8)，因为它的参数数量过多，需要减少部分参数和内存访问。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 反残差结构 FusedMBConv:3×3 膨胀卷积层+BN 层+Swish 激活函数+1×1 点卷积层+BN 层</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FusedMBConvBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">kernel</span><span class="p">,</span>                <span class="c1"># 卷积核大小</span>
+                 <span class="n">input_c</span><span class="p">,</span>               <span class="c1"># 输入通道数</span>
+                 <span class="n">out_c</span><span class="p">,</span>                 <span class="c1"># 输出通道数</span>
+                 <span class="n">expand_ratio</span><span class="p">,</span>          <span class="c1"># 膨胀系数 1 or 4</span>
+                 <span class="n">stride</span><span class="p">,</span>                <span class="c1"># 卷积核步长</span>
+                 <span class="n">se_ratio</span><span class="p">,</span>              <span class="c1"># 启用 se 注意力模块</span>
+                 <span class="n">drop_rate</span><span class="p">,</span>             <span class="c1"># 通道随机失活率</span>
+                 <span class="n">norm_layer</span><span class="p">):</span>           <span class="c1"># 归一化层</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FusedMBConvBlock</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># 膨胀通道数 = 输入通道数*膨胀系数</span>
+        <span class="n">expanded_c</span> <span class="o">=</span> <span class="n">input_c</span> <span class="o">*</span> <span class="n">expand_ratio</span>
+        <span class="c1"># 步长必须是 1 或者 2</span>
+        <span class="k">assert</span> <span class="n">stride</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="c1"># 没有 se 注意力模块</span>
+        <span class="k">assert</span> <span class="n">se_ratio</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="c1"># 深度卷积步长为 2 则没有 shortcut 连接</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_res_connect</span> <span class="o">=</span> <span class="n">stride</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">input_c</span> <span class="o">==</span> <span class="n">out_c</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop_rate</span> <span class="o">=</span> <span class="n">drop_rate</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_expansion</span> <span class="o">=</span> <span class="n">expand_ratio</span> <span class="o">!=</span> <span class="mi">1</span>
+
+        <span class="n">layers</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="c1"># Swish 激活函数</span>
+        <span class="n">activation_layer</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">SiLU</span>
+
+        <span class="c1"># 只有当 expand ratio 不等于 1 时才有膨胀卷积</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_expansion</span><span class="p">:</span>
+            <span class="c1"># 3×3 膨胀卷积(膨胀系数&gt;1) 升维</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;expand_conv&quot;</span><span class="p">:</span> <span class="n">ConvBNAct</span><span class="p">(</span><span class="n">input_c</span><span class="p">,</span>
+                                                    <span class="n">expanded_c</span><span class="p">,</span>
+                                                    <span class="n">kernel_size</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+                                                        <span class="n">norm_layer</span><span class="o">=</span><span class="n">norm_layer</span><span class="p">,</span>
+                                                    <span class="n">activation_layer</span><span class="o">=</span><span class="n">activation_layer</span><span class="p">)})</span>
+            <span class="c1"># 1×1 点卷积</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;project_conv&quot;</span><span class="p">:</span> <span class="n">ConvBNAct</span><span class="p">(</span><span class="n">expanded_c</span><span class="p">,</span>
+                                               <span class="n">out_c</span><span class="p">,</span>
+                                               <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                               <span class="n">norm_layer</span><span class="o">=</span><span class="n">norm_layer</span><span class="p">,</span>
+                                               <span class="n">activation_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">)})</span>  <span class="c1"># 注意没有激活函数</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># 当没有膨胀卷积时,3×3 点卷积</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;project_conv&quot;</span><span class="p">:</span> <span class="n">ConvBNAct</span><span class="p">(</span><span class="n">input_c</span><span class="p">,</span>
+                                                     <span class="n">out_c</span><span class="p">,</span>
+                                                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+                                                     <span class="n">norm_layer</span><span class="o">=</span><span class="n">norm_layer</span><span class="p">,</span>
+                                                     <span class="n">activation_layer</span><span class="o">=</span><span class="n">activation_layer</span><span class="p">)})</span>  <span class="c1"># 注意有激活函数</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_res_connect</span> <span class="ow">and</span> <span class="n">drop_rate</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drop_connect</span> <span class="o">=</span> <span class="n">DropConnect</span><span class="p">(</span><span class="n">drop_rate</span><span class="p">)</span>
+        <span class="c1"># 只有在使用 shortcut 连接时才使用 drop_connect 层</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_res_connect</span> <span class="ow">and</span> <span class="n">drop_rate</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drop_connect</span> <span class="o">=</span> <span class="n">DropConnect</span><span class="p">(</span><span class="n">drop_rate</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drop_connect</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_connect</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="c1"># 反残差结构随机失活</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_res_connect</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">x</span>
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id6">
+<h2>小结与思考<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>EfficientNet V1 通过神经网络搜索技术（NAS）分析了网络深度、宽度和输入图像分辨率对模型性能的影响，并提出了一种复合模型缩放方法，通过统一的缩放系数平衡调整这三个参数，使用 SE 模块进一步提升特征表示能力。</p></li>
+<li><p>EfficientNet V2 在 V1 的基础上引入了训练感知神经结构搜索和缩放，考虑了模型的推理和训练速度，采用渐进式学习策略和自适应正则化强度调整机制，通过联合优化准确率、参数效率和训练效率，提高了模型的训练速度和性能。</p></li>
+<li><p>EfficientNet V2 网络结构实现中，使用了 Fused-MBConv 模块以加快训练速度和提升性能，较小的 expansion ratio 减少内存访问量，偏向使用 3×3 卷积核并通过堆叠更多层来增加感受野，移除了最后一个步长为 1 的 stage 以减少参数和内存访问。</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2>本节视频<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
+<iframe src="https://player.bilibili.com/player.html?bvid=BV1DK411k7qt&as_wide=1&high_quality=1&danmaku=0&t=30&autoplay=0" width="100%" height="500" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./04Inference02Mobilenet"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="025FBNet.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">FBNet 系列</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="027GhostNet.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">GhostNet 系列</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#efficientnet-v1">EfficientNet V1 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">复合模型缩放</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#se">SE 模块</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">网络结构实现</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#efficientnet-v2">EfficientNet V2 模型</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nas">训练感知 NAS 和缩放</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">渐进式学习</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">自适应正则化</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">网络结构实现</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">小结与思考</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">本节视频</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 01, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
