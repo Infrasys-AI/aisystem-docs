@@ -22,7 +22,7 @@
 
 ## 课程脑图
 
-![脑图](images/Architecture03.png)
+![脑图](../images/03Compiler/Architecture03.png)
 
 ## 备注
 
