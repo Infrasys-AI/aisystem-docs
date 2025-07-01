@@ -10,14 +10,9 @@
 <meta property="og:title" content="EfficientFormer 系列" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="04Inference02Mobilenet/033EfficientFormer.html" />
-<meta property="og:site_name" content="AISystem & AIInfra (AI系统原理)" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
 <meta property="og:description" content="本节主要介绍一种轻量化的 Transformer 结构，在获得高性能的同时，能够保持一定的推理速度。以延迟为目标进行优化设计。通过延迟分析重新探讨 ViT 及其变体的设计原则。 EfficientFormer V1 模型: EfficientFormer V1:基于 ViT 的模型中使用的网络架构和具体的算子，找到端侧低效的原因。然后引入了维度一致的 Transformer Block 作为..." />
-<meta property="og:image:width" content="1146" />
-<meta property="og:image:height" content="600" />
-<meta property="og:image" content="/None" />
-<meta property="og:image:alt" content="本节主要介绍一种轻量化的 Transformer 结构，在获得高性能的同时，能够保持一定的推理速度。以延迟为目标进行优化设计。通过延迟分析重新探讨 ViT 及其变体的设计原则。 EfficientFormer V1 模型: EfficientFormer V1:基于 ViT 的模型中使用的网络架构和具体的算子，找..." />
 <meta name="description" content="本节主要介绍一种轻量化的 Transformer 结构，在获得高性能的同时，能够保持一定的推理速度。以延迟为目标进行优化设计。通过延迟分析重新探讨 ViT 及其变体的设计原则。 EfficientFormer V1 模型: EfficientFormer V1:基于 ViT 的模型中使用的网络架构和具体的算子，找到端侧低效的原因。然后引入了维度一致的 Transformer Block 作为..." />
-<meta name="twitter:card" content="summary_large_image" />
 
     <title>EfficientFormer 系列 &#8212; AI System</title>
   
@@ -29,18 +24,18 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=362ab14a" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
@@ -48,32 +43,29 @@
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
     <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
-  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=aabdd393"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/rtd-data.js?v=db39d344"></script>
+    <script src="../_static/rtd-data.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '04Inference02Mobilenet/033EfficientFormer';</script>
@@ -82,21 +74,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="CNN 模型小型化（下）" href="03Cnn.html" />
-    <link rel="prev" title="MobileFormer" href="032MobileFormer.html" />
-
+    <link rel="prev" title="MobileFormer" href="032MobileFormer.html" /> 
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="cn"/>
-    <meta name="docbuild:last-update" content="Jun 15, 2025"/>
-
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
 <link
   rel="alternate"
   type="application/atom+xml"
   href="../reference/blog/atom.xml"
   title="Blog"
 />
-
-
-
+  
   </head>
   
   
@@ -172,6 +160,8 @@
         <div class="sidebar-primary-item">
 
   
+    
+  
 
 <a class="navbar-brand logo" href="../index.html">
   
@@ -189,7 +179,7 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -200,7 +190,7 @@
           
           
           
-          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -212,7 +202,7 @@
           
           
           
-          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i></span>
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Youtube</span></a>
         </li>
         <li class="nav-item">
@@ -224,7 +214,7 @@
           
           
           
-          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i></span>
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Blibili</span></a>
         </li>
 </ul></div>
@@ -232,7 +222,7 @@
 
  <script>
  document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
     <span class="search-button__default-text">Search</span>
     <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -243,11 +233,17 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系结构 ===</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -312,7 +308,7 @@
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与编译原理 ===</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -353,14 +349,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler07CANN/README.html">CANN &amp; Ascend C</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/01CANN.html">昇腾异构计算架构 CANN</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/02OPType.html">CANN 算子类型</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/03AscendC.html">算子开发编程语言 Ascend C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/04Grmmar.html">Ascend C 语法扩展</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/05Paradigm.html">Ascend C 编程范式</a></li>
 </ul>
 </details></li>
 </ul>
@@ -471,20 +459,6 @@
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 附录内容 ===</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../00Others/README.html">附录(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Editors.html">编辑和作者(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Instruments.html">书写工具(DONE)</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../00Others/Install.html">本地部署(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
-</ul>
-</details></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Inference.html">参考链接(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Glossary.html">术语表(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Criterion.html">书写规范(DONE)</a></li>
-</ul>
-</details></li>
-</ul>
 
     </div>
 </nav></div>
@@ -513,9 +487,9 @@
   
     <div class="header-article-items__start">
       
-        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
   <span class="fa-solid fa-bars"></span>
-</label></div>
+</button></div>
       
     </div>
   
@@ -657,10 +631,10 @@
 
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
   </button>
 `);
 </script>
@@ -668,14 +642,14 @@ document.write(`
 
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
   </button>
 `);
 </script>
-<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
-</label>
+</button>
 </div></div>
       
     </div>
@@ -722,8 +696,7 @@ document.write(`
                 
 <div id="searchbox"></div>
                 <article class="bd-article">
-                  
-<!--Copyright © XcodeHw 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+                   <!--Copyright © XcodeHw 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
 <section class="tex2jax_ignore mathjax_ignore" id="efficientformer">
 <h1>EfficientFormer 系列<a class="headerlink" href="#efficientformer" title="Link to this heading">#</a></h1>
 <p>本节主要介绍一种轻量化的 Transformer 结构，在获得高性能的同时，能够保持一定的推理速度。以延迟为目标进行优化设计。通过延迟分析重新探讨 ViT 及其变体的设计原则。</p>
@@ -736,7 +709,7 @@ document.write(`
 <p>patch 嵌入通常使用一个不重叠的卷积层来实现，该层具有较大的内核大小和步长。一种普遍的看法是，Transformer 网络中 patch 嵌入层的计算成本不显著或可以忽略不计。然而，在上图中比较了具有大核和大步长的 patch 嵌入模型，即 DeiT-S 和 PoolFormer-s24，以及没有它的模型，即 LeViT-256 和 EfficientFormer，结果表明，patch 嵌入反而是移动设备上的速度瓶颈。</p>
 <p>大多数编译器都不支持大型内核卷积，并且无法通过 Winograd 等现有算法来加速。或者，非重叠 patch 嵌入可以由一个具有快速下采样的卷积 stem 代替，该卷积 stem 由几个硬件效率高的 3×3 卷积组成。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#stem 以一些普通卷积组成</span>
-<span class="k">def</span> <span class="nf">stem</span><span class="p">(</span><span class="n">in_chs</span><span class="p">,</span> <span class="n">out_chs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">stem</span><span class="p">(</span><span class="n">in_chs</span><span class="p">,</span> <span class="n">out_chs</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
         <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_chs</span><span class="p">,</span> <span class="n">out_chs</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
         <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">out_chs</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span>
@@ -804,8 +777,8 @@ MHSA(Q,K,V) = Softamax(\frac{Q\odot K^{T}}{\sqrt{C_{j}}}). V
 \]</div>
 <p>其中 Q、K、V 表示通过线性投影学习的查询、键和值，b 表示作为位置编码的参数化注意力 bias。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#以 1x1 卷积为主的 MLP</span>
-<span class="k">class</span> <span class="nc">Mlp</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Mlp</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">out_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="n">out_features</span> <span class="o">=</span> <span class="n">out_features</span> <span class="ow">or</span> <span class="n">in_features</span>
@@ -819,13 +792,13 @@ MHSA(Q,K,V) = Softamax(\frac{Q\odot K^{T}}{\sqrt{C_{j}}}). V
         <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">hidden_features</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">out_features</span><span class="p">)</span>
  
-    <span class="k">def</span> <span class="nf">_init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">):</span>
             <span class="n">trunc_normal_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">.02</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">constant_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
  
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -835,9 +808,9 @@ MHSA(Q,K,V) = Softamax(\frac{Q\odot K^{T}}{\sqrt{C_{j}}}). V
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">return</span> 
 
-<span class="k">class</span> <span class="nc">Meta4D</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Meta4D</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
  
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
                  <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span>
                  <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">drop_path</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
                  <span class="n">use_layer_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layer_scale_init_value</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
@@ -858,7 +831,7 @@ MHSA(Q,K,V) = Softamax(\frac{Q\odot K^{T}}{\sqrt{C_{j}}}). V
             <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
                 <span class="n">layer_scale_init_value</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dim</span><span class="p">)),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
  
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_1</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
@@ -886,10 +859,10 @@ MP_{i,j=3,4} \in {MB_{i}^{4D},MB_{i}^{3D},I_{i}}
 <p>其中 <span class="math notranslate nohighlight">\(I\)</span> 表示 identity path，<span class="math notranslate nohighlight">\(j\)</span> 表示第 <span class="math notranslate nohighlight">\(j\)</span> 阶段，<span class="math notranslate nohighlight">\(i\)</span> 表示第 <span class="math notranslate nohighlight">\(i\)</span> 个块。</p>
 <p>在超网的 <span class="math notranslate nohighlight">\(S_{1}\)</span> 和 <span class="math notranslate nohighlight">\(S_{2}\)</span> 中，每个块可以从 MB4D 或 I 中选择，而在 <span class="math notranslate nohighlight">\(S_{3}\)</span> 和 <span class="math notranslate nohighlight">\(S_{4}\)</span> 中，块可以是 MB3D、MB4D 或 I。出于两个原因，作者仅在最后两个阶段启用 MB3D：首先，由于 MHSA 的计算相对于 token 长度呈二次增长，因此在早期阶段对其进行集成将大大增加计算成本。其次，将全局 MHSA 应用于最后阶段符合这样一种直觉，即网络的早期阶段捕获低级特征，而后期阶段学习长期依赖性。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Meta3D 与 Meta4D 在 MLP 有不同，Meta3D 使用如下的 LinearMLP，主要以线性层为主</span>
-<span class="k">class</span> <span class="nc">LinearMlp</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinearMlp</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; MLP as used in Vision Transformer, MLP-Mixer and related networks</span>
 <span class="sd">    &quot;&quot;&quot;</span> 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="n">out_features</span> <span class="o">=</span> <span class="n">out_features</span> <span class="ow">or</span> <span class="n">in_features</span>
         <span class="n">hidden_features</span> <span class="o">=</span> <span class="n">hidden_features</span> <span class="ow">or</span> <span class="n">in_features</span>
@@ -900,7 +873,7 @@ MP_{i,j=3,4} \in {MB_{i}^{4D},MB_{i}^{3D},I_{i}}
         <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_features</span><span class="p">,</span> <span class="n">out_features</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">drop2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">drop</span><span class="p">)</span>
  
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -908,9 +881,9 @@ MP_{i,j=3,4} \in {MB_{i}^{4D},MB_{i}^{3D},I_{i}}
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">x</span>
     
-<span class="k">class</span> <span class="nc">Meta3D</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Meta3D</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
  
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
                  <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span> <span class="n">norm_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">,</span>
                  <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">drop_path</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
                  <span class="n">use_layer_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layer_scale_init_value</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
@@ -931,7 +904,7 @@ MP_{i,j=3,4} \in {MB_{i}^{4D},MB_{i}^{3D},I_{i}}
             <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
                 <span class="n">layer_scale_init_value</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dim</span><span class="p">)),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
  
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_1</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -1039,8 +1012,8 @@ X_{i+1} = \sum_{n} \frac{e^{(a_{i}^{n}+\epsilon_{i}^{n})}/ \tau}{\sum_{n} e^{(a_
 <p>通过统一的 FFN 和删除残差连接的 token mixer，V2 检查来自 EfficientFormer 的搜索空间是否仍然足够，特别是在深度方面。论文改变了网络深度（每个阶段中的 block 数）和宽度（通道数），并发现更深和更窄的网络会带来更好的精度（0.2%的改进）、更少的参数（0.3M 的减少）和更少的耗时（0.1ms 的加速），如上表所示。因此，论文将此网络设置为新的基线（精度 80.5%），以验证后续的设计修改，并为架构搜索提供更深入的超网络。</p>
 <p>此外，具有进一步缩小的空间分辨率（1/64）的 5 阶段模型已广泛用于有效的 ViT 工作。为了证明是否应该从一个 5 阶段超网络中搜索，论文在当前的基线网络中添加了一个额外的阶段，并验证了性能增益和开销。值得注意的是，尽管考虑到小的特征分辨率，计算开销不是一个问题，但附加阶段是参数密集型的。因此需要缩小网络维度（深度或宽度），以将参数和延迟与基线模型对齐，以便进行公平比较。如上表所示，尽管节省了 MACs（0.12G），但 5 阶段模型的最佳性能在更多参数（0.39M）和延迟开销（0.2ms）的情况下意外降至 80.31%。这符合直觉，即五阶段计算效率高，但参数密集。鉴于 5 阶段网络无法在现有的规模和速度范围内引入更多潜力，论文坚持 4 阶段设计。这一分析也解释了为什么某些 ViT 在 MACs 精度方面提供了出色的 Pareto curve，但在大小上往往非常冗余。作为最重要的一点，优化单一度量很容易陷入困境。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 深度卷积前馈网络(局部模块)</span>
-<span class="k">class</span> <span class="nc">FFN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FFN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
                  <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span>
                  <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">drop_path</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
                  <span class="n">use_layer_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layer_scale_init_value</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
@@ -1057,7 +1030,7 @@ X_{i+1} = \sum_{n} \frac{e^{(a_{i}^{n}+\epsilon_{i}^{n})}/ \tau}{\sum_{n} e^{(a_
             <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
                 <span class="n">layer_scale_init_value</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># 缩放因子</span>
  
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>    <span class="c1"># 残差连接</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1069,8 +1042,8 @@ X_{i+1} = \sum_{n} \frac{e^{(a_{i}^{n}+\epsilon_{i}^{n})}/ \tau}{\sum_{n} e^{(a_
 <section id="id3">
 <h3>多头注意力改进<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
 <p>然后，论文研究了在不增加模型大小和耗时的额外开销的情况下提高注意力模块性能的技术。如图（c）所示，论文研究了 MHSA 的两种方法。首先通过添加 depth-wise 3×3 CONV 将局部信息注入到 Value 矩阵（V）中，也采用了这种方法。其次通过在 head 维度上添加全连接层来实现注意力头之间的通信，如图 2（c）所示。通过这些修改，进一步将性能提高到 80.8%，与基线模型相比，具有相似的参数和延迟。</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Attention4D</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">384</span><span class="p">,</span> <span class="n">key_dim</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Attention4D</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">384</span><span class="p">,</span> <span class="n">key_dim</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
                  <span class="n">attn_ratio</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                  <span class="n">resolution</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
                  <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
@@ -1130,14 +1103,14 @@ X_{i+1} = \sum_{n} \frac{e^{(a_{i}^{n}+\epsilon_{i}^{n})}/ \tau}{\sum_{n} e^{(a_
                              <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">(</span><span class="n">idxs</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
  
     <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">mode</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ab&#39;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">ab</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_biases</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_bias_idxs</span><span class="p">]</span>
  
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  <span class="c1"># x (B,N,C)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  <span class="c1"># x (B,N,C)</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stride_conv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stride_conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -1170,8 +1143,8 @@ X_{i+1} = \sum_{n} \frac{e^{(a_{i}^{n}+\epsilon_{i}^{n})}/ \tau}{\sum_{n} e^{(a_
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#AttnFFN（Local Global 模块）</span>
-<span class="k">class</span> <span class="nc">AttnFFN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AttnFFN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">mlp_ratio</span><span class="o">=</span><span class="mf">4.</span><span class="p">,</span>
                  <span class="n">act_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span> <span class="n">norm_layer</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">,</span>
                  <span class="n">drop</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">drop_path</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
                  <span class="n">use_layer_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layer_scale_init_value</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
@@ -1193,7 +1166,7 @@ X_{i+1} = \sum_{n} \frac{e^{(a_{i}^{n}+\epsilon_{i}^{n})}/ \tau}{\sum_{n} e^{(a_
             <span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
                 <span class="n">layer_scale_init_value</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
  
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_layer_scale</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_mixer</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>    <span class="c1"># 多头自注意力 + 残差连接</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_scale_2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>    <span class="c1"># mlp 深度卷积 + 残差连接</span>
@@ -1214,8 +1187,8 @@ X_{i+1} = \sum_{n} \frac{e^{(a_{i}^{n}+\epsilon_{i}^{n})}/ \tau}{\sum_{n} e^{(a_
 Out_{[B,H,N,C]} = (Q_{[B,H,N,C]}.K^{T}_{[B,H,C,\frac{N}{2}]}).V_{[B,H,\frac{N}{2},C]}\tag{1}
 \]</div>
 <p>根据测试该模型的耗时仅下降到 2.8ms，仍然比基线模型慢 2 倍。因此，为了在网络的早期阶段执行 MHSA，论文将所有 Query、Key 和 Value 降采样到固定的空间分辨率（1/32），并将注意力的输出插值回原始分辨率，以馈送到下一层，如图所示（（d）和（e））。我们称这种方法为“Stride Attention”。如表所示，这种简单的近似值将延迟从 3.5ms 显著降低到 1.5ms，并保持了具有竞争力的准确性（81.5%对 81.7%）。</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Attention4DDownsample</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">384</span><span class="p">,</span> <span class="n">key_dim</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Attention4DDownsample</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">384</span><span class="p">,</span> <span class="n">key_dim</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
                  <span class="n">attn_ratio</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                  <span class="n">resolution</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
                  <span class="n">out_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1286,14 +1259,14 @@ Out_{[B,H,N,C]} = (Q_{[B,H,N,C]}.K^{T}_{[B,H,C,\frac{N}{2}]}).V_{[B,H,\frac{N}{2
                              <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">(</span><span class="n">idxs</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">N_</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
  
     <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">mode</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ab&#39;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">ab</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_biases_seg</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_bias_idxs_seg</span><span class="p">]</span>
  
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  <span class="c1"># x (B,N,C)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  <span class="c1"># x (B,N,C)</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
  
         <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">H</span> <span class="o">*</span> <span class="n">W</span> <span class="o">//</span> <span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -1326,8 +1299,8 @@ Out_{[B,H,\frac{N}{2},C]} = (Q_{[B,H,\frac{N}{2},C]}.K^{T}_{[B,H,C,N]}).V_{[B,H,
 \]</div>
 <p>然而，决定如何减少 Query 中的 token 数量是非常重要的。Graham 等人根据经验使用池化对 Query 进行下采样，而 Liu 等人建议搜索局部或全局方法。为了在移动设备上实现可接受的推理速度，将注意力下采样应用于具有高分辨率的早期阶段是不利的，这限制了以更高分辨率搜索不同下采样方法的现有工作的价值。</p>
 <p>相反，论文提出了一种同时使用局部性和全局依赖性的组合策略，如图(f)所示。为了获得下采样的 Query，论文使用池化层作为静态局部下采样，使用 3×3 DWCONV 作为可学习的局部下采样。此外，注意力下采样模块残差连接到 regular strided CONV，以形成 local-global 方式，类似于下采样 bottlenecks 或 inverted bottlenecks。如表所示，通过略微增加参数和耗时开销，论文进一步将注意力下采样的准确率提高到 81.8%。</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LGQuery</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">,</span> <span class="n">resolution1</span><span class="p">,</span> <span class="n">resolution2</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">LGQuery</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">,</span> <span class="n">resolution1</span><span class="p">,</span> <span class="n">resolution2</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resolution1</span> <span class="o">=</span> <span class="n">resolution1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resolution2</span> <span class="o">=</span> <span class="n">resolution2</span>
@@ -1337,7 +1310,7 @@ Out_{[B,H,\frac{N}{2},C]} = (Q_{[B,H,\frac{N}{2},C]}.K^{T}_{[B,H,C,N]}).V_{[B,H,
         <span class="bp">self</span><span class="o">.</span><span class="n">proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_dim</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                                   <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">out_dim</span><span class="p">),</span> <span class="p">)</span>
  
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">local_q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">pool_q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -1437,8 +1410,7 @@ A\in{A_{N[i,j]},A_{C[j]},A_{E[i,j]}} \tag{9}
     </script>
     <script>kernelName = 'python3'</script>
 <div class="section ablog__blog_comments">
-  
-  
+   
 </div>
 
                 </article>
@@ -1514,6 +1486,10 @@ A\in{A_{N[i,j]},A_{C[j]},A_{E[i,j]}} \tag{9}
   
   <div class="footer-item">
     
+<p class="component-author">
+By Author name not set
+</p>
+
   </div>
   
   <div class="footer-item">
@@ -1523,7 +1499,7 @@ A\in{A_{N[i,j]},A_{C[j]},A_{E[i,j]}} \tag{9}
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jun 15, 2025.
+  Last updated on Jul 01, 2025.
   <br/>
 </p>
   </div>
@@ -1541,8 +1517,8 @@ A\in{A_{N[i,j]},A_{C[j]},A_{E[i,j]}} \tag{9}
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>

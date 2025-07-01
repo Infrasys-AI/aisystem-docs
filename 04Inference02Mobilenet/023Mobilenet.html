@@ -10,14 +10,9 @@
 <meta property="og:title" content="MobileNet 系列" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="04Inference02Mobilenet/023Mobilenet.html" />
-<meta property="og:site_name" content="AISystem & AIInfra (AI系统原理)" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
 <meta property="og:description" content="在本节节会介绍 MobileNet 系列，重点在于其模型结构的轻量化设计，主要介绍详细的轻量化设计原则，基于这原则，MobileNetV1 是如何设计成一个小型，低延迟，低功耗的参数化模型，可以满足各种用例的资源约束。可以更方便的实现分类，检测，嵌入和分割等功能。会结合目前较流行的深度学习技术，在 V1 的基础会分别讲解 V2，V3，V4 做出的改进升级，让读者们更深入了解轻量级网络结构的设..." />
-<meta property="og:image:width" content="1146" />
-<meta property="og:image:height" content="600" />
-<meta property="og:image" content="/None" />
-<meta property="og:image:alt" content="在本节节会介绍 MobileNet 系列，重点在于其模型结构的轻量化设计，主要介绍详细的轻量化设计原则，基于这原则，MobileNetV1 是如何设计成一个小型，低延迟，低功耗的参数化模型，可以满足各种用例的资源约束。可以更方便的实现分类，检测，嵌入和分割等功能。会结合目前较流行的深度学习技术，在 V1 的基础会..." />
 <meta name="description" content="在本节节会介绍 MobileNet 系列，重点在于其模型结构的轻量化设计，主要介绍详细的轻量化设计原则，基于这原则，MobileNetV1 是如何设计成一个小型，低延迟，低功耗的参数化模型，可以满足各种用例的资源约束。可以更方便的实现分类，检测，嵌入和分割等功能。会结合目前较流行的深度学习技术，在 V1 的基础会分别讲解 V2，V3，V4 做出的改进升级，让读者们更深入了解轻量级网络结构的设..." />
-<meta name="twitter:card" content="summary_large_image" />
 
     <title>MobileNet 系列 &#8212; AI System</title>
   
@@ -29,18 +24,18 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=362ab14a" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
@@ -48,32 +43,29 @@
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
     <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
-  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=aabdd393"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/rtd-data.js?v=db39d344"></script>
+    <script src="../_static/rtd-data.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '04Inference02Mobilenet/023Mobilenet';</script>
@@ -82,21 +74,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ESPNet 系列" href="024ESPNet.html" />
-    <link rel="prev" title="ShuffleNet 系列" href="022Shufflenet.html" />
-
+    <link rel="prev" title="ShuffleNet 系列" href="022Shufflenet.html" /> 
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="cn"/>
-    <meta name="docbuild:last-update" content="Jun 15, 2025"/>
-
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
 <link
   rel="alternate"
   type="application/atom+xml"
   href="../reference/blog/atom.xml"
   title="Blog"
 />
-
-
-
+  
   </head>
   
   
@@ -172,6 +160,8 @@
         <div class="sidebar-primary-item">
 
   
+    
+  
 
 <a class="navbar-brand logo" href="../index.html">
   
@@ -189,7 +179,7 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -200,7 +190,7 @@
           
           
           
-          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -212,7 +202,7 @@
           
           
           
-          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i></span>
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Youtube</span></a>
         </li>
         <li class="nav-item">
@@ -224,7 +214,7 @@
           
           
           
-          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i></span>
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Blibili</span></a>
         </li>
 </ul></div>
@@ -232,7 +222,7 @@
 
  <script>
  document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
     <span class="search-button__default-text">Search</span>
     <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -243,11 +233,17 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系结构 ===</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -312,7 +308,7 @@
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与编译原理 ===</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -353,14 +349,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler07CANN/README.html">CANN &amp; Ascend C</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/01CANN.html">昇腾异构计算架构 CANN</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/02OPType.html">CANN 算子类型</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/03AscendC.html">算子开发编程语言 Ascend C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/04Grmmar.html">Ascend C 语法扩展</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/05Paradigm.html">Ascend C 编程范式</a></li>
 </ul>
 </details></li>
 </ul>
@@ -471,20 +459,6 @@
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 附录内容 ===</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../00Others/README.html">附录(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Editors.html">编辑和作者(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Instruments.html">书写工具(DONE)</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../00Others/Install.html">本地部署(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
-</ul>
-</details></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Inference.html">参考链接(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Glossary.html">术语表(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Criterion.html">书写规范(DONE)</a></li>
-</ul>
-</details></li>
-</ul>
 
     </div>
 </nav></div>
@@ -513,9 +487,9 @@
   
     <div class="header-article-items__start">
       
-        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
   <span class="fa-solid fa-bars"></span>
-</label></div>
+</button></div>
       
     </div>
   
@@ -657,10 +631,10 @@
 
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
   </button>
 `);
 </script>
@@ -668,14 +642,14 @@ document.write(`
 
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
   </button>
 `);
 </script>
-<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
-</label>
+</button>
 </div></div>
       
     </div>
@@ -741,8 +715,7 @@ document.write(`
                 
 <div id="searchbox"></div>
                 <article class="bd-article">
-                  
-<!--Copyright © XcodeHw 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+                   <!--Copyright © XcodeHw 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
 <section class="tex2jax_ignore mathjax_ignore" id="mobilenet">
 <h1>MobileNet 系列<a class="headerlink" href="#mobilenet" title="Link to this heading">#</a></h1>
 <p>在本节节会介绍 MobileNet 系列，重点在于其模型结构的轻量化设计，主要介绍详细的轻量化设计原则，基于这原则，MobileNetV1 是如何设计成一个小型，低延迟，低功耗的参数化模型，可以满足各种用例的资源约束。可以更方便的实现分类，检测，嵌入和分割等功能。会结合目前较流行的深度学习技术，在 V1 的基础会分别讲解 V2，V3，V4 做出的改进升级，让读者们更深入了解轻量级网络结构的设计思路与过程。</p>
@@ -776,7 +749,7 @@ D_{k}\cdot D_{k}\cdot M\cdot D_{F}\cdot D_{F} + M\cdot N\cdot D_{F}\cdot D_{F}
 \frac{D_{k}\cdot D_{k}\cdot M\cdot D_{F}\cdot D_{F} + M\cdot N\cdot D_{F}\cdot D_{F}}{D_{k}\cdot D_{k}\cdot M\cdot N\cdot D_{F}\cdot D_{F}}=\frac{1}{N}+\frac{1}{D_{k}^{2}}
 \]</div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 定义 DW、PW 卷积模块</span>
-<span class="k">def</span> <span class="nf">conv_dw</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">oup</span><span class="p">,</span> <span class="n">stride</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">conv_dw</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">oup</span><span class="p">,</span> <span class="n">stride</span><span class="p">):</span>
     
     <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
                 <span class="c1"># DW  DW 卷积的卷积核输入与输出的数量一致，且等于分组数</span>
@@ -814,17 +787,17 @@ D_{k}\cdot D_{k} \cdot αM\cdotρD_{F}\cdotρD_{F}+ αM\cdot αN\cdotρD_{F}\cdo
 <h3>网络结构实现<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
 <p>在 V1 结构中会加入 BN，并使用 ReLU 激活函数，所以 depthwise separable convolution 的基本结构如下图右面所示, 左面是正常的 conv：</p>
 <p><img alt="Mobilenet" src="../_images/04Mobilenet03.png" /></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="c1"># 定义普通卷积、BN、激活模块</span>
-<span class="k">def</span> <span class="nf">conv_bn</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">oup</span><span class="p">,</span> <span class="n">stride</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">conv_bn</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">oup</span><span class="p">,</span> <span class="n">stride</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">oup</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">oup</span><span class="p">),</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="p">)</span>
 <span class="c1"># 定义 DW、PW 卷积模块</span>
-<span class="k">def</span> <span class="nf">conv_dw</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">oup</span><span class="p">,</span> <span class="n">stride</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">conv_dw</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">oup</span><span class="p">,</span> <span class="n">stride</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
                 <span class="c1"># dw</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="n">inp</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>   <span class="c1"># DW 卷积的卷积核输入与输出的数量一致，且等于分组数</span>
@@ -839,11 +812,11 @@ D_{k}\cdot D_{k} \cdot αM\cdotρD_{F}\cdotρD_{F}+ αM\cdot αN\cdotρD_{F}\cdo
 </pre></div>
 </div>
 <p>整体网络就是通过不断堆叠 MBconv 组件组成的,首先是一个 3x3 的标准卷积，然后后面就是堆积 depthwise separable convolution，并且可以看到其中的部分 depthwise convolution 会通过 strides=2 进行 down sampling。经过 卷积提取特征后再采用 average pooling 将 feature 变成 1x1，根据预测类别大小加上全连接层，最后是一个 softmax 层。</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="k">class</span> <span class="nc">MobileNetV1</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ch_in</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MobileNetV1</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ch_in</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MobileNetV1</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
@@ -865,7 +838,7 @@ D_{k}\cdot D_{k} \cdot αM\cdotρD_{F}\cdotρD_{F}+ αM\cdot αN\cdotρD_{F}\cdo
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">)</span> <span class="c1">#线性层</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -910,8 +883,8 @@ D_{k}\cdot D_{k} \cdot αM\cdotρD_{F}\cdotρD_{F}+ αM\cdot αN\cdotρD_{F}\cdo
 </ul>
 <p>在 Inverted Residual block 中，<span class="math notranslate nohighlight">\( 3 \times 3\)</span> 卷积变成 Depthwise 了，计算量很少了，所以通道数可以多一点，效果更好，所以通过 <span class="math notranslate nohighlight">\(1 \times 1\)</span> 卷积先提升通道数，再 Depthwise <span class="math notranslate nohighlight">\( 3 \times 3\)</span> 卷积，最后用 <span class="math notranslate nohighlight">\(1 \times 1\)</span> 卷积降低通道数。两端的通道数都很小，所以 <span class="math notranslate nohighlight">\(1 \times 1\)</span> 卷积升通道和降通道计算量都并不大，而中间的通道数虽然多，但是 Depthwise 的卷积计算量也不。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 定义 mobile 网络基本结构--即到残差结构</span>
-<span class="k">class</span> <span class="nc">InvertedResidual</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channel</span><span class="p">,</span> <span class="n">out_channel</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="n">expand_ratio</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InvertedResidual</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channel</span><span class="p">,</span> <span class="n">out_channel</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="n">expand_ratio</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">InvertedResidual</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="n">hidden_channel</span> <span class="o">=</span> <span class="n">in_channel</span> <span class="o">*</span> <span class="n">expand_ratio</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_shortcut</span> <span class="o">=</span> <span class="n">stride</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">in_channel</span> <span class="o">==</span> <span class="n">out_channel</span>  <span class="c1"># stride == 1 and in_channel == out_channel：保证输入矩阵与输出矩阵的 shape 一致，且通道数也一致，这样才可以进行 shurtcut</span>
@@ -931,7 +904,7 @@ D_{k}\cdot D_{k} \cdot αM\cdotρD_{F}\cdotρD_{F}+ αM\cdot αN\cdotρD_{F}\cdo
 
         <span class="bp">self</span><span class="o">.</span><span class="n">conv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">layers</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_shortcut</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -944,8 +917,8 @@ D_{k}\cdot D_{k} \cdot αM\cdotρD_{F}\cdotρD_{F}+ αM\cdot αN\cdotρD_{F}\cdo
 <p>卷积之后通常会接一个 ReLU 非线性激活，在 MobileNet 中使用 ReLU6。ReLU6 在普通的 ReLU 基础上限制最大输出为 6，这是为了在移动端设备 float16/int8 的低精度的时候也能有很好的数值分辨率。</p>
 <p>如果对 ReLU 的激活范围不加限制，输出范围为 0 到正无穷，如果激活值非常大，分布在一个很大的范围内，则低精度的 float16/int8 无法很好地精确描述如此大范围的数值，带来精度损失。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 定义普通卷积、BN 结构</span>
-<span class="k">class</span> <span class="nc">ConvBNReLU</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channel</span><span class="p">,</span> <span class="n">out_channel</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConvBNReLU</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channel</span><span class="p">,</span> <span class="n">out_channel</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="n">padding</span> <span class="o">=</span> <span class="p">(</span><span class="n">kernel_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>  <span class="c1"># padding 的设置根据 kernel_size 来定，如果 kernel_size 为 3，则 padding 设置为 1；如果 kernel_size 为 1，为 padding 为 0</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ConvBNReLU</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="c1"># 在 pytorch 中，如果设置的 group=1 的话，就为普通卷积；如果设置的值为输入特征矩阵的深度的话（即 in_channel），则为深度卷积（deptwise conv），并且 Dw 卷积的输出特征矩阵的深度等于输入特征矩阵的深度</span>
@@ -962,10 +935,10 @@ D_{k}\cdot D_{k} \cdot αM\cdotρD_{F}\cdotρD_{F}+ αM\cdot αN\cdotρD_{F}\cdo
 <p>V2 的加入了 <span class="math notranslate nohighlight">\(1 \times 1\)</span> 升维，引入 Shortcut 并且去掉了最后的 ReLU，改为 Linear。步长为 1 时，先进行 <span class="math notranslate nohighlight">\(1 \times 1\)</span> 卷积升维，再进行深度卷积提取特征，再通过 Linear 的逐点卷积降维。</p>
 <p>将 input 与 output 相加，形成残差结构。步长为 2 时，因为 input 与 output 的尺寸不符，因此不添加 shortcut 结构。整个结构由 V2 block 堆叠而成。</p>
 <p><img alt="Mobilenet" src="../_images/04Mobilenet07.png" /></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="k">def</span> <span class="nf">_make_divisible</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="n">divisor</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">min_ch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_divisible</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="n">divisor</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">min_ch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">     将输入的通道数(ch)调整到 divisor 的整数倍，方便硬件加速</span>
 <span class="sd">    This function is taken from the original tf repo.</span>
@@ -981,8 +954,8 @@ D_{k}\cdot D_{k} \cdot αM\cdotρD_{F}\cdotρD_{F}+ αM\cdot αN\cdotρD_{F}\cdo
     <span class="k">return</span> <span class="n">new_ch</span>
 
 <span class="c1"># 定义 mobileNetV2 网络</span>
-<span class="k">class</span> <span class="nc">MobileNetV2</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">round_nearest</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MobileNetV2</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">round_nearest</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MobileNetV2</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="n">block</span> <span class="o">=</span> <span class="n">InvertedResidual</span>
         <span class="n">input_channel</span> <span class="o">=</span> <span class="n">_make_divisible</span><span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">round_nearest</span><span class="p">)</span>  <span class="c1"># 将卷积核的个数调整为 8 的整数倍</span>
@@ -1034,7 +1007,7 @@ D_{k}\cdot D_{k} \cdot αM\cdotρD_{F}\cdotρD_{F}+ αM\cdot αN\cdotρD_{F}\cdo
                 <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>   <span class="c1"># 初始化为正态分布的函数，均值为 0，方差为 0.01</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">avgpool</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -1096,14 +1069,14 @@ h-swish[x] = x\frac{ReLU6(x+3)}{6}
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 注意力机制模块（SE 模块，即两个全连接层）</span>
 <span class="c1"># 该模块的基本流程是：</span>
 <span class="c1"># 先进行自适应平均池化(1x1)———&gt;1x1 的卷积层———&gt;relu 激活层———&gt;1x1 的卷积池化———&gt;hardsigmoid()激活函数激活</span>
-<span class="k">class</span> <span class="nc">SqueezeExcitation</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">squeeze_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SqueezeExcitation</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">squeeze_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SqueezeExcitation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="n">squeeze_c</span> <span class="o">=</span> <span class="n">_make_divisible</span><span class="p">(</span><span class="n">input_c</span> <span class="o">//</span> <span class="n">squeeze_factor</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>    <span class="c1"># 获得距离该数最近的 8 的整数倍的数字</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">input_c</span><span class="p">,</span> <span class="n">squeeze_c</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>    <span class="c1"># 该卷积的输出的 squeeze_c 是输入 input_c 的 1/4  其作用与全连接层一样</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">squeeze_c</span><span class="p">,</span> <span class="n">input_c</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">adaptive_avg_pool2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">output_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>   <span class="c1"># 将特征矩阵每一个 channel 上的数据给平均池化到 1x1 的大小</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1117,8 +1090,8 @@ h-swish[x] = x\frac{ReLU6(x+3)}{6}
 <h3>反向残差结构<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
 <p>相对于 MobileNets_V2，MobileNets_V3 的反向残差结构发生改变，在 MobileNets_V2 的反向残差结构基础上加入了 SE 模块。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 定义 block 的配置类</span>
-<span class="k">class</span> <span class="nc">InvertedResidualConfig</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InvertedResidualConfig</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">input_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>  <span class="c1"># block 模块中的第一个 1x1 卷积层的输入 channel 数</span>
                  <span class="n">kernel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>   <span class="c1"># depthwise 卷积的卷积核大小</span>
                  <span class="n">expanded_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>   <span class="c1"># block 模块中的第一个 1x1 卷积层的输出 channel 数</span>
@@ -1136,13 +1109,13 @@ h-swish[x] = x\frac{ReLU6(x+3)}{6}
         <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">=</span> <span class="n">stride</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">adjust_channels</span><span class="p">(</span><span class="n">channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">width_multi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adjust_channels</span><span class="p">(</span><span class="n">channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">width_multi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_make_divisible</span><span class="p">(</span><span class="n">channels</span> <span class="o">*</span> <span class="n">width_multi</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 
 
 <span class="c1"># 此为 block 模块，其包含第一个 1x1 卷积层、DeptWis 卷积层、SE 注意力机制层（判断是否需求）、第二个 1x1 卷积层、激活函数（需要判断是否是非线性激活）,ConvBNActivation 为普通卷积块卷积层</span>
-<span class="k">class</span> <span class="nc">InvertedResidual</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InvertedResidual</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">cnf</span><span class="p">:</span> <span class="n">InvertedResidualConfig</span><span class="p">,</span>   <span class="c1"># cnf:配置类参数</span>
                  <span class="n">norm_layer</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]):</span>      <span class="c1"># norm_layer：# BN 层</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">InvertedResidual</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -1189,7 +1162,7 @@ h-swish[x] = x\frac{ReLU6(x+3)}{6}
         <span class="bp">self</span><span class="o">.</span><span class="n">out_channels</span> <span class="o">=</span> <span class="n">cnf</span><span class="o">.</span><span class="n">out_c</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_strided</span> <span class="o">=</span> <span class="n">cnf</span><span class="o">.</span><span class="n">stride</span> <span class="o">&gt;</span> <span class="mi">1</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_res_connect</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">+=</span> <span class="n">x</span>   <span class="c1"># 进行 shortcut 连接</span>
@@ -1202,16 +1175,16 @@ h-swish[x] = x\frac{ReLU6(x+3)}{6}
 <h3>模型结构与实现<a class="headerlink" href="#id11" title="Link to this heading">#</a></h3>
 <p>核心模块，也是网络的基本模块。主要实现了通道可分离卷积+SE 通道注意力机制+残差连接。结构图如下：</p>
 <p><img alt="Mobilenet" src="../_images/04Mobilenet11.png" /></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span><span class="p">,</span> <span class="n">Tensor</span>
-<span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">functional</span> <span class="k">as</span> <span class="n">F</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span><span class="p">,</span> <span class="n">Tensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">functional</span> <span class="k">as</span> <span class="n">F</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 
 <span class="c1"># MobileNetV3 网络结构基础框架：其包括：模型的第一层卷积层———&gt;nx【bneckBlock 模块】———&gt;1x1 的卷积层———&gt;自适应平均池化层———&gt;全连接层———&gt;全连接层</span>
-<span class="k">class</span> <span class="nc">MobileNetV3</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MobileNetV3</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">inverted_residual_setting</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">InvertedResidualConfig</span><span class="p">],</span>           <span class="c1"># beneckBlock 结构一系列参数列表</span>
                  <span class="n">last_channel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>   <span class="c1"># 对应的是倒数第二个全连接层输出节点数  1280</span>
                  <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>  <span class="c1"># 类别个数</span>
@@ -1277,7 +1250,7 @@ h-swish[x] = x\frac{ReLU6(x+3)}{6}
                 <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_forward_impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_forward_impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">avgpool</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -1285,7 +1258,7 @@ h-swish[x] = x\frac{ReLU6(x+3)}{6}
 
         <span class="k">return</span> <span class="n">x</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_impl</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1353,8 +1326,8 @@ MemTime_{i}=\frac{WeightBytes_{i}+AtivationBytes_{i}}{PeakMemmBW}
 <p>ExtraDW 是本文提出的一种新变体，它允许廉价地增加网络的深度和感受野。它提供了以下几点优势：结合 ConvNext 与 IB.4 的优势。</p>
 <p>FFN 是由两个 1x1 的点状卷积（PW）堆叠而成，并在它们之间加入激活和标准化层。PW 是最受加速器友好的操作之一，但最好与其他模块一起使用。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#倒瓶颈层实现        </span>
-<span class="k">class</span> <span class="nc">UniversalInvertedBottleneckBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+<span class="k">class</span><span class="w"> </span><span class="nc">UniversalInvertedBottleneckBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
             <span class="n">inp</span><span class="p">,</span> 
             <span class="n">oup</span><span class="p">,</span> 
             <span class="n">start_dw_kernel_size</span><span class="p">,</span> 
@@ -1380,7 +1353,7 @@ MemTime_{i}=\frac{WeightBytes_{i}+AtivationBytes_{i}}{PeakMemmBW}
         <span class="c1"># Projection with 1x1 convs.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_proj_conv</span> <span class="o">=</span> <span class="n">conv_2d</span><span class="p">(</span><span class="n">expand_filters</span><span class="p">,</span> <span class="n">oup</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">act</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_dw_kernel_size</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_dw_</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
           
@@ -1436,15 +1409,15 @@ where attention_{j}=softmax(\frac{(XW^{Q_{j}})(SR(X)W^K)^T}{\sqrt{d_{k}}})(SR(X)
 <li><p>MNv4-Conv-L：针对 384px 输入，双重延迟目标为 2.3ms（Pixel6EdgeTPU）和 2.0ms（Pixel7EdgeTPU）。</p></li>
 </ul>
 <p>需要注意的是，通过将作者的搜索空间限制在跨设备具有良好相关成本模型的组件上，作者发现 EdgeTPU 延迟优化可以直接产生普遍高效的模型。</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
 
-<span class="kn">from</span> <span class="nn">mobilenet.model_config</span> <span class="kn">import</span> <span class="n">MODEL_SPECS</span> 
+<span class="kn">from</span><span class="w"> </span><span class="nn">mobilenet.model_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">MODEL_SPECS</span> 
 
 <span class="c1">#通过配置参数构建 Mobile v4 block</span>
-<span class="k">def</span> <span class="nf">build_blocks</span><span class="p">(</span><span class="n">layer_spec</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_blocks</span><span class="p">(</span><span class="n">layer_spec</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">layer_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;block_name&#39;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">()</span>
     <span class="n">block_names</span> <span class="o">=</span> <span class="n">layer_spec</span><span class="p">[</span><span class="s1">&#39;block_name&#39;</span><span class="p">]</span>
@@ -1472,8 +1445,8 @@ where attention_{j}=softmax(\frac{(XW^{Q_{j}})(SR(X)W^K)^T}{\sqrt{d_{k}}})(SR(X)
     <span class="k">return</span> <span class="n">layers</span>
 
 <span class="c1">#构建 Mobilenet v4</span>
-<span class="k">class</span> <span class="nc">MobileNetV4</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MobileNetV4</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
         <span class="c1"># MobileNetV4ConvSmall  MobileNetV4ConvMedium  MobileNetV4ConvLarge</span>
         <span class="c1"># MobileNetV4HybridMedium  MobileNetV4HybridLarge</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Params to initiate MobilenNetV4</span>
@@ -1499,7 +1472,7 @@ where attention_{j}=softmax(\frac{(XW^{Q_{j}})(SR(X)W^K)^T}{\sqrt{d_{k}}})(SR(X)
         <span class="c1"># layer5   </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layer5</span> <span class="o">=</span> <span class="n">build_blocks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s1">&#39;layer5&#39;</span><span class="p">])</span>       
                
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv0</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer1</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer2</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
@@ -1549,8 +1522,7 @@ where attention_{j}=softmax(\frac{(XW^{Q_{j}})(SR(X)W^K)^T}{\sqrt{d_{k}}})(SR(X)
     </script>
     <script>kernelName = 'python3'</script>
 <div class="section ablog__blog_comments">
-  
-  
+   
 </div>
 
                 </article>
@@ -1645,6 +1617,10 @@ where attention_{j}=softmax(\frac{(XW^{Q_{j}})(SR(X)W^K)^T}{\sqrt{d_{k}}})(SR(X)
   
   <div class="footer-item">
     
+<p class="component-author">
+By Author name not set
+</p>
+
   </div>
   
   <div class="footer-item">
@@ -1654,7 +1630,7 @@ where attention_{j}=softmax(\frac{(XW^{Q_{j}})(SR(X)W^K)^T}{\sqrt{d_{k}}})(SR(X)
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jun 15, 2025.
+  Last updated on Jul 01, 2025.
   <br/>
 </p>
   </div>
@@ -1672,8 +1648,8 @@ where attention_{j}=softmax(\frac{(XW^{Q_{j}})(SR(X)W^K)^T}{\sqrt{d_{k}}})(SR(X)
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>

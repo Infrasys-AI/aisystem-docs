@@ -10,14 +10,9 @@
 <meta property="og:title" content="ShuffleNet 系列" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="04Inference02Mobilenet/022Shufflenet.html" />
-<meta property="og:site_name" content="AISystem & AIInfra (AI系统原理)" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
 <meta property="og:description" content="本节节会介绍 ShuffleNet 系列，重点在于其模型结构的轻量化设计，涉及如何降低深度网络计算量，在本节中会着重会讲解逐点分组卷积(Pointwise Group Convolution)和通道混洗(Channel Shuffle)两种新的运算，而 V2 版本则会从设备运算速度方面考虑将网络进行轻量化。 ShuffleNet V1 模型: ShuffleNet V1: 它的贡献在于，使用..." />
-<meta property="og:image:width" content="1146" />
-<meta property="og:image:height" content="600" />
-<meta property="og:image" content="/None" />
-<meta property="og:image:alt" content="本节节会介绍 ShuffleNet 系列，重点在于其模型结构的轻量化设计，涉及如何降低深度网络计算量，在本节中会着重会讲解逐点分组卷积(Pointwise Group Convolution)和通道混洗(Channel Shuffle)两种新的运算，而 V2 版本则会从设备运算速度方面考虑将网络进行轻量化。 Sh..." />
 <meta name="description" content="本节节会介绍 ShuffleNet 系列，重点在于其模型结构的轻量化设计，涉及如何降低深度网络计算量，在本节中会着重会讲解逐点分组卷积(Pointwise Group Convolution)和通道混洗(Channel Shuffle)两种新的运算，而 V2 版本则会从设备运算速度方面考虑将网络进行轻量化。 ShuffleNet V1 模型: ShuffleNet V1: 它的贡献在于，使用..." />
-<meta name="twitter:card" content="summary_large_image" />
 
     <title>ShuffleNet 系列 &#8212; AI System</title>
   
@@ -29,18 +24,18 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=362ab14a" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
@@ -48,32 +43,29 @@
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
     <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
-  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=aabdd393"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/rtd-data.js?v=db39d344"></script>
+    <script src="../_static/rtd-data.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '04Inference02Mobilenet/022Shufflenet';</script>
@@ -82,21 +74,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="MobileNet 系列" href="023Mobilenet.html" />
-    <link rel="prev" title="SqueezeNet 系列" href="021Squeezenet.html" />
-
+    <link rel="prev" title="SqueezeNet 系列" href="021Squeezenet.html" /> 
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="cn"/>
-    <meta name="docbuild:last-update" content="Jun 15, 2025"/>
-
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
 <link
   rel="alternate"
   type="application/atom+xml"
   href="../reference/blog/atom.xml"
   title="Blog"
 />
-
-
-
+  
   </head>
   
   
@@ -172,6 +160,8 @@
         <div class="sidebar-primary-item">
 
   
+    
+  
 
 <a class="navbar-brand logo" href="../index.html">
   
@@ -189,7 +179,7 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -200,7 +190,7 @@
           
           
           
-          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -212,7 +202,7 @@
           
           
           
-          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i></span>
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Youtube</span></a>
         </li>
         <li class="nav-item">
@@ -224,7 +214,7 @@
           
           
           
-          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i></span>
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Blibili</span></a>
         </li>
 </ul></div>
@@ -232,7 +222,7 @@
 
  <script>
  document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
     <span class="search-button__default-text">Search</span>
     <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -243,11 +233,17 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系结构 ===</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -312,7 +308,7 @@
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与编译原理 ===</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -353,14 +349,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler07CANN/README.html">CANN &amp; Ascend C</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/01CANN.html">昇腾异构计算架构 CANN</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/02OPType.html">CANN 算子类型</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/03AscendC.html">算子开发编程语言 Ascend C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/04Grmmar.html">Ascend C 语法扩展</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/05Paradigm.html">Ascend C 编程范式</a></li>
 </ul>
 </details></li>
 </ul>
@@ -471,20 +459,6 @@
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 附录内容 ===</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../00Others/README.html">附录(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Editors.html">编辑和作者(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Instruments.html">书写工具(DONE)</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../00Others/Install.html">本地部署(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
-</ul>
-</details></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Inference.html">参考链接(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Glossary.html">术语表(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Criterion.html">书写规范(DONE)</a></li>
-</ul>
-</details></li>
-</ul>
 
     </div>
 </nav></div>
@@ -513,9 +487,9 @@
   
     <div class="header-article-items__start">
       
-        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
   <span class="fa-solid fa-bars"></span>
-</label></div>
+</button></div>
       
     </div>
   
@@ -657,10 +631,10 @@
 
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
   </button>
 `);
 </script>
@@ -668,14 +642,14 @@ document.write(`
 
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
   </button>
 `);
 </script>
-<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
-</label>
+</button>
 </div></div>
       
     </div>
@@ -722,8 +696,7 @@ document.write(`
                 
 <div id="searchbox"></div>
                 <article class="bd-article">
-                  
-<!--Copyright © XcodeHw 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+                   <!--Copyright © XcodeHw 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
 <section class="tex2jax_ignore mathjax_ignore" id="shufflenet">
 <h1>ShuffleNet 系列<a class="headerlink" href="#shufflenet" title="Link to this heading">#</a></h1>
 <p>本节节会介绍 ShuffleNet 系列，重点在于其模型结构的轻量化设计，涉及如何降低深度网络计算量，在本节中会着重会讲解逐点分组卷积(Pointwise Group Convolution)和通道混洗(Channel Shuffle)两种新的运算，而 V2 版本则会从设备运算速度方面考虑将网络进行轻量化。</p>
@@ -763,7 +736,7 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
 <p>这种操作可以大大减少计算量，因为你每个卷积核不再是和输入的全部特征图做卷积，而是和一个组的特征图做卷积。但是如果多个组操作叠加在一起，如上图 a 的两个卷积层都有组操作，显然就会产生边界效应。</p>
 <p>即某个输出通道 仅仅来自输入通道 的一小部分。这种计算方式使得网络模型学习得到的特征会非常局限。于是就有了 通道重排来解决这个问题，先看上图 b，在进行 GConv2 之前，对其输入图做一个分配，也就是每个组分成几个次组，然后将不同组的下面的组作为 GConv2 的一个组的输入，使得 GConv2 的每一个组都能卷积输入的所有组的特征图，这和图 c 的通道重排的思想是一样的。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 通道混洗</span>
-<span class="k">def</span> <span class="nf">shuffle_channels</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">shuffle_channels</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
     <span class="c1"># 先得到输入特征图的 shape，b:batch size，h,w:一张图的 size，c:通道数</span>
     <span class="n">batch_size</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
     <span class="k">assert</span> <span class="n">channels</span> <span class="o">%</span> <span class="n">groups</span> <span class="o">==</span> <span class="mi">0</span>
@@ -783,9 +756,9 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
 <p>基于残差块（residual block）和 通道重排（channel shuffle）设计的 ShuffleNet Unit 主要由深度卷积、逐点分组卷积和逐点分组卷积组成。</p>
 <p><img alt="Shufflenet" src="../_images/03Shufflenet02.png" /></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ShuffleNet 中 stride=1 的基本单元</span>
-<span class="k">class</span> <span class="nc">ShuffleNetUnitA</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ShuffleNetUnitA</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;ShuffleNet unit for stride=1&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ShuffleNetUnitA</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">assert</span> <span class="n">in_channels</span> <span class="o">==</span> <span class="n">out_channels</span>
         <span class="k">assert</span> <span class="n">out_channels</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span>
@@ -805,7 +778,7 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
                                      <span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bn6</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">out_channels</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_conv1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bn2</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">shuffle_channels</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)</span>
@@ -818,9 +791,9 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ShuffleNet 中 stride=2 的基本单元,下采样模块(下采样模块，concat)</span>
-<span class="k">class</span> <span class="nc">ShuffleNetUnitB</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ShuffleNetUnitB</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;ShuffleNet unit for stride=2&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ShuffleNetUnitB</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="c1"># 右分支的通道数和左分支的通道数叠加 == 输出特征图的通道数 out_channel(重点，和上面的残差是不一样的)</span>
         <span class="n">out_channels</span> <span class="o">-=</span> <span class="n">in_channels</span>
@@ -839,7 +812,7 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
                                      <span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bn6</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">out_channels</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="c1"># 右分支</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_conv1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bn2</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
@@ -860,9 +833,9 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
 <h3>网络结构与实现<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
 <p>ShuffleNet V1 架构主要由一组 ShuffleNet 单元组成，分为三个阶段。每个阶段的第一个构建块应用 stride = 2。一个阶段内的其他超参数保持不变，下一个阶段的输出通道加倍。，我们将每个 ShuffleNet 的瓶颈通道数设置为输出通道的 1/4。stage2 的第一个 block 上不用 GConv,用普通的 <span class="math notranslate nohighlight">\(1\times 1\)</span> 卷积，因为此时输入通道数只有 24，太少了。且每个 stage 中的第一个 block 的 stride=2（对应 ShuffleNet Unit 中的下采样模块,上图 c），其他 block 的 stride=1(对应 ShuffleNet 基本模块，上图 b)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#shuffleNet 网络</span>
-<span class="k">class</span> <span class="nc">ShuffleNet</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ShuffleNet</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;ShuffleNet for groups=3&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ShuffleNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -877,7 +850,7 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
         <span class="bp">self</span><span class="o">.</span><span class="n">stage4</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">stage4_seq</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">960</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">net</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">max_pool2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage2</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
@@ -917,7 +890,7 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
 <h3>通道分割<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
 <p>在 ShuffleNet V1 block 的基础上，ShuffleNet V2 block 引入通道分割（Channel Split）这个简单的算子来实现上述目的，如下图 (c) 所示。在每个单元 (block) 的开始，我们将输入特征图的 c 个通道切分成 (split) 两个分支 (branches)：<span class="math notranslate nohighlight">\(c-c'\)</span> 个通道和 <span class="math notranslate nohighlight">\(c'\)</span> 个通道。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#特征图 C 个通道进行切分</span>
-<span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">groups</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span>
 </pre></div>
@@ -929,8 +902,8 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
 <p>针对需要进行空间下采样的 block，卷积单元（block）进行了修改，通道切分算子被移除，然后 block 的输出通道数变为两倍，详细信息如下图(d) 所示。</p>
 <p><img alt="Shufflenet" src="../_images/03Shufflenet04.png" /></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Shuffle V2 block</span>
-<span class="k">class</span> <span class="nc">ShuffleUnit</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">stride</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ShuffleUnit</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">stride</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ShuffleUnit</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="c1"># 步长必须在 1 和 2 之间</span>
         <span class="k">if</span> <span class="n">stride</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
@@ -975,11 +948,11 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
 
     <span class="c1"># 深度卷积</span>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">depthwise_conv</span><span class="p">(</span><span class="n">input_c</span><span class="p">,</span> <span class="n">output_c</span><span class="p">,</span> <span class="n">kernel_s</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">depthwise_conv</span><span class="p">(</span><span class="n">input_c</span><span class="p">,</span> <span class="n">output_c</span><span class="p">,</span> <span class="n">kernel_s</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">input_c</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">output_c</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="n">kernel_s</span><span class="p">,</span>
                          <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">bias</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="n">input_c</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># 通道切分</span>
             <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -999,8 +972,8 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
 <h3>网络结构实现<a class="headerlink" href="#id8" title="Link to this heading">#</a></h3>
 <p>上图 c,d 显示的卷积 block 叠加起来即组成了最后的 ShuffleNet v2 模型，这样堆叠后的网络是类似 ShuffleNet v1 模型的，v1 和 v2 block 的区别在于，v2 在全局平均池化层（global averaged pooling）之前添加了一个 卷积来混合特征（mix up features），而 v1 没有。但与 v1 一样，v2 的 block 的通道数是按照 0.5x 1x 等比例进行缩放，以生成不同复杂度的 ShuffleNet v2 网络，并标记为 ShuffleNet V2 0.5×、ShuffleNet V2 1× 等模型。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># V2 网络结构</span>
-<span class="k">class</span> <span class="nc">ShuffleNetV2</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stages_repeats</span><span class="p">,</span> <span class="n">stages_out_channels</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">ShuffleUnit</span><span class="o">=</span><span class="n">ShuffleUnit</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ShuffleNetV2</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stages_repeats</span><span class="p">,</span> <span class="n">stages_out_channels</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">ShuffleUnit</span><span class="o">=</span><span class="n">ShuffleUnit</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ShuffleNetV2</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stages_repeats</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
@@ -1047,7 +1020,7 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
         <span class="bp">self</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">output_channels</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
         <span class="c1"># 权重初始化</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_params</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">init_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">):</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">kaiming_normal_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;fan_out&#39;</span><span class="p">)</span>
@@ -1060,7 +1033,7 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
                 <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
                 <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxpool</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -1072,7 +1045,7 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">x</span>
 
-<span class="k">def</span> <span class="nf">shufflenet_v2_x0_5</span><span class="p">(</span><span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">shufflenet_v2_x0_5</span><span class="p">(</span><span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    weight: https://download.pytorch.org/models/shufflenetv2_x0.5-f707e7126e.pth</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1119,8 +1092,7 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
     </script>
     <script>kernelName = 'python3'</script>
 <div class="section ablog__blog_comments">
-  
-  
+   
 </div>
 
                 </article>
@@ -1196,6 +1168,10 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
   
   <div class="footer-item">
     
+<p class="component-author">
+By Author name not set
+</p>
+
   </div>
   
   <div class="footer-item">
@@ -1205,7 +1181,7 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jun 15, 2025.
+  Last updated on Jul 01, 2025.
   <br/>
 </p>
   </div>
@@ -1223,8 +1199,8 @@ Computation=C_{out}/g\times H_{out}\times W_{out} \times(C_{in}/g\times K_{h}\ti
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>

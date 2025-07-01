@@ -10,14 +10,9 @@
 <meta property="og:title" content="昇思 MindSore 关键特性" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="05Framework01Foundation/05MindSpore.html" />
-<meta property="og:site_name" content="AISystem & AIInfra (AI系统原理)" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
 <meta property="og:description" content="本节将会介绍华为自研AI框架昇思MindSpore，这是一个面向全场景设计的AI计算框架，旨在为AI算法研究和生产部署提供一个统一、高效、安全的平台。接下来，将详细阐述MindSpore的定位、架构、特性、以及其在端边云全场景下的应用和优势。 MindSpore 基本介绍: MindSpore定位: 昇思MindSpore是面向“端-边-云”全场景设计的AI框架，旨在弥合AI算法研究与生产部..." />
-<meta property="og:image:width" content="1146" />
-<meta property="og:image:height" content="600" />
-<meta property="og:image" content="/None" />
-<meta property="og:image:alt" content="本节将会介绍华为自研AI框架昇思MindSpore，这是一个面向全场景设计的AI计算框架，旨在为AI算法研究和生产部署提供一个统一、高效、安全的平台。接下来，将详细阐述MindSpore的定位、架构、特性、以及其在端边云全场景下的应用和优势。 MindSpore 基本介绍: MindSpore定位: 昇思Mind..." />
 <meta name="description" content="本节将会介绍华为自研AI框架昇思MindSpore，这是一个面向全场景设计的AI计算框架，旨在为AI算法研究和生产部署提供一个统一、高效、安全的平台。接下来，将详细阐述MindSpore的定位、架构、特性、以及其在端边云全场景下的应用和优势。 MindSpore 基本介绍: MindSpore定位: 昇思MindSpore是面向“端-边-云”全场景设计的AI框架，旨在弥合AI算法研究与生产部..." />
-<meta name="twitter:card" content="summary_large_image" />
 
     <title>昇思 MindSore 关键特性 &#8212; AI System</title>
   
@@ -29,18 +24,18 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=362ab14a" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
@@ -48,32 +43,29 @@
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
     <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
-  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=aabdd393"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/rtd-data.js?v=db39d344"></script>
+    <script src="../_static/rtd-data.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '05Framework01Foundation/05MindSpore';</script>
@@ -82,21 +74,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="自动微分" href="../05Framework02AutoDiff/README.html" />
-    <link rel="prev" title="框架编程范式" href="04Programing.html" />
-
+    <link rel="prev" title="框架编程范式" href="04Programing.html" /> 
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="cn"/>
-    <meta name="docbuild:last-update" content="Jun 15, 2025"/>
-
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
 <link
   rel="alternate"
   type="application/atom+xml"
   href="../reference/blog/atom.xml"
   title="Blog"
 />
-
-
-
+  
   </head>
   
   
@@ -172,6 +160,8 @@
         <div class="sidebar-primary-item">
 
   
+    
+  
 
 <a class="navbar-brand logo" href="../index.html">
   
@@ -189,7 +179,7 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -200,7 +190,7 @@
           
           
           
-          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -212,7 +202,7 @@
           
           
           
-          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i></span>
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Youtube</span></a>
         </li>
         <li class="nav-item">
@@ -224,7 +214,7 @@
           
           
           
-          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i></span>
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Blibili</span></a>
         </li>
 </ul></div>
@@ -232,7 +222,7 @@
 
  <script>
  document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
     <span class="search-button__default-text">Search</span>
     <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -243,11 +233,17 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系结构 ===</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -312,7 +308,7 @@
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与编译原理 ===</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -353,14 +349,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler07CANN/README.html">CANN &amp; Ascend C</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/01CANN.html">昇腾异构计算架构 CANN</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/02OPType.html">CANN 算子类型</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/03AscendC.html">算子开发编程语言 Ascend C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/04Grmmar.html">Ascend C 语法扩展</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/05Paradigm.html">Ascend C 编程范式</a></li>
 </ul>
 </details></li>
 </ul>
@@ -471,20 +459,6 @@
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 附录内容 ===</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../00Others/README.html">附录(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Editors.html">编辑和作者(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Instruments.html">书写工具(DONE)</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../00Others/Install.html">本地部署(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
-</ul>
-</details></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Inference.html">参考链接(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Glossary.html">术语表(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Criterion.html">书写规范(DONE)</a></li>
-</ul>
-</details></li>
-</ul>
 
     </div>
 </nav></div>
@@ -513,9 +487,9 @@
   
     <div class="header-article-items__start">
       
-        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
   <span class="fa-solid fa-bars"></span>
-</label></div>
+</button></div>
       
     </div>
   
@@ -657,10 +631,10 @@
 
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
   </button>
 `);
 </script>
@@ -668,14 +642,14 @@ document.write(`
 
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
   </button>
 `);
 </script>
-<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
-</label>
+</button>
 </div></div>
       
     </div>
@@ -739,8 +713,7 @@ document.write(`
                 
 <div id="searchbox"></div>
                 <article class="bd-article">
-                  
-<section class="tex2jax_ignore mathjax_ignore" id="mindsore">
+                   <section class="tex2jax_ignore mathjax_ignore" id="mindsore">
 <h1>昇思 MindSore 关键特性<a class="headerlink" href="#mindsore" title="Link to this heading">#</a></h1>
 <p>本节将会介绍华为自研AI框架昇思MindSpore，这是一个面向全场景设计的AI计算框架，旨在为AI算法研究和生产部署提供一个统一、高效、安全的平台。接下来，将详细阐述MindSpore的定位、架构、特性、以及其在端边云全场景下的应用和优势。</p>
 <section id="mindspore">
@@ -779,12 +752,12 @@ document.write(`
 </ul>
 <p>对于同一个Class实例化（instantiation）后得到的不同对象而言，方法和属性相同，不同的是属性的值。不同的属性值决定了对象的内部状态，因此OOP能够很好地进行状态管理。</p>
 <p>下面为Python构造简单类的示例：</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Sample</span><span class="p">:</span>  <span class="c1">#class declaration</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Sample</span><span class="p">:</span>  <span class="c1">#class declaration</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>  <span class="c1"># class constructor (code)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>  <span class="c1"># class constructor (code)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1"># attribute (data)</span>
 
-    <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>  <span class="c1"># method declaration (code)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>  <span class="c1"># method declaration (code)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1"># method implementation (code)</span>
 </pre></div>
 </div>
@@ -795,13 +768,13 @@ document.write(`
 </ul>
 <p>此二者恰好与类的Methods和Attributes一一对应，同时权重本身就是神经网络层的内部状态，因此使用类来构造Layer天然符合其定义。此外，我们在编程时希望使用神经网络层进行堆叠，构造神经网络，使用OOP编程可以很容易地通过Layer对象组合构造新的Layer类。</p>
 <p>下面为使用昇思MindSpore构造神经网络类的示例：</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mindspore</span> <span class="kn">import</span> <span class="n">nn</span><span class="p">,</span> <span class="n">Parameter</span>
-<span class="kn">from</span> <span class="nn">mindspore.common.initializer</span> <span class="kn">import</span> <span class="n">initializer</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mindspore</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span><span class="p">,</span> <span class="n">Parameter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindspore.common.initializer</span><span class="w"> </span><span class="kn">import</span> <span class="n">initializer</span>
 
 
-<span class="k">class</span> <span class="nc">Linear</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Cell</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Linear</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Cell</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">out_features</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">out_features</span><span class="p">,</span>
                  <span class="n">has_bias</span><span class="p">):</span>  <span class="c1"># class constructor (code)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
@@ -811,7 +784,7 @@ document.write(`
             <span class="n">initializer</span><span class="p">(</span><span class="s1">&#39;zeros&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">out_features</span><span class="p">],</span> <span class="n">mindspore</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
             <span class="s1">&#39;bias&#39;</span><span class="p">)</span>  <span class="c1"># layer weight (data)</span>
 
-    <span class="k">def</span> <span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>  <span class="c1"># method declaration (code)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>  <span class="c1"># method declaration (code)</span>
         <span class="n">output</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
             <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># tensor transformation (code)</span>
         <span class="n">output</span> <span class="o">=</span> <span class="n">output</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span>  <span class="c1"># tensor transformation (code)</span>
@@ -819,21 +792,21 @@ document.write(`
 </pre></div>
 </div>
 <p>除神经网络层的构造使用面向对象编程范式外，昇思MindSpore支持纯面向对象编程方式构造神经网络训练逻辑，此时神经网络的正向计算、反向传播、梯度优化等操作均使用类进行构造。下面是纯面向对象编程的示例：</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindspore</span>  
-<span class="kn">import</span> <span class="nn">mindspore.nn</span> <span class="k">as</span> <span class="nn">nn</span>  
-<span class="kn">from</span> <span class="nn">mindspore</span> <span class="kn">import</span> <span class="n">value_and_grad</span>  
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">mindspore</span>  
+<span class="kn">import</span><span class="w"> </span><span class="nn">mindspore.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>  
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindspore</span><span class="w"> </span><span class="kn">import</span> <span class="n">value_and_grad</span>  
   
  
-<span class="k">class</span> <span class="nc">TrainOneStepCell</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Cell</span><span class="p">):</span>  
+<span class="k">class</span><span class="w"> </span><span class="nc">TrainOneStepCell</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Cell</span><span class="p">):</span>  
   
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">):</span>  
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">):</span>  
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>  
         <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>  
         <span class="bp">self</span><span class="o">.</span><span class="n">grad_fn</span> <span class="o">=</span> <span class="n">value_and_grad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>  
                                       <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>  
   
-    <span class="k">def</span> <span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">inputs</span><span class="p">):</span>  
+    <span class="k">def</span><span class="w"> </span><span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">inputs</span><span class="p">):</span>  
         <span class="n">loss</span><span class="p">,</span> <span class="n">grads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_fn</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>  
         <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">grads</span><span class="p">)</span>  
         <span class="k">return</span> <span class="n">loss</span>  
@@ -858,8 +831,8 @@ document.write(`
 <li><p>确定性，给定相同输入必然返回相同输出。无副作用。</p></li>
 </ul>
 <p>由于确定性这一特点，通过限制副作用，程序可以有更少的错误，更容易调试和测试，更适合形式验证。下面是使用函数式编程的示例：</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mindspore.numpy</span> <span class="k">as</span> <span class="nn">mnp</span>
-<span class="kn">from</span> <span class="nn">mindspore</span> <span class="kn">import</span> <span class="n">grad</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">mindspore.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mnp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindspore</span><span class="w"> </span><span class="kn">import</span> <span class="n">grad</span>
 
 <span class="n">grad_tanh</span> <span class="o">=</span> <span class="n">grad</span><span class="p">(</span><span class="n">mnp</span><span class="o">.</span><span class="n">tanh</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">grad_tanh</span><span class="p">(</span><span class="mf">2.0</span><span class="p">))</span>
@@ -894,10 +867,10 @@ document.write(`
 </ul>
 <p>下面是函数式+面向对象融合编程的简单示例：</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Class definition  </span>
-<span class="k">class</span> <span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Cell</span><span class="p">):</span>  
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+<span class="k">class</span><span class="w"> </span><span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Cell</span><span class="p">):</span>  
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
         <span class="o">......</span>  
-    <span class="k">def</span> <span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>  
+    <span class="k">def</span><span class="w"> </span><span class="nf">construct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>  
         <span class="o">......</span>  
   
 <span class="c1"># Object instantiation  </span>
@@ -906,7 +879,7 @@ document.write(`
 <span class="n">optimizer</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">trainable_params</span><span class="p">(),</span> <span class="n">lr</span><span class="p">)</span> <span class="c1"># optimizer  </span>
   
 <span class="c1"># define forward function  </span>
-<span class="k">def</span> <span class="nf">forword_fn</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>  
+<span class="k">def</span><span class="w"> </span><span class="nf">forword_fn</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>  
     <span class="n">logits</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>  
     <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>  
     <span class="k">return</span> <span class="n">loss</span><span class="p">,</span> <span class="n">logits</span>  
@@ -915,7 +888,7 @@ document.write(`
 <span class="n">grad_fn</span> <span class="o">=</span> <span class="n">value_and_grad</span><span class="p">(</span><span class="n">forward_fn</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">optim</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">has_aux</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
   
 <span class="c1"># define train step function </span>
-<span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>  
+<span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>  
      <span class="c1"># get values and gradients  </span>
     <span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">logits</span><span class="p">),</span> <span class="n">grads</span> <span class="o">=</span> <span class="n">grad_fn</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span> 
     <span class="n">optimizer</span><span class="p">(</span><span class="n">grads</span><span class="p">)</span> <span class="c1"># update gradient  </span>
@@ -1080,8 +1053,7 @@ w' &amp;= w_0 - \alpha \left[ \left( 1 - \frac{(g_2^T \cdot g_1)}{2 \cdot \| g_1
     </script>
     <script>kernelName = 'python3'</script>
 <div class="section ablog__blog_comments">
-  
-  
+   
 </div>
 
                 </article>
@@ -1174,6 +1146,10 @@ w' &amp;= w_0 - \alpha \left[ \left( 1 - \frac{(g_2^T \cdot g_1)}{2 \cdot \| g_1
   
   <div class="footer-item">
     
+<p class="component-author">
+By Author name not set
+</p>
+
   </div>
   
   <div class="footer-item">
@@ -1183,7 +1159,7 @@ w' &amp;= w_0 - \alpha \left[ \left( 1 - \frac{(g_2^T \cdot g_1)}{2 \cdot \| g_1
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jun 15, 2025.
+  Last updated on Jul 01, 2025.
   <br/>
 </p>
   </div>
@@ -1201,8 +1177,8 @@ w' &amp;= w_0 - \alpha \left[ \left( 1 - \frac{(g_2^T \cdot g_1)}{2 \cdot \| g_1
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>

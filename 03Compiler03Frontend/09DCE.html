@@ -10,14 +10,9 @@
 <meta property="og:title" content="死代码消除" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="03Compiler03Frontend/09DCE.html" />
-<meta property="og:site_name" content="AISystem & AIInfra (AI系统原理)" />
+<meta property="og:site_name" content="AISystem & AIInfra (AI 系统原理)" />
 <meta property="og:description" content="死代码消除（Dead Code Elimination）是一种编译器优化技术，旨在删除程序中不会被执行的代码，从而提高程序的执行效率和资源利用率。死代码是指在程序的当前执行路径下不会被访问或执行的代码片段。 传统编译器的死代码消除: 死代码消除的目的是删除程序中无用和不可达操作对应的代码。在传统编译器中，死代码消除通常是通过分析控制流图(CFG)，从而找到并删除无用和不可达操作对应的代码。 ..." />
-<meta property="og:image:width" content="1146" />
-<meta property="og:image:height" content="600" />
-<meta property="og:image" content="/None" />
-<meta property="og:image:alt" content="死代码消除（Dead Code Elimination）是一种编译器优化技术，旨在删除程序中不会被执行的代码，从而提高程序的执行效率和资源利用率。死代码是指在程序的当前执行路径下不会被访问或执行的代码片段。 传统编译器的死代码消除: 死代码消除的目的是删除程序中无用和不可达操作对应的代码。在传统编译器中，死代码消..." />
 <meta name="description" content="死代码消除（Dead Code Elimination）是一种编译器优化技术，旨在删除程序中不会被执行的代码，从而提高程序的执行效率和资源利用率。死代码是指在程序的当前执行路径下不会被访问或执行的代码片段。 传统编译器的死代码消除: 死代码消除的目的是删除程序中无用和不可达操作对应的代码。在传统编译器中，死代码消除通常是通过分析控制流图(CFG)，从而找到并删除无用和不可达操作对应的代码。 ..." />
-<meta name="twitter:card" content="summary_large_image" />
 
     <title>死代码消除 &#8212; AI System</title>
   
@@ -29,18 +24,18 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=362ab14a" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-examples.css?v=e236af4b" />
@@ -48,32 +43,29 @@
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/readthedocs-doc-embed.css" />
     <link rel="stylesheet" type="text/css" href="https://assets.readthedocs.org/static/css/badge_only.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
-  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=aabdd393"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/rtd-data.js?v=db39d344"></script>
+    <script src="../_static/rtd-data.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '03Compiler03Frontend/09DCE';</script>
@@ -82,21 +74,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="代数简化" href="10algebraic.html" />
-    <link rel="prev" title="公共表达式消除原理" href="08CSE.html" />
-
+    <link rel="prev" title="公共表达式消除原理" href="08CSE.html" /> 
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="cn"/>
-    <meta name="docbuild:last-update" content="Jun 15, 2025"/>
-
+    <meta name="docbuild:last-update" content="Jul 01, 2025"/> 
 <link
   rel="alternate"
   type="application/atom+xml"
   href="../reference/blog/atom.xml"
   title="Blog"
 />
-
-
-
+  
   </head>
   
   
@@ -172,6 +160,8 @@
         <div class="sidebar-primary-item">
 
   
+    
+  
 
 <a class="navbar-brand logo" href="../index.html">
   
@@ -189,7 +179,7 @@
   
   
 </a></div>
-        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -200,7 +190,7 @@
           
           
           
-          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/chenzomi12/AISystem" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -212,7 +202,7 @@
           
           
           
-          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i></span>
+          <a href="https://www.youtube.com/@ZOMI666" title="Youtube" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-youtube fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Youtube</span></a>
         </li>
         <li class="nav-item">
@@ -224,7 +214,7 @@
           
           
           
-          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i></span>
+          <a href="https://space.bilibili.com/517221395" title="Blibili" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-bilibili fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Blibili</span></a>
         </li>
 </ul></div>
@@ -232,7 +222,7 @@
 
  <script>
  document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
     <span class="search-button__default-text">Search</span>
     <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -243,11 +233,17 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 一. AI 系统概述 ===</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01Introduction/README.html">课程概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/00Introduction.html">本节内容</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/01present.html">AI 的历史与现状</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/02Develop.html">AI 发展驱动力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/03architecture.html">AI 系统全栈架构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/05Sample.html">AI 系统与程序代码关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01Introduction/06Foundation.html">大模型的到来</a></li>
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系结构 ===</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 二. AI 硬件体系架构 ===</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../02Hardware/README.html">AI 硬件体系架构概述</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02Hardware01Foundation/README.html">AI 计算体系概述</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -312,7 +308,7 @@
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与编译原理 ===</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 三. AI 编程与计算架构 ===</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../03Compiler/README.html">AI 编译原理概述</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler01Tradition/README.html">传统编译器</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -353,14 +349,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/05OtherOpt.html">指令和存储优化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/06AutoTuning.html">Auto-Tuning 原理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../03Compiler04Backend/07Practice.html">TVM 实践案例</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../03Compiler07CANN/README.html">CANN &amp; Ascend C</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/01CANN.html">昇腾异构计算架构 CANN</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/02OPType.html">CANN 算子类型</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/03AscendC.html">算子开发编程语言 Ascend C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/04Grmmar.html">Ascend C 语法扩展</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../03Compiler07CANN/05Paradigm.html">Ascend C 编程范式</a></li>
 </ul>
 </details></li>
 </ul>
@@ -471,20 +459,6 @@
 </ul>
 </details></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">=== 附录内容 ===</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../00Others/README.html">附录(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Editors.html">编辑和作者(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Instruments.html">书写工具(DONE)</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../00Others/Install.html">本地部署(DONE)</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
-</ul>
-</details></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Inference.html">参考链接(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Glossary.html">术语表(DONE)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00Others/Criterion.html">书写规范(DONE)</a></li>
-</ul>
-</details></li>
-</ul>
 
     </div>
 </nav></div>
@@ -513,9 +487,9 @@
   
     <div class="header-article-items__start">
       
-        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
   <span class="fa-solid fa-bars"></span>
-</label></div>
+</button></div>
       
     </div>
   
@@ -657,10 +631,10 @@
 
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
   </button>
 `);
 </script>
@@ -668,14 +642,14 @@ document.write(`
 
 <script>
 document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
   </button>
 `);
 </script>
-<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
-</label>
+</button>
 </div></div>
       
     </div>
@@ -715,8 +689,7 @@ document.write(`
                 
 <div id="searchbox"></div>
                 <article class="bd-article">
-                  
-<!--Copyright 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
+                   <!--Copyright 适用于[License](https://github.com/chenzomi12/AISystem)版权许可-->
 <section class="tex2jax_ignore mathjax_ignore" id="id1">
 <h1>死代码消除<a class="headerlink" href="#id1" title="Link to this heading">#</a></h1>
 <p>死代码消除（Dead Code Elimination）是一种编译器优化技术，旨在删除程序中不会被执行的代码，从而提高程序的执行效率和资源利用率。死代码是指在程序的当前执行路径下不会被访问或执行的代码片段。</p>
@@ -731,7 +704,7 @@ document.write(`
 <p><img alt="不可达案例" src="../_images/09DCE01.png" /></p>
 <p>如上面的控制流图所示，其中 <span class="math notranslate nohighlight">\(b_9\)</span> 是一个不可达的基本块，因为不存在一条路径从 <span class="math notranslate nohighlight">\(b_0\)</span> 到达 <span class="math notranslate nohighlight">\(b_9\)</span> ，所以 <span class="math notranslate nohighlight">\(b_9\)</span> 中的所有操作都是不可达操作。对于基本块 <span class="math notranslate nohighlight">\(b_3\)</span> 以及其两个条件转移目的基本块 <span class="math notranslate nohighlight">\(b_4\)</span> 和 <span class="math notranslate nohighlight">\(b_5\)</span>，假设 <span class="math notranslate nohighlight">\(b_3\)</span> 的条件转移条件始终为 true 且 <span class="math notranslate nohighlight">\(b_4\)</span> 为 true 所对应的条件转移目的基本块，在这种情况下，<span class="math notranslate nohighlight">\(b_5\)</span> 将不会被执行到，<span class="math notranslate nohighlight">\(b_5\)</span> 中所对应的操作为不可达操作。</p>
 <p>以下是一个简单的不可达操作删除的例子：</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">flag</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">flag</span><span class="p">):</span>
     <span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Flag is True&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -743,7 +716,7 @@ document.write(`
 </pre></div>
 </div>
 <p>上面是用 python 实现的一段代码。在该程序中，test 函数的输入始终为 False，所以在 test 函数内部，<code class="docutils literal notranslate"><span class="pre">print(&quot;Flag</span> <span class="pre">is</span> <span class="pre">True&quot;)</span></code> 这条语句将永远不会被执行到，所以这条语句为不可达操作。编译会将上述代码优化为：</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">flag</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">flag</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Flag is False.&quot;</span><span class="p">)</span>
     <span class="k">return</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This code is unreachable.&quot;</span><span class="p">)</span>
@@ -752,7 +725,7 @@ document.write(`
 </pre></div>
 </div>
 <p>在 test 函数中，当 test 进行 return 后任有一个打印操作 <code class="docutils literal notranslate"><span class="pre">print(&quot;This</span> <span class="pre">code</span> <span class="pre">is</span> <span class="pre">unreachable.&quot;)</span></code> ,由于该操作位于 return 后，永远不会被执行到，编译器会将上述代码进一步优化成：</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">flag</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">flag</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Flag is False.&quot;</span><span class="p">)</span>
     <span class="k">return</span>
 
@@ -766,7 +739,7 @@ document.write(`
 <p>无用操作是指其结果没有外部可见效应，比如冗余的变量赋值操作，该变量在定义后没有在后续的操作中使用到，不会对后续操作产生任何影响，所以可以直接删除该变量赋值操作。在传统编译器中，编译器如何判断一个操作是否是无用操作呢？</p>
 <p>在传统编译器中，有一些操作可以被认为是一定有用的，一些书中将这种操作称为关键操作。而参与关键操作计算的或者控制流程图流向关键操作所在基本块的条件转移或跳转操作也可以认为是有用的，编译器可以通过。</p>
 <p>以下是一个简单的删除无用操作的例子：</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">c</span>
     <span class="k">return</span> <span class="n">y</span>
@@ -775,7 +748,7 @@ document.write(`
 </pre></div>
 </div>
 <p>上面是用 python 实现的一段代码。在 test 函数中，因为最后的结果需要返回变量 y，此时变量 y 对于 test 函数来说是有用的，而 y 又需要通过 x 计算得到，所以变量 x 对于 test 函数来说也是有用的。简单修改一下代码：</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">c</span>
     <span class="k">return</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="n">c</span>
@@ -862,8 +835,7 @@ RDOM(n) = \{n\} \cup (\bigcap_{m\in{succ(n)}}RDOM(m))
     </script>
     <script>kernelName = 'python3'</script>
 <div class="section ablog__blog_comments">
-  
-  
+   
 </div>
 
                 </article>
@@ -932,6 +904,10 @@ RDOM(n) = \{n\} \cup (\bigcap_{m\in{succ(n)}}RDOM(m))
   
   <div class="footer-item">
     
+<p class="component-author">
+By Author name not set
+</p>
+
   </div>
   
   <div class="footer-item">
@@ -941,7 +917,7 @@ RDOM(n) = \{n\} \cup (\bigcap_{m\in{succ(n)}}RDOM(m))
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jun 15, 2025.
+  Last updated on Jul 01, 2025.
   <br/>
 </p>
   </div>
@@ -959,8 +935,8 @@ RDOM(n) = \{n\} \cup (\bigcap_{m\in{succ(n)}}RDOM(m))
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>
